@@ -88,6 +88,7 @@ class wxSingleSlider;
 class wxUndoableScrollBar;
 class wxUndoableToolbar;
 class wxUndoableColorPicker;
+class wxNumTextCtrl;
 enum class ChannelMixMode : int;
 class RenderViewPanel: public AgentPanel
 {
@@ -224,7 +225,7 @@ private:
 	wxButton* m_snapshot_btn;
 	wxUndoableToolbar* m_view_manip_btn;
 	wxSingleSlider* m_aov_sldr;
-	wxTextCtrl* m_aov_text;
+	wxNumTextCtrl* m_aov_text;
 	wxUndoableToolbar* m_cam_op_tb;
 	wxToolBar *m_full_screen_toolbar;
 
@@ -232,7 +233,7 @@ private:
 	wxUndoableToolbar* m_depth_atten_btn;
 	wxSingleSlider *m_depth_atten_factor_sldr;
 	wxToolBar *m_depth_atten_reset_btn;
-	wxTextCtrl *m_depth_atten_factor_text;
+	wxNumTextCtrl *m_depth_atten_factor_text;
 
 	//right bar///////////////////////////////////////////////////
 	wxToolBar *m_pin_btn;
@@ -240,16 +241,16 @@ private:
 	wxToolBar* m_center_click_btn;
 	wxToolBar *m_scale_121_btn;
 	wxSingleSlider *m_scale_factor_sldr;
-	wxTextCtrl *m_scale_factor_text;
+	wxNumTextCtrl *m_scale_factor_text;
 	wxSpinButton* m_scale_factor_spin;
 	wxToolBar *m_scale_mode_btn;
 	wxToolBar *m_scale_reset_btn;
 
 	//bottom bar///////////////////////////////////////////////////
 	wxUndoableToolbar* m_slider_mode_btn;
-	wxTextCtrl *m_x_rot_text;
-	wxTextCtrl *m_y_rot_text;
-	wxTextCtrl *m_z_rot_text;
+	wxNumTextCtrl *m_x_rot_text;
+	wxNumTextCtrl *m_y_rot_text;
+	wxNumTextCtrl *m_z_rot_text;
 	wxUndoableScrollBar* m_x_rot_sldr;
 	wxUndoableScrollBar* m_y_rot_sldr;
 	wxUndoableScrollBar* m_z_rot_sldr;

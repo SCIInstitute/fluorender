@@ -26,27 +26,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <VolumePropPanel.h>
-#include <Global.h>
-#include <Names.h>
-#include <MainSettings.h>
-#include <RenderView.h>
-#include <Root.h>
-#include <VolumeData.h>
-#include <VolumeGroup.h>
-#include <CurrentObjects.h>
-#include <DataManager.h>
-#include <Histogram.h>
-#include <RecordHistParams.h>
-#include <TableHistParams.h>
-#include <Reshape.h>
-#include <MultiVolumeRenderer.h>
-#include <VolumeRenderer.h>
-#include <VolumeSelector.h>
-#include <Colocalize.h>
-#include <ShaderProgram.h>
-#include <Color.h>
-#include <BBox.h>
-#include <Point.h>
 #include <wxFadeButton.h>
 #include <wxMapDoubleSlider.h>
 #include <wxDoubleSlider.h>
@@ -57,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxUndoableToolbar.h>
 #include <wxUndoableTextCtrl.h>
 #include <wxBoldText.h>
+#include <wxNumTextCtrl.h>
 #include <Helper.h>
 #include <png_resource.h>
 #include <wx/colordlg.h>
@@ -119,9 +99,9 @@ VolumePropPanel::VolumePropPanel(
 		wxDefaultPosition, bts);
 	m_minmax_sldr = new wxMapDoubleSlider(this, wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_low_offset_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_low_offset_text = new wxNumTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
-	m_high_offset_text = new wxTextCtrl(this, wxID_ANY, "255",
+	m_high_offset_text = new wxNumTextCtrl(this, wxID_ANY, "255",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_minmax_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -158,7 +138,7 @@ VolumePropPanel::VolumePropPanel(
 	m_gamma_sldr = new wxSingleSlider(this, wxID_ANY, 100, 10, 400,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	//m_gamma_sldr->SetRangeStyle(1);
-	m_gamma_text = new wxTextCtrl(this, wxID_ANY, "1.00",
+	m_gamma_text = new wxNumTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_gamma_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_gamma_st->SetFontBold();
@@ -180,7 +160,7 @@ VolumePropPanel::VolumePropPanel(
 		wxDefaultPosition, bts);
 	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 127, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_alpha_text = new wxTextCtrl(this, wxID_ANY, "127",
+	m_alpha_text = new wxNumTextCtrl(this, wxID_ANY, "127",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_alpha_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_alpha_st->SetFontBold();
@@ -202,7 +182,7 @@ VolumePropPanel::VolumePropPanel(
 		wxDefaultPosition, bts);
 	m_luminance_sldr = new wxSingleSlider(this, wxID_ANY, 128, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_luminance_text = new wxTextCtrl(this, wxID_ANY, "128",
+	m_luminance_text = new wxNumTextCtrl(this, wxID_ANY, "128",
 		wxDefaultPosition, tts1, wxTE_RIGHT/*, vald_int*/);
 	m_luminance_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_luminance_st->SetFontBold();
@@ -224,7 +204,7 @@ VolumePropPanel::VolumePropPanel(
 		wxDefaultPosition, bts);
 	m_sample_sldr = new wxSingleSlider(this, wxID_ANY, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_sample_text = new wxTextCtrl(this, wxID_ANY, "1.0",
+	m_sample_text = new wxNumTextCtrl(this, wxID_ANY, "1.0",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_sample_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_sample_st->SetFontBold();
@@ -248,9 +228,9 @@ VolumePropPanel::VolumePropPanel(
 		wxDefaultPosition, bts);
 	m_thresh_sldr = new wxMapDoubleSlider(this, wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_left_thresh_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_left_thresh_text = new wxNumTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_int);
-	m_right_thresh_text = new wxTextCtrl(this, wxID_ANY, "255",
+	m_right_thresh_text = new wxNumTextCtrl(this, wxID_ANY, "255",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_thresh_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -286,9 +266,9 @@ VolumePropPanel::VolumePropPanel(
 		wxDefaultPosition, bts);
 	m_boundary_sldr = new wxDoubleSlider(this, wxID_ANY, 0, 1000, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_boundary_low_text = new wxTextCtrl(this, wxID_ANY, "0.0000",
+	m_boundary_low_text = new wxNumTextCtrl(this, wxID_ANY, "0.0000",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp4);
-	m_boundary_high_text = new wxTextCtrl(this, wxID_ANY, "1.0000",
+	m_boundary_high_text = new wxNumTextCtrl(this, wxID_ANY, "1.0000",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp4);
 	m_boundary_link_tb = new wxToolBar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
@@ -320,7 +300,7 @@ VolumePropPanel::VolumePropPanel(
 	//shading
 	m_shading_strength_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_shading_strength_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+	m_shading_strength_text = new wxNumTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
 	//highlight
 	m_shade_st = new wxFadeButton(this, wxID_ANY, "Shading",
@@ -331,7 +311,7 @@ VolumePropPanel::VolumePropPanel(
 	wxStaticBitmap* shine_bitmap = new wxStaticBitmap(this, wxID_ANY, bitmap,
 		wxDefaultPosition, tts4);
 	shine_bitmap->SetToolTip("Set the shininess/spread of highlights");
-	m_shading_shine_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+	m_shading_shine_text = new wxNumTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, tts4, wxTE_RIGHT, vald_fp2);
 	m_shade_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_shade_st->SetFontBold();
@@ -358,7 +338,7 @@ VolumePropPanel::VolumePropPanel(
 		wxDefaultPosition, bts);
 	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+	m_shadow_text = new wxNumTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_fp2);
 	m_shadow_chk = new wxUndoableCheckBox(this, wxID_ANY, "");
 	m_shadow_dir_chk = new wxUndoableToolbar(this, wxID_ANY,
@@ -371,7 +351,7 @@ VolumePropPanel::VolumePropPanel(
 	m_shadow_dir_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_dir_sldr->SetRangeStyle(2);
-	m_shadow_dir_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_shadow_dir_text = new wxNumTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, tts4, wxTE_RIGHT, vald_int);
 	m_shadow_st->SetFontBold();
 	m_shadow_st->SetTintColor(wxColor(160, 150, 255));
@@ -400,10 +380,10 @@ VolumePropPanel::VolumePropPanel(
 	m_colormap_sldr = new wxMapDoubleSlider(this,
 		wxID_ANY, 0, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_colormap_low_text = new wxTextCtrl(this,
+	m_colormap_low_text = new wxNumTextCtrl(this,
 		wxID_ANY, "0",
 		wxDefaultPosition, tts2, wxTE_RIGHT, vald_int);
-	m_colormap_hi_text = new wxTextCtrl(this,
+	m_colormap_hi_text = new wxNumTextCtrl(this,
 		wxID_ANY, "255",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_colormap_link_tb = new wxToolBar(this, wxID_ANY,
@@ -546,7 +526,7 @@ VolumePropPanel::VolumePropPanel(
 		bitmap, "Set display mode of main/unselected data");
 	m_main_color_mode_tb->Bind(wxEVT_TOOL, &VolumePropPanel::OnMainColorMode, this);
 	m_main_color_mode_tb->Realize();
-	m_main_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
+	m_main_color_text = new wxNumTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
 	m_main_color_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnMainColorTextChange, this);
 	m_main_color_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnMainColorTextFocus, this);
@@ -567,7 +547,7 @@ VolumePropPanel::VolumePropPanel(
 		bitmap, "Set display mode of alt/selected data");
 	m_alt_color_mode_tb->Bind(wxEVT_TOOL, &VolumePropPanel::OnAltColorMode, this);
 	m_alt_color_mode_tb->Realize();
-	m_alt_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
+	m_alt_color_text = new wxNumTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, tts2, wxTE_CENTER);
 	m_alt_color_text->Bind(wxEVT_TEXT, &VolumePropPanel::OnAltColorTextChange, this);
 	m_alt_color_text->Bind(wxEVT_LEFT_DCLICK, &VolumePropPanel::OnAltColorTextFocus, this);

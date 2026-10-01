@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanelAgent.h>
 #include <wxUndoableScrollBar.h>
 #include <wxUndoableToolbar.h>
+#include <wxNumTextCtrl.h>
 #include <wx/aboutdlg.h>
 #include <wx/valnum.h>
 #include <png_resource.h>
@@ -511,7 +512,7 @@ wxWindow* MoviePanel::CreateSimplePage(wxWindow* parent)
 	m_seq_dec_btn->SetMaxSize(wxSize(h, h));
 	m_seq_dec_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnSeqDecBtn, this);
 	m_seq_dec_btn->SetToolTip("Decrease the time point number by 1");
-	m_seq_num_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_seq_num_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_seq_num_text->Bind(wxEVT_TEXT, &MoviePanel::OnSeqNumText, this);
 	m_seq_inc_btn = new wxButton(page, wxID_ANY, "",
@@ -983,7 +984,7 @@ MoviePanel::MoviePanel(wxWindow* parent,
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	//FPS
 	st = new wxStaticText(this, wxID_ANY, "FPS: ");
-	m_fps_text = new wxTextCtrl(this, wxID_ANY, "30",
+	m_fps_text = new wxNumTextCtrl(this, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(30, -1)), wxTE_RIGHT);
 	m_fps_text->Bind(wxEVT_TEXT, &MoviePanel::OnFpsEdit, this);
 	sizer1->Add(5, 5);
@@ -992,7 +993,7 @@ MoviePanel::MoviePanel(wxWindow* parent,
 	//movie length
 	st = new wxStaticText(this, wxID_ANY, "Length: ");
 	st2 = new wxStaticText(this, wxID_ANY, "Sec.");
-	m_movie_len_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_movie_len_text = new wxNumTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(50, -1)), wxTE_RIGHT);
 	m_movie_len_text->Bind(wxEVT_TEXT, &MoviePanel::OnMovieLenText, this);
 	sizer1->Add(5, 5);
@@ -1054,22 +1055,22 @@ MoviePanel::MoviePanel(wxWindow* parent,
 	m_start_btn->Bind(wxEVT_BUTTON, &MoviePanel::OnStartFrameBtn, this);
 
 	// --- text controls
-	m_start_frame_text = new wxTextCtrl(this, wxID_ANY, "1",
+	m_start_frame_text = new wxNumTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(45, -1)), wxTE_RIGHT, vald_int);
 
 	f = m_start_frame_text->GetFont();
 	f.MakeLarger();
 	m_start_frame_text->SetFont(f);
 
-	m_end_frame_text = new wxTextCtrl(this, wxID_ANY, "10",
+	m_end_frame_text = new wxNumTextCtrl(this, wxID_ANY, "10",
 		wxDefaultPosition, FromDIP(wxSize(45, -1)), wxTE_RIGHT, vald_int);
 	m_end_frame_text->SetFont(f);
 
-	m_cur_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_cur_frame_text = new wxNumTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
 	m_cur_frame_text->SetFont(f);
 
-	m_full_frame_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_full_frame_text = new wxNumTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, ts, wxTE_RIGHT, vald_int);
 	m_full_frame_text->SetFont(f);
 
@@ -1116,7 +1117,7 @@ MoviePanel::MoviePanel(wxWindow* parent,
 	m_loop_btn->Bind(wxEVT_TOGGLEBUTTON, &MoviePanel::OnLoop, this);
 
 	// --- right-side controls
-	m_progress_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+	m_progress_text = new wxNumTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, ts, wxTE_RIGHT);
 	m_progress_text->SetFont(f);
 

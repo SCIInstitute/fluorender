@@ -40,6 +40,7 @@ namespace flrd
 }
 class TrackDlg;
 class wxSingleSlider;
+class wxNumTextCtrl;
 class TrackListCtrl : public wxListCtrl
 {
 public:
@@ -162,7 +163,7 @@ private:
 
 	//selection page
 	//component tools
-	wxTextCtrl* m_comp_id_text;
+	wxNumTextCtrl* m_comp_id_text;
 	wxButton* m_comp_id_x_btn;
 	wxButton* m_comp_full_btn;
 	wxButton* m_comp_exclusive_btn;
@@ -171,14 +172,14 @@ private:
 	wxButton* m_shuffle_btn;
 	//cell size filter
 	wxSingleSlider* m_cell_size_sldr;
-	wxTextCtrl* m_cell_size_text;
+	wxNumTextCtrl* m_cell_size_text;
 	//uncertainty filter
 	wxButton* m_comp_uncertain_btn;
 	wxSingleSlider* m_comp_uncertain_low_sldr;
-	wxTextCtrl* m_comp_uncertain_low_text;
+	wxNumTextCtrl* m_comp_uncertain_low_text;
 
 	//link page
-	wxTextCtrl* m_comp_id_text2;
+	wxNumTextCtrl* m_comp_id_text2;
 	wxButton* m_comp_id_x_btn2;
 	wxButton* m_comp_append_btn2;
 	wxButton* m_comp_clear_btn2;
@@ -191,7 +192,7 @@ private:
 
 	//modify page
 	//ID edit controls
-	wxTextCtrl* m_cell_new_id_text;
+	wxNumTextCtrl* m_cell_new_id_text;
 	wxButton* m_cell_new_id_x_btn;
 	wxButton* m_comp_append_btn3;
 	wxButton* m_comp_clear_btn3;
@@ -216,7 +217,7 @@ private:
 
 	//ghost num
 	wxSingleSlider* m_ghost_num_sldr;
-	wxTextCtrl* m_ghost_num_text;
+	wxNumTextCtrl* m_ghost_num_text;
 	wxCheckBox* m_ghost_show_tail_chk;
 	wxCheckBox* m_ghost_show_lead_chk;
 

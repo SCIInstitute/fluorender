@@ -322,29 +322,29 @@ public:
 
 private:
 	//common controls
-	wxTextCtrl *m_fps_text;
-	wxTextCtrl *m_movie_len_text;
+	wxNumTextCtrl *m_fps_text;
+	wxNumTextCtrl *m_movie_len_text;
 	wxComboBox *m_views_cmb;
 
 	wxUndoableToolbar* m_slider_btn;
 	wxUndoableScrollBar* m_progress_sldr;
 
 	wxButton* m_start_btn;
-	wxTextCtrl *m_start_frame_text;
-	wxTextCtrl *m_end_frame_text;
+	wxNumTextCtrl *m_start_frame_text;
+	wxNumTextCtrl *m_end_frame_text;
 	wxButton* m_end_btn;
 
 	wxButton *m_dec_time_btn;
-	wxTextCtrl *m_cur_frame_text;
+	wxNumTextCtrl *m_cur_frame_text;
 	wxButton *m_inc_time_btn;
-	wxTextCtrl* m_full_frame_text;
+	wxNumTextCtrl* m_full_frame_text;
 
 	wxButton *m_rewind_btn;
 	wxToggleButton* m_play_inv_btn;
 	wxToggleButton *m_play_btn;
 	wxButton* m_forward_btn;
 	wxToggleButton* m_loop_btn;
-	wxTextCtrl *m_progress_text;
+	wxNumTextCtrl *m_progress_text;
 	wxButton *m_save_btn;
 
 	//basic movie controls
@@ -359,7 +359,7 @@ private:
 	wxCheckBox *m_bat_chk;
 	wxButton* m_seq_dec_btn;
 	wxButton* m_seq_inc_btn;
-	wxTextCtrl* m_seq_num_text;
+	wxNumTextCtrl* m_seq_num_text;
 	wxTextCtrl* m_seq_total_text;
 
 	//key frame

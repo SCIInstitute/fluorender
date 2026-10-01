@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class wxSingleSlider;
+class wxNumTextCtrl;
 class OclDlg : public AgentPanel
 {
 public:
@@ -64,7 +65,7 @@ private:
 	wxButton* m_saveas_btn;
 	wxButton* m_execute_btn;
 	wxSingleSlider* m_iterations_sldr;
-	wxTextCtrl* m_iterations_txt;
+	wxNumTextCtrl* m_iterations_txt;
 	wxTextCtrl* m_output_txt;
 
 	//list

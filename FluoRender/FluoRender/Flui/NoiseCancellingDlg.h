@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentOwner.h>
 
 class wxSingleSlider;
+class wxNumTextCtrl;
 class NoiseCancellingDlg : public AgentPanel
 {
 public:
@@ -53,10 +54,10 @@ private:
 	wxCheckBox *m_ca_select_only_chk;
 	//threshold
 	wxSingleSlider *m_threshold_sldr;
-	wxTextCtrl *m_threshold_text;
+	wxNumTextCtrl *m_threshold_text;
 	//voxel size threhsold
 	wxSingleSlider *m_voxel_sldr;
-	wxTextCtrl *m_voxel_text;
+	wxNumTextCtrl *m_voxel_text;
 	//preview
 	wxButton *m_preview_btn;
 	//erase

@@ -26,25 +26,8 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <TrackDlg.h>
-#include <Directory.h>
-#include <Global.h>
-#include <Names.h>
-#include <MainSettings.h>
-#include <RenderView.h>
-#include <CurrentObjects.h>
-#include <VolumeData.h>
-#include <VolumeGroup.h>
-#include <TrackGroup.h>
-#include <DataManager.h>
-#include <CompEditor.h>
-#include <CompSelector.h>
-#include <CompAnalyzer.h>
-#include <Cell.h>
-#include <TrackMap.h>
-#include <MovieMaker.h>
-#include <Color.h>
 #include <wxSingleSlider.h>
-#include <ModalDlg.h>
+#include <wxNumTextCtrl.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 #include <wx/wfstream.h>
@@ -344,7 +327,7 @@ wxWindow* TrackDlg::CreateSelectPage(wxWindow *parent)
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Selection tools:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_comp_id_text = new wxTextCtrl(page, wxID_ANY, "",
+	m_comp_id_text = new wxNumTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_comp_id_x_btn = new wxButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(23, 23)));
@@ -382,7 +365,7 @@ wxWindow* TrackDlg::CreateSelectPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(110, 20)));
 	m_cell_size_sldr = new wxSingleSlider(page, wxID_ANY, 20, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cell_size_text = new wxTextCtrl(page, wxID_ANY, "20",
+	m_cell_size_text = new wxNumTextCtrl(page, wxID_ANY, "20",
 		wxDefaultPosition, FromDIP(wxSize(60, 23)), wxTE_RIGHT, vald_int);
 	m_cell_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &TrackDlg::OnCellSizeChange, this);
 	m_cell_size_text->Bind(wxEVT_TEXT, &TrackDlg::OnCellSizeText, this);
@@ -396,7 +379,7 @@ wxWindow* TrackDlg::CreateSelectPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(80, 23)));
 	m_comp_uncertain_low_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_comp_uncertain_low_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_comp_uncertain_low_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(60, 23)), wxTE_RIGHT, vald_int);
 	m_comp_uncertain_btn->Bind(wxEVT_BUTTON, &TrackDlg::OnCompUncertainBtn, this);
 	m_comp_uncertain_low_sldr->Bind(wxEVT_SCROLL_CHANGED, &TrackDlg::OnCompUncertainLowChange, this);
@@ -434,7 +417,7 @@ wxWindow* TrackDlg::CreateLinkPage(wxWindow *parent)
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "Selection tools:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_comp_id_text2 = new wxTextCtrl(page, wxID_ANY, "",
+	m_comp_id_text2 = new wxNumTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_comp_id_x_btn2 = new wxButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(23, 23)));
@@ -513,7 +496,7 @@ wxWindow* TrackDlg::CreateModifyPage(wxWindow *parent)
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "New ID/Selection:",
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
-	m_cell_new_id_text = new wxTextCtrl(page, wxID_ANY, "",
+	m_cell_new_id_text = new wxNumTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(77, 23)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_cell_new_id_x_btn = new wxButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(23, 23)));
@@ -679,7 +662,7 @@ wxWindow* TrackDlg::CreateListPage(wxWindow* parent)
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);
 	m_ghost_num_sldr = new wxSingleSlider(page, wxID_ANY, 10, 0, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_ghost_num_text = new wxTextCtrl(page, wxID_ANY, "10",
+	m_ghost_num_text = new wxNumTextCtrl(page, wxID_ANY, "10",
 		wxDefaultPosition, FromDIP(wxSize(60, 23)), wxTE_RIGHT, vald_int);
 	m_ghost_show_lead_chk = new wxCheckBox(page, wxID_ANY, "Lead",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER);

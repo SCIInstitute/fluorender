@@ -42,6 +42,7 @@ struct ConvertGridData
 };
 
 class wxSingleSlider;
+class wxNumTextCtrl;
 class ConvertDlg : public TabbedPanel
 {
 public:
@@ -84,19 +85,19 @@ private:
 
 	//convert settings
 	wxSingleSlider* m_cnv_vol_mesh_thresh_sldr;
-	wxTextCtrl* m_cnv_vol_mesh_thresh_text;
+	wxNumTextCtrl* m_cnv_vol_mesh_thresh_text;
 	wxSingleSlider* m_cnv_vol_mesh_downsample_sldr;
-	wxTextCtrl* m_cnv_vol_mesh_downsample_text;
+	wxNumTextCtrl* m_cnv_vol_mesh_downsample_text;
 	wxSingleSlider* m_cnv_vol_mesh_downsample_z_sldr;
-	wxTextCtrl* m_cnv_vol_mesh_downsample_z_text;
+	wxNumTextCtrl* m_cnv_vol_mesh_downsample_z_text;
 
 	//process settings
 	wxSingleSlider* m_cnv_vol_mesh_simplify_sldr;
-	wxTextCtrl* m_cnv_vol_mesh_simplify_text;
+	wxNumTextCtrl* m_cnv_vol_mesh_simplify_text;
 	wxSingleSlider* m_cnv_vol_mesh_smooth_n_sldr;
-	wxTextCtrl* m_cnv_vol_mesh_smooth_n_text;
+	wxNumTextCtrl* m_cnv_vol_mesh_smooth_n_text;
 	wxSingleSlider* m_cnv_vol_mesh_smooth_t_sldr;
-	wxTextCtrl* m_cnv_vol_mesh_smooth_t_text;
+	wxNumTextCtrl* m_cnv_vol_mesh_smooth_t_text;
 
 	//output
 	wxButton* m_update_btn;

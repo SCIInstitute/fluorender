@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BrickTexture.h>
 #include <TextRenderer.h>
 #include <wxSingleSlider.h>
+#include <wxNumTextCtrl.h>
 #include <ModalDlg.h>
 #include <wx/valnum.h>
 #include <wx/notebook.h>
@@ -203,7 +204,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_paint_hist_depth_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_paint_hist_depth_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPaintHistDepthChange, this);
-	m_paint_hist_depth_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_paint_hist_depth_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_paint_hist_depth_text->Bind(wxEVT_TEXT, &SettingDlg::OnPaintHistDepthEdit, this);
 	sizer3_1->Add(m_paint_hist_depth_sldr, 1, wxEXPAND);
@@ -228,7 +229,7 @@ wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)
 	m_pencil_dist_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_pencil_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPencilDistChange, this);
-	m_pencil_dist_text = new wxTextCtrl(page, wxID_ANY, "30",
+	m_pencil_dist_text = new wxNumTextCtrl(page, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_pencil_dist_text->Bind(wxEVT_TEXT, &SettingDlg::OnPencilDistEdit, this);
 	sizer4_1->Add(m_pencil_dist_sldr, 1, wxEXPAND);
@@ -397,7 +398,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	m_line_width_sldr = new wxSingleSlider(page, wxID_ANY, 3, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_line_width_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnLineWidthSldr, this);
-	m_line_width_text = new wxTextCtrl(page, wxID_ANY, "3",
+	m_line_width_text = new wxNumTextCtrl(page, wxID_ANY, "3",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_line_width_text->Bind(wxEVT_TEXT, &SettingDlg::OnLineWidthText, this);
 	sizer2_1->Add(m_line_width_sldr, 1, wxEXPAND);
@@ -413,7 +414,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	m_peeling_layers_sldr = new wxSingleSlider(page, wxID_ANY, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_peeling_layers_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPeelingLayersChange, this);
-	m_peeling_layers_text = new wxTextCtrl(page, wxID_ANY, "1",
+	m_peeling_layers_text = new wxNumTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_peeling_layers_text->Bind(wxEVT_TEXT, &SettingDlg::OnPeelingLayersEdit, this);
 	sizer3_1->Add(m_peeling_layers_sldr, 1, wxEXPAND);
@@ -439,7 +440,7 @@ wxWindow* SettingDlg::CreateRenderingPage(wxWindow *parent)
 	m_pin_threshold_sldr = new wxSingleSlider(page, wxID_ANY, 100, 10, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_pin_threshold_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnPinThresholdChange, this);
-	m_pin_threshold_text = new wxTextCtrl(page, wxID_ANY, "1000",
+	m_pin_threshold_text = new wxNumTextCtrl(page, wxID_ANY, "1000",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_pin_threshold_text->Bind(wxEVT_TEXT, &SettingDlg::OnPinThresholdEdit, this);
 	sizer4_1->Add(st, 0, wxALIGN_CENTER);
@@ -509,7 +510,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_large_data_sldr = new wxSingleSlider(page, wxID_ANY, 20, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_large_data_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnLargeDataChange, this);
-	m_large_data_text = new wxTextCtrl(page, wxID_ANY, "200",
+	m_large_data_text = new wxNumTextCtrl(page, wxID_ANY, "200",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_large_data_text->Bind(wxEVT_TEXT, &SettingDlg::OnLargeDataEdit, this);
 	sizer1_1->Add(new wxStaticText(page, 0, "Size Threshold:"),
@@ -578,7 +579,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_graphics_mem_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_graphics_mem_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnGraphicsMemChange, this);
-	m_graphics_mem_text = new wxTextCtrl(page, wxID_ANY, "1000",
+	m_graphics_mem_text = new wxNumTextCtrl(page, wxID_ANY, "1000",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_graphics_mem_text->Bind(wxEVT_TEXT, &SettingDlg::OnGraphicsMemEdit, this);
 	sizer3_2->Add(new wxStaticText(page, 0, "Graphics Memory:"),
@@ -591,7 +592,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_block_size_sldr = new wxSingleSlider(page, wxID_ANY, 7, 6, 12,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_block_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnBlockSizeChange, this);
-	m_block_size_text = new wxTextCtrl(page, wxID_ANY, "128",
+	m_block_size_text = new wxNumTextCtrl(page, wxID_ANY, "128",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_block_size_text->Bind(wxEVT_TEXT, &SettingDlg::OnBlockSizeEdit, this);
 	sizer3_2->Add(new wxStaticText(page, 0, "Brick Size:"),
@@ -604,7 +605,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_response_time_sldr = new wxSingleSlider(page, wxID_ANY, 10, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_response_time_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnResponseTimeChange, this);
-	m_response_time_text = new wxTextCtrl(page, wxID_ANY, "100",
+	m_response_time_text = new wxNumTextCtrl(page, wxID_ANY, "100",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int);
 	m_response_time_text->Bind(wxEVT_TEXT, &SettingDlg::OnResponseTimeEdit, this);
 	sizer3_2->Add(new wxStaticText(page, 0, "Response Time:"),
@@ -617,7 +618,7 @@ wxWindow* SettingDlg::CreatePerformancePage(wxWindow *parent)
 	m_detail_level_offset_sldr = new wxSingleSlider(page, wxID_ANY, 0, -5, 5,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_detail_level_offset_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnDetailLevelOffsetChange, this);
-	m_detail_level_offset_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_detail_level_offset_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(40, -1)), wxTE_RIGHT, vald_int2);
 	m_detail_level_offset_text->Bind(wxEVT_TEXT, &SettingDlg::OnDetailLevelOffsetEdit, this);
 	sizer3_2->Add(new wxStaticText(page, 0, "Detail Level Offset:"),
@@ -715,7 +716,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	m_eye_dist_sldr = new wxSingleSlider(page, wxID_ANY, 200, 0, 2000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_eye_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnEyeDistChange, this);
-	m_eye_dist_text = new wxTextCtrl(page, wxID_ANY, "20.0",
+	m_eye_dist_text = new wxNumTextCtrl(page, wxID_ANY, "20.0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp1);
 	m_eye_dist_text->Bind(wxEVT_TEXT, &SettingDlg::OnEyeDistEdit, this);
 	sizer1_5->Add(20, 5);
@@ -738,7 +739,7 @@ wxWindow* SettingDlg::CreateDisplayPage(wxWindow* parent)
 	m_lg_offset_sldr = new wxSingleSlider(page, wxID_ANY, 20, 0, 90,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_lg_offset_sldr->Bind(wxEVT_SCROLL_CHANGED, &SettingDlg::OnLgOffsetChange, this);
-	m_lg_offset_text = new wxTextCtrl(page, wxID_ANY, "20",
+	m_lg_offset_text = new wxNumTextCtrl(page, wxID_ANY, "20",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_lg_offset_text->Bind(wxEVT_TEXT, &SettingDlg::OnLgOffsetEdit, this);
 	sizer1_8->Add(20, 5);

@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxFadeButton.h>
 #include <wxSingleSlider.h>
 #include <wxUndoableToolbar.h>
+#include <wxNumTextCtrl.h>
 #include <wx/valnum.h>
 #include <wx/gbsizer.h>
 #include <png_resource.h>
@@ -167,14 +168,14 @@ wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)
 
 	//input boxes
 	vald_fp2.SetRange(0.0, 10.0);
-	m_r_gamma_text = new wxTextCtrl(page, wxID_ANY, "1.00",
+	m_r_gamma_text = new wxNumTextCtrl(page, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_r_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRGammaText, this);
-	m_r_brightness_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_r_brightness_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_int);
 	m_r_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRBrightnessText, this);
 	vald_fp2.SetRange(0.0, 1.0);
-	m_r_hdr_text = new wxTextCtrl(page, wxID_ANY, "0.00",
+	m_r_hdr_text = new wxNumTextCtrl(page, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_r_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnRHdrText, this);
 	sizer_v->Add(m_r_gamma_text, wxGBPosition(2, 0), wxGBSpan(1, 1), wxEXPAND);
@@ -262,14 +263,14 @@ wxWindow* OutputAdjPanel::CreateGreenPage(wxWindow* parent, wxSize& size)
 
 	//input boxes
 	vald_fp2.SetRange(0.0, 10.0);
-	m_g_gamma_text = new wxTextCtrl(page, wxID_ANY, "1.00",
+	m_g_gamma_text = new wxNumTextCtrl(page, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_g_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGGammaText, this);
-	m_g_brightness_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_g_brightness_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_int);
 	m_g_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGBrightnessText, this);
 	vald_fp2.SetRange(0.0, 1.0);
-	m_g_hdr_text = new wxTextCtrl(page, wxID_ANY, "0.00",
+	m_g_hdr_text = new wxNumTextCtrl(page, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_g_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnGHdrText, this);
 	sizer_v->Add(m_g_gamma_text, wxGBPosition(2, 0), wxGBSpan(1, 1), wxEXPAND);
@@ -357,14 +358,14 @@ wxWindow* OutputAdjPanel::CreateBluePage(wxWindow* parent, wxSize& size)
 
 	//input boxes
 	vald_fp2.SetRange(0.0, 10.0);
-	m_b_gamma_text = new wxTextCtrl(page, wxID_ANY, "1.00",
+	m_b_gamma_text = new wxNumTextCtrl(page, wxID_ANY, "1.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_b_gamma_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBGammaText, this);
-	m_b_brightness_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_b_brightness_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_int);
 	m_b_brightness_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBBrightnessText, this);
 	vald_fp2.SetRange(0.0, 1.0);
-	m_b_hdr_text = new wxTextCtrl(page, wxID_ANY, "0.00",
+	m_b_hdr_text = new wxNumTextCtrl(page, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(30, 20)), wxTE_CENTER, vald_fp2);
 	m_b_hdr_text->Bind(wxEVT_TEXT, &OutputAdjPanel::OnBHdrText, this);
 	sizer_v->Add(m_b_gamma_text, wxGBPosition(2, 0), wxGBSpan(1, 1), wxEXPAND);

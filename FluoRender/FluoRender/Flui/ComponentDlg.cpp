@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDlgAgent.h>
 #include <GridHelper.h>
 #include <wxSingleSlider.h>
+#include <wxNumTextCtrl.h>
 #include <wx/scrolwin.h>
 #include <wx/valnum.h>
 #include <limits>
@@ -112,7 +113,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_iter_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_iter_text = new wxTextCtrl(page, wxID_ANY, "0",
+	m_iter_text = new wxNumTextCtrl(page, wxID_ANY, "0",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_iter_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnIterSldr, this);
 	m_iter_text->Bind(wxEVT_TEXT, &ComponentDlg::OnIterText, this);
@@ -128,7 +129,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_thresh_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_thresh_text = new wxTextCtrl(page, wxID_ANY, "0.000",
+	m_thresh_text = new wxNumTextCtrl(page, wxID_ANY, "0.000",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
 	m_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnThreshSldr, this);
 	m_thresh_text->Bind(wxEVT_TEXT, &ComponentDlg::OnThreshText, this);
@@ -151,7 +152,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_falloff_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_falloff_text = new wxTextCtrl(page, wxID_ANY, "0.000",
+	m_falloff_text = new wxNumTextCtrl(page, wxID_ANY, "0.000",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
 	m_falloff_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnFalloffSldr, this);
 	m_falloff_text->Bind(wxEVT_TEXT, &ComponentDlg::OnFalloffText, this);
@@ -181,7 +182,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_clean_iter_sldr = new wxSingleSlider(page, wxID_ANY, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_clean_iter_text = new wxTextCtrl(page, wxID_ANY, "5",
+	m_clean_iter_text = new wxNumTextCtrl(page, wxID_ANY, "5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_clean_iter_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnCleanIterSldr, this);
 	m_clean_iter_text->Bind(wxEVT_TEXT, &ComponentDlg::OnCleanIterText, this);
@@ -197,7 +198,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_clean_limit_sldr = new wxSingleSlider(page, wxID_ANY, 5, 1, 50,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_clean_limit_text = new wxTextCtrl(page, wxID_ANY, "5",
+	m_clean_limit_text = new wxNumTextCtrl(page, wxID_ANY, "5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_clean_limit_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnCleanLimitSldr, this);
 	m_clean_limit_text->Bind(wxEVT_TEXT, &ComponentDlg::OnCleanLimitText, this);
@@ -231,7 +232,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_fix_size_sldr = new wxSingleSlider(page, wxID_ANY, 50, 1, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_fix_size_text = new wxTextCtrl(page, wxID_ANY, "50",
+	m_fix_size_text = new wxNumTextCtrl(page, wxID_ANY, "50",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_fix_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnFixSizeSldr, this);
 	m_fix_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnFixSizeText, this);
@@ -254,7 +255,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_density_sldr = new wxSingleSlider(page, wxID_ANY, 1000, 0, 10000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_density_text = new wxTextCtrl(page, wxID_ANY, "1.0",
+	m_density_text = new wxNumTextCtrl(page, wxID_ANY, "1.0",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
 	m_density_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensitySldr, this);
 	m_density_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityText, this);
@@ -269,7 +270,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_varth_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_varth_text = new wxTextCtrl(page, wxID_ANY, "0.0",
+	m_varth_text = new wxNumTextCtrl(page, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
 	m_varth_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnVarthSldr, this);
 	m_varth_text->Bind(wxEVT_TEXT, &ComponentDlg::OnVarthText, this);
@@ -284,7 +285,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_density_window_size_sldr = new wxSingleSlider(page, wxID_ANY, 5, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_density_window_size_text = new wxTextCtrl(page, wxID_ANY, "5",
+	m_density_window_size_text = new wxNumTextCtrl(page, wxID_ANY, "5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_density_window_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensityWindowSizeSldr, this);
 	m_density_window_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityWindowSizeText, this);
@@ -299,7 +300,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_density_stats_size_sldr = new wxSingleSlider(page, wxID_ANY, 15, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_density_stats_size_text = new wxTextCtrl(page, wxID_ANY, "15",
+	m_density_stats_size_text = new wxNumTextCtrl(page, wxID_ANY, "15",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_density_stats_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDensityStatsSizeSldr, this);
 	m_density_stats_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDensityStatsSizeText, this);
@@ -322,7 +323,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_dist_strength_sldr = new wxSingleSlider(page, wxID_ANY, 500, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_strength_text = new wxTextCtrl(page, wxID_ANY, "0.5",
+	m_dist_strength_text = new wxNumTextCtrl(page, wxID_ANY, "0.5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
 	m_dist_strength_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistStrengthSldr, this);
 	m_dist_strength_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistStrengthText, this);
@@ -337,7 +338,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_dist_thresh_sldr = new wxSingleSlider(page, wxID_ANY, 0, 0, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_thresh_text = new wxTextCtrl(page, wxID_ANY, "0.000",
+	m_dist_thresh_text = new wxNumTextCtrl(page, wxID_ANY, "0.000",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp3);
 	m_dist_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistThreshSldr, this);
 	m_dist_thresh_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistThreshText, this);
@@ -352,7 +353,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_dist_filter_size_sldr = new wxSingleSlider(page, wxID_ANY, 3, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_filter_size_text = new wxTextCtrl(page, wxID_ANY, "3",
+	m_dist_filter_size_text = new wxNumTextCtrl(page, wxID_ANY, "3",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_dist_filter_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistFilterSizeSldr, this);
 	m_dist_filter_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistFilterSizeText, this);
@@ -367,7 +368,7 @@ wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_max_dist_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_max_dist_text = new wxTextCtrl(page, wxID_ANY, "30",
+	m_max_dist_text = new wxNumTextCtrl(page, wxID_ANY, "30",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_max_dist_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnMaxDistSldr, this);
 	m_max_dist_text->Bind(wxEVT_TEXT, &ComponentDlg::OnMaxDistText, this);
@@ -553,7 +554,7 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_cluster_clnum_sldr = new wxSingleSlider(page, wxID_ANY, 2, 2, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_clnum_text = new wxTextCtrl(page, wxID_ANY, "2",
+	m_cluster_clnum_text = new wxNumTextCtrl(page, wxID_ANY, "2",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_cluster_clnum_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterClnumSldr, this);
 	m_cluster_clnum_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterClnumText, this);
@@ -568,7 +569,7 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_cluster_maxiter_sldr = new wxSingleSlider(page, wxID_ANY, 200, 1, 1000,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_maxiter_text = new wxTextCtrl(page, wxID_ANY, "200",
+	m_cluster_maxiter_text = new wxNumTextCtrl(page, wxID_ANY, "200",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_cluster_maxiter_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterMaxiterSldr, this);
 	m_cluster_maxiter_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterMaxiterText, this);
@@ -583,7 +584,7 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_cluster_tol_sldr = new wxSingleSlider(page, wxID_ANY, 0.90, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_tol_text = new wxTextCtrl(page, wxID_ANY, "0.90",
+	m_cluster_tol_text = new wxNumTextCtrl(page, wxID_ANY, "0.90",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp2);
 	m_cluster_tol_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterTolSldr, this);
 	m_cluster_tol_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterTolText, this);
@@ -598,7 +599,7 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_cluster_size_sldr = new wxSingleSlider(page, wxID_ANY, 60, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_size_text = new wxTextCtrl(page, wxID_ANY, "60",
+	m_cluster_size_text = new wxNumTextCtrl(page, wxID_ANY, "60",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_cluster_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterSizeSldr, this);
 	m_cluster_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterSizeText, this);
@@ -613,7 +614,7 @@ wxWindow* ComponentDlg::CreateClusteringPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 20)));
 	m_cluster_eps_sldr = new wxSingleSlider(page, wxID_ANY, 25, 5, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cluster_eps_text = new wxTextCtrl(page, wxID_ANY, "2.5",
+	m_cluster_eps_text = new wxNumTextCtrl(page, wxID_ANY, "2.5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_fp1);
 	m_cluster_eps_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnClusterEpsSldr, this);
 	m_cluster_eps_text->Bind(wxEVT_TEXT, &ComponentDlg::OnClusterepsText, this);
@@ -682,7 +683,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(page, 0, "ID:",
 		wxDefaultPosition, wxDefaultSize);
-	m_comp_id_text = new wxTextCtrl(page, wxID_ANY, "",
+	m_comp_id_text = new wxNumTextCtrl(page, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(80, 23)), wxTE_PROCESS_ENTER | wxTE_RIGHT);
 	m_comp_id_x_btn = new wxButton(page, wxID_ANY, "X",
 		wxDefaultPosition, FromDIP(wxSize(23, 23)));
@@ -783,7 +784,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_con_size_sldr = new wxSingleSlider(page, wxID_ANY, 5, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_con_size_text = new wxTextCtrl(page, wxID_ANY, "5",
+	m_con_size_text = new wxNumTextCtrl(page, wxID_ANY, "5",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_con_size_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnConSizeSldr, this);
 	m_con_size_text->Bind(wxEVT_TEXT, &ComponentDlg::OnConSizeText, this);
@@ -890,7 +891,7 @@ wxWindow* ComponentDlg::CreateAnalysisPage(wxWindow *parent)
 	wxBoxSizer *sizer5_2 = new wxBoxSizer(wxHORIZONTAL);
 	m_dist_neighbor_sldr = new wxSingleSlider(page, wxID_ANY, 1, 1, 20,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_dist_neighbor_text = new wxTextCtrl(page, wxID_ANY, "1",
+	m_dist_neighbor_text = new wxNumTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(60, 20)), wxTE_RIGHT, vald_int);
 	m_dist_neighbor_sldr->Bind(wxEVT_SCROLL_CHANGED, &ComponentDlg::OnDistNeighborSldr, this);
 	m_dist_neighbor_text->Bind(wxEVT_TEXT, &ComponentDlg::OnDistNeighborText, this);

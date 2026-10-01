@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ConvertDlgAgent.h>
 #include <GridHelper.h>
 #include <wxSingleSlider.h>
+#include <wxNumTextCtrl.h>
 #include <wx/valnum.h>
 #include <wx/clipbrd.h>
 //resources
@@ -141,7 +142,7 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cnv_vol_mesh_thresh_sldr = new wxSingleSlider(page, wxID_ANY, 30, 1, 99,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_thresh_text = new wxTextCtrl(page, wxID_ANY, "0.30",
+	m_cnv_vol_mesh_thresh_text = new wxNumTextCtrl(page, wxID_ANY, "0.30",
 		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_fp2);
 	m_cnv_vol_mesh_thresh_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshThreshChange, this);
 	m_cnv_vol_mesh_thresh_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshThreshText, this);
@@ -156,7 +157,7 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cnv_vol_mesh_downsample_sldr = new wxSingleSlider(page, wxID_ANY, 2, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_downsample_text = new wxTextCtrl(page, wxID_ANY, "2",
+	m_cnv_vol_mesh_downsample_text = new wxNumTextCtrl(page, wxID_ANY, "2",
 		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_int);
 	m_cnv_vol_mesh_downsample_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshDownsampleChange, this);
 	m_cnv_vol_mesh_downsample_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshDownsampleText, this);
@@ -171,7 +172,7 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cnv_vol_mesh_downsample_z_sldr = new wxSingleSlider(page, wxID_ANY, 1, 1, 10,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_downsample_z_text = new wxTextCtrl(page, wxID_ANY, "1",
+	m_cnv_vol_mesh_downsample_z_text = new wxNumTextCtrl(page, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_int);
 	m_cnv_vol_mesh_downsample_z_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshDownsampleZChange, this);
 	m_cnv_vol_mesh_downsample_z_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshDownsampleZText, this);
@@ -202,7 +203,7 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cnv_vol_mesh_simplify_sldr = new wxSingleSlider(page, wxID_ANY, 30, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_simplify_text = new wxTextCtrl(page, wxID_ANY, "0.30",
+	m_cnv_vol_mesh_simplify_text = new wxNumTextCtrl(page, wxID_ANY, "0.30",
 		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_fp2);
 	m_cnv_vol_mesh_simplify_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshSimplifyChange, this);
 	m_cnv_vol_mesh_simplify_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshSimplifyText, this);
@@ -217,7 +218,7 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cnv_vol_mesh_smooth_n_sldr = new wxSingleSlider(page, wxID_ANY, 10, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_smooth_n_text = new wxTextCtrl(page, wxID_ANY, "0.10",
+	m_cnv_vol_mesh_smooth_n_text = new wxNumTextCtrl(page, wxID_ANY, "0.10",
 		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_fp2);
 	m_cnv_vol_mesh_smooth_n_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshSmoothNChange, this);
 	m_cnv_vol_mesh_smooth_n_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshSmoothNText, this);
@@ -232,7 +233,7 @@ wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)
 		wxDefaultPosition, FromDIP(wxSize(100, 23)));
 	m_cnv_vol_mesh_smooth_t_sldr = new wxSingleSlider(page, wxID_ANY, 10, 0, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_cnv_vol_mesh_smooth_t_text = new wxTextCtrl(page, wxID_ANY, "0.10",
+	m_cnv_vol_mesh_smooth_t_text = new wxNumTextCtrl(page, wxID_ANY, "0.10",
 		wxDefaultPosition, FromDIP(wxSize(40, 23)), wxTE_RIGHT, vald_fp2);
 	m_cnv_vol_mesh_smooth_t_sldr->Bind(wxEVT_SCROLL_CHANGED, &ConvertDlg::OnCnvVolMeshSmoothTChange, this);
 	m_cnv_vol_mesh_smooth_t_text->Bind(wxEVT_TEXT, &ConvertDlg::OnCnvVolMeshSmoothTText, this);

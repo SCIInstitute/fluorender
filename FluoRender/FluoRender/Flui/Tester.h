@@ -31,31 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentOwner.h>
 
 class wxSingleSlider;
-class MainFrame;
+class wxNumTextCtrl;
 class TesterDlg : public AgentPanel
 {
-	//enum
-	//{
-	//	ID_P1Slider = ID_TESTER,
-	//	ID_P1Text,
-	//	ID_P1Check,
-	//	ID_P2Slider,
-	//	ID_P2Text,
-	//	ID_P2Check,
-	//	ID_P3Slider,
-	//	ID_P3Text,
-	//	ID_P3Check,
-	//	ID_P4Slider,
-	//	ID_P4Text,
-	//	ID_P4Check,
-	//	//all control
-	//	ID_AllCheck,
-	//	//buttons
-	//	ID_B1Btn
-	//};
-
 public:
-	TesterDlg(MainFrame* frame);
+	TesterDlg(wxWindow* parent);
 	~TesterDlg();
 
 	//values
@@ -71,10 +51,10 @@ public:
 	wxSingleSlider* m_p4_sldr;
 
 	//text boxes
-	wxTextCtrl* m_p1_text;
-	wxTextCtrl* m_p2_text;
-	wxTextCtrl* m_p3_text;
-	wxTextCtrl* m_p4_text;
+	wxNumTextCtrl* m_p1_text;
+	wxNumTextCtrl* m_p2_text;
+	wxNumTextCtrl* m_p3_text;
+	wxNumTextCtrl* m_p4_text;
 
 	//check boxes
 	wxCheckBox *m_p1_chck;

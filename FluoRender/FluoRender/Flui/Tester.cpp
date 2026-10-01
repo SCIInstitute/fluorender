@@ -26,32 +26,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <Tester.h>
-#include <Global.h>
-#include <Names.h>
-#include <MainFrame.h>
 #include <wxSingleSlider.h>
+#include <wxNumTextCtrl.h>
 
-//BEGIN_EVENT_TABLE(TesterDlg, wxDialog)
-//	//sliders
-//	EVT_COMMAND_SCROLL(ID_P1Slider, TesterDlg::OnP1Change)
-//	EVT_COMMAND_SCROLL(ID_P2Slider, TesterDlg::OnP2Change)
-//	EVT_COMMAND_SCROLL(ID_P3Slider, TesterDlg::OnP3Change)
-//	EVT_COMMAND_SCROLL(ID_P4Slider, TesterDlg::OnP4Change)
-//	//check boxes
-//	EVT_CHECKBOX(ID_P1Check, TesterDlg::OnP1Check)
-//	EVT_CHECKBOX(ID_P2Check, TesterDlg::OnP2Check)
-//	EVT_CHECKBOX(ID_P3Check, TesterDlg::OnP3Check)
-//	EVT_CHECKBOX(ID_P4Check, TesterDlg::OnP4Check)
-//	//all control
-//	EVT_CHECKBOX(ID_AllCheck, TesterDlg::OnAllCheck)
-//	//buttons
-//	EVT_BUTTON(ID_B1Btn, TesterDlg::OnB1)
-//END_EVENT_TABLE()
-
-TesterDlg::TesterDlg(MainFrame *frame)
-: AgentPanel(frame, frame,
+TesterDlg::TesterDlg(wxWindow *parent)
+: AgentPanel(parent,
 	wxDefaultPosition,
-	frame->FromDIP(wxSize(600, 600)),
+	parent->FromDIP(wxSize(600, 600)),
 	wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER|
 	wxMAXIMIZE_BOX|wxMINIMIZE_BOX,
 	wxString("Tester")),

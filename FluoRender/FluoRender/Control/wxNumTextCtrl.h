@@ -50,7 +50,7 @@ public:
 	void ChangeValue(const wxString& value);
 
 private:
-	static constexpr int DelayMs = 1500;
+	static constexpr int DelayMs = 1000;
 
 	void OnTimer(wxTimerEvent& event);
 	void OnKillFocus(wxFocusEvent& event);

@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 class wxFadeButton;
 class wxSingleSlider;
 class wxUndoableToolbar;
+class wxNumTextCtrl;
 namespace fluo
 {
 	class Color;
@@ -90,9 +91,9 @@ private:
 	wxSingleSlider *m_r_brightness_sldr;
 	wxSingleSlider *m_r_hdr_sldr;
 	//red input boxes
-	wxTextCtrl *m_r_gamma_text;
-	wxTextCtrl *m_r_brightness_text;
-	wxTextCtrl *m_r_hdr_text;
+	wxNumTextCtrl *m_r_gamma_text;
+	wxNumTextCtrl *m_r_brightness_text;
+	wxNumTextCtrl *m_r_hdr_text;
 	//red reset buttons
 	wxButton *m_r_reset_btn;
 
@@ -107,9 +108,9 @@ private:
 	wxSingleSlider *m_g_brightness_sldr;
 	wxSingleSlider *m_g_hdr_sldr;
 	//green input boxes
-	wxTextCtrl *m_g_gamma_text;
-	wxTextCtrl *m_g_brightness_text;
-	wxTextCtrl *m_g_hdr_text;
+	wxNumTextCtrl *m_g_gamma_text;
+	wxNumTextCtrl *m_g_brightness_text;
+	wxNumTextCtrl *m_g_hdr_text;
 	//green reset buttons
 	wxButton *m_g_reset_btn;
 
@@ -124,9 +125,9 @@ private:
 	wxSingleSlider *m_b_brightness_sldr;
 	wxSingleSlider *m_b_hdr_sldr;
 	//blue input boxes
-	wxTextCtrl *m_b_gamma_text;
-	wxTextCtrl *m_b_brightness_text;
-	wxTextCtrl *m_b_hdr_text;
+	wxNumTextCtrl *m_b_gamma_text;
+	wxNumTextCtrl *m_b_brightness_text;
+	wxNumTextCtrl *m_b_hdr_text;
 	//blue reset buttons
 	wxButton *m_b_reset_btn;
 

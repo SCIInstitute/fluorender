@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <OclDlgAgent.h>
 #include <ModalDlg.h>
 #include <wxSingleSlider.h>
+#include <wxNumTextCtrl.h>
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 #include <wx/valnum.h>
@@ -84,7 +85,7 @@ OclDlg::OclDlg(wxWindow* parent) :
 	st = new wxStaticText(this, 0, "Iteration");
 	m_iterations_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 100,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_iterations_txt = new wxTextCtrl(this, wxID_ANY, "1",
+	m_iterations_txt = new wxNumTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_iterations_sldr->Bind(wxEVT_SCROLL_CHANGED, &OclDlg::OnIterationsChange, this);
 	m_iterations_txt->Bind(wxEVT_TEXT, &OclDlg::OnIterationsEdit, this);

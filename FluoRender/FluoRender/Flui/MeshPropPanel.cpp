@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxBoldText.h>
 #include <wxUndoableColorPicker.h>
 #include <wxUndoableToolbar.h>
+#include <wxNumTextCtrl.h>
 #include <Helper.h>
 #include <png_resource.h>
 #include <icons.h>
@@ -61,7 +62,7 @@ MeshPropPanel::MeshPropPanel(
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxBoldText(this, 0, "Main Color:",
 		wxDefaultPosition, bts, wxALIGN_CENTER);
-	m_color_text = new wxTextCtrl(this, wxID_ANY, "255 , 255 , 255",
+	m_color_text = new wxNumTextCtrl(this, wxID_ANY, "255 , 255 , 255",
 		wxDefaultPosition, wxDefaultSize, wxTE_CENTER);
 	m_color_btn = new wxUndoableColorPicker(this, wxID_ANY, *wxRED,
 		wxDefaultPosition, wxDefaultSize);
@@ -113,7 +114,7 @@ MeshPropPanel::MeshPropPanel(
 		wxDefaultPosition, wxDefaultSize);
 	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 127, 0, 255, 
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_alpha_text = new wxTextCtrl(this, wxID_ANY, "0.50",
+	m_alpha_text = new wxNumTextCtrl(this, wxID_ANY, "0.50",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_alpha_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnAlphaCheck, this);
 	m_alpha_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnAlphaChange, this);
@@ -131,7 +132,7 @@ MeshPropPanel::MeshPropPanel(
 		wxDefaultPosition, wxDefaultSize);
 	m_shading_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255, 
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_shading_text = new wxTextCtrl(this, wxID_ANY, "1.00",
+	m_shading_text = new wxNumTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	bitmap = wxGetBitmap(sun);
 	wxStaticBitmap* shine_bitmap = new wxStaticBitmap(this, wxID_ANY, bitmap,
@@ -139,7 +140,7 @@ MeshPropPanel::MeshPropPanel(
 	shine_bitmap->SetToolTip("Set the shininess/spread of highlights");
 	m_shine_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_shine_text = new wxTextCtrl(this, wxID_ANY, "1.00",
+	m_shine_text = new wxNumTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_shading_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnShadingCheck, this);
 	m_shading_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnShadingChange, this);
@@ -162,7 +163,7 @@ MeshPropPanel::MeshPropPanel(
 		wxDefaultPosition, wxDefaultSize);
 	m_shadow_sldr = new wxSingleSlider(this, wxID_ANY, 60, 0, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_shadow_text = new wxTextCtrl(this, wxID_ANY, "0.60",
+	m_shadow_text = new wxNumTextCtrl(this, wxID_ANY, "0.60",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_shadow_dir_chk = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, tts1, wxTB_NODIVIDER);
@@ -174,7 +175,7 @@ MeshPropPanel::MeshPropPanel(
 	m_shadow_dir_sldr = new wxSingleSlider(this, wxID_ANY, 0, -180, 180,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shadow_dir_sldr->SetRangeStyle(2);
-	m_shadow_dir_text = new wxTextCtrl(this, wxID_ANY, "0",
+	m_shadow_dir_text = new wxNumTextCtrl(this, wxID_ANY, "0",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_int);
 	m_shadow_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnShadowCheck, this);
 	m_shadow_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnShadowChange, this);
@@ -199,7 +200,7 @@ MeshPropPanel::MeshPropPanel(
 		wxDefaultPosition, wxDefaultSize);
 	m_scale_sldr = new wxSingleSlider(this, wxID_ANY, 100, 50, 200,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_scale_text = new wxTextCtrl(this, wxID_ANY, "1.00",
+	m_scale_text = new wxNumTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
 	m_scale_chk->Bind(wxEVT_CHECKBOX, &MeshPropPanel::OnScaleCheck, this);
 	m_scale_sldr->Bind(wxEVT_SCROLL_CHANGED, &MeshPropPanel::OnScaleChange, this);

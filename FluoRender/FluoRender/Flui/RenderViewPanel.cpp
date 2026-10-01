@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wxUndoableToolbar.h>
 #include <wxUndoableColorPicker.h>
 #include <wxBoldText.h>
+#include <wxNumTextCtrl.h>
 #include <wx/utils.h>
 #include <wx/valnum.h>
 #include <algorithm>
@@ -375,7 +376,7 @@ void RenderViewPanel::CreateBar()
 	//angle of view
 	m_aov_sldr = new wxSingleSlider(this, wxID_ANY, 45, 10, 100,
 		wxDefaultPosition, FromDIP(wxSize(100, 20)), wxSL_HORIZONTAL);
-	m_aov_text = new wxTextCtrl(this, wxID_ANY, "",
+	m_aov_text = new wxNumTextCtrl(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_aov_sldr->Bind(wxEVT_IDLE, &RenderViewPanel::OnAovSldrIdle, this);
 	m_aov_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnAovChange, this);
@@ -453,7 +454,7 @@ void RenderViewPanel::CreateBar()
 	m_depth_atten_factor_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 100,
 		wxDefaultPosition, wxDefaultSize, ls);
 	//text
-	m_depth_atten_factor_text = new wxTextCtrl(this, wxID_ANY, "0.00",
+	m_depth_atten_factor_text = new wxNumTextCtrl(this, wxID_ANY, "0.00",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_CENTER, vald_fp2);
 	m_depth_atten_factor_sldr->Bind(wxEVT_SCROLL_CHANGED, &RenderViewPanel::OnDepthAttenChange, this);
 	m_depth_atten_factor_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnDepthAttenEdit, this);
@@ -525,7 +526,7 @@ void RenderViewPanel::CreateBar()
 	ls = inverse_slider ? wxSL_VERTICAL : (wxSL_VERTICAL | wxSL_INVERSE);
 	m_scale_factor_sldr = new wxSingleSlider(this, wxID_ANY, 100, 50, 999,
 		wxDefaultPosition, wxDefaultSize, ls, wxDefaultValidator, "test");
-	m_scale_factor_text = new wxTextCtrl(this, wxID_ANY, "100",
+	m_scale_factor_text = new wxNumTextCtrl(this, wxID_ANY, "100",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_CENTER, vald_int);
 	m_scale_factor_spin = new wxSpinButton(this, wxID_ANY,
 		wxDefaultPosition, FromDIP(wxSize(40, 20)));
@@ -585,15 +586,15 @@ void RenderViewPanel::CreateBar()
 
 	m_x_rot_sldr = new wxUndoableScrollBar(this, ID_RotXScroll);
 	m_x_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
-	m_x_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+	m_x_rot_text = new wxNumTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(45,20)), wxTE_RIGHT, vald_fp1);
 	m_y_rot_sldr = new wxUndoableScrollBar(this, ID_RotYScroll);
 	m_y_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
-	m_y_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+	m_y_rot_text = new wxNumTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(45,20)), wxTE_RIGHT, vald_fp1);
 	m_z_rot_sldr = new wxUndoableScrollBar(this, ID_RotZScroll);
 	m_z_rot_sldr->SetScrollbar2(180, 60, 0, 360, 15);
-	m_z_rot_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+	m_z_rot_text = new wxNumTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(45,20)), wxTE_RIGHT, vald_fp1);
 	m_x_rot_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnRotEdit, this);
 	m_y_rot_text->Bind(wxEVT_TEXT, &RenderViewPanel::OnRotEdit, this);

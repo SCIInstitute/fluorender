@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <NoiseCancellingDlg.h>
 #include <NoiseCancellingDlgAgent.h>
 #include <wxSingleSlider.h>
+#include <wxNumTextCtrl.h>
 #include <wx/valnum.h>
 
 NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
@@ -53,7 +54,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
 		wxDefaultPosition, FromDIP(wxSize(75, 23)));
 	m_threshold_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 2550,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_threshold_text = new wxTextCtrl(this, wxID_ANY, "0.0",
+	m_threshold_text = new wxNumTextCtrl(this, wxID_ANY, "0.0",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_fp1);
 	m_preview_btn = new wxButton(this, wxID_ANY, "Preview",
 		wxDefaultPosition, FromDIP(wxSize(70, 23)));
@@ -72,7 +73,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
 		wxDefaultPosition, FromDIP(wxSize(75, 23)));
 	m_voxel_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 500,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
-	m_voxel_text = new wxTextCtrl(this, wxID_ANY, "1",
+	m_voxel_text = new wxNumTextCtrl(this, wxID_ANY, "1",
 		wxDefaultPosition, FromDIP(wxSize(40, 20)), wxTE_RIGHT, vald_int);
 	m_erase_btn = new wxButton(this, wxID_ANY, "Erase",
 		wxDefaultPosition, FromDIP(wxSize(70, 23)));

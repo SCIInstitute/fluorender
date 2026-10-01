@@ -48,6 +48,7 @@ class wxUndoableComboBox;
 class wxUndoableColorPicker;
 class wxColourPickerEvent;
 class wxUndoableTextCtrl;
+class wxNumTextCtrl;
 class VolumePropPanel: public AgentPanel
 {
 	enum
@@ -146,75 +147,75 @@ private:
 	//minmax
 	wxFadeButton *m_minmax_st;
 	wxMapDoubleSlider *m_minmax_sldr;
-	wxTextCtrl *m_low_offset_text;
-	wxTextCtrl* m_high_offset_text;
+	wxNumTextCtrl *m_low_offset_text;
+	wxNumTextCtrl* m_high_offset_text;
 	wxToolBar* m_minmax_link_tb;
 	wxUndoableCheckBox* m_minmax_chk;
 	//gamma
 	wxFadeButton *m_gamma_st;
 	wxSingleSlider *m_gamma_sldr;
-	wxTextCtrl *m_gamma_text;
+	wxNumTextCtrl *m_gamma_text;
 	wxUndoableCheckBox* m_gamma_chk;
 	//alpha
 	wxFadeButton *m_alpha_st;
 	wxSingleSlider *m_alpha_sldr;
-	wxTextCtrl* m_alpha_text;
+	wxNumTextCtrl* m_alpha_text;
 	wxUndoableCheckBox* m_alpha_chk;
 	//luminance
 	wxFadeButton *m_luminance_st;
 	wxSingleSlider *m_luminance_sldr;
-	wxTextCtrl* m_luminance_text;
+	wxNumTextCtrl* m_luminance_text;
 	wxUndoableCheckBox* m_luminance_chk;
 	//sample rate
 	wxFadeButton* m_sample_st;
 	wxSingleSlider *m_sample_sldr;
-	wxTextCtrl *m_sample_text;
+	wxNumTextCtrl *m_sample_text;
 	wxUndoableCheckBox* m_sample_chk;
 
 	//2
 	//thresholds
 	wxFadeButton* m_thresh_st;
 	wxMapDoubleSlider *m_thresh_sldr;
-	wxTextCtrl *m_left_thresh_text;
-	wxTextCtrl *m_right_thresh_text;
+	wxNumTextCtrl *m_left_thresh_text;
+	wxNumTextCtrl *m_right_thresh_text;
 	wxToolBar* m_thresh_link_tb;
 	wxUndoableCheckBox* m_thresh_chk;
 	//boundary
 	wxFadeButton* m_boundary_st;
 	wxDoubleSlider *m_boundary_sldr;
-	wxTextCtrl *m_boundary_low_text;
-	wxTextCtrl* m_boundary_high_text;
+	wxNumTextCtrl *m_boundary_low_text;
+	wxNumTextCtrl* m_boundary_high_text;
 	wxToolBar* m_boundary_link_tb;
 	wxUndoableCheckBox* m_boundary_chk;
 	//shading
 	wxFadeButton* m_shade_st;
 	wxSingleSlider *m_shading_shine_sldr;
-	wxTextCtrl *m_shading_shine_text;
+	wxNumTextCtrl *m_shading_shine_text;
 	wxSingleSlider *m_shading_strength_sldr;
-	wxTextCtrl *m_shading_strength_text;
+	wxNumTextCtrl *m_shading_strength_text;
 	wxUndoableCheckBox* m_shade_chk;
 	//shadow
 	wxFadeButton* m_shadow_st;
 	wxSingleSlider *m_shadow_sldr;
-	wxTextCtrl *m_shadow_text;
+	wxNumTextCtrl *m_shadow_text;
 	wxUndoableCheckBox* m_shadow_chk;
 	wxSingleSlider* m_shadow_dir_sldr;
-	wxTextCtrl* m_shadow_dir_text;
+	wxNumTextCtrl* m_shadow_dir_text;
 	wxUndoableToolbar* m_shadow_dir_chk;
 	//colormap
 	wxFadeButton* m_colormap_st;
 	wxMapDoubleSlider *m_colormap_sldr;
-	wxTextCtrl *m_colormap_low_text;
-	wxTextCtrl *m_colormap_hi_text;
+	wxNumTextCtrl *m_colormap_low_text;
+	wxNumTextCtrl *m_colormap_hi_text;
 	wxUndoableCheckBox* m_colormap_chk;
 	wxToolBar* m_colormap_link_tb;
 
 	//3
 	//color
-	wxTextCtrl *m_main_color_text;
+	wxNumTextCtrl *m_main_color_text;
 	wxUndoableToolbar* m_main_color_mode_tb;
 	wxUndoableColorPicker* m_main_color_btn;
-	wxTextCtrl *m_alt_color_text;
+	wxNumTextCtrl *m_alt_color_text;
 	wxUndoableToolbar* m_alt_color_mode_tb;
 	wxUndoableColorPicker* m_alt_color_btn;
 	//space

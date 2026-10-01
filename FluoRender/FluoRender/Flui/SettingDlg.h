@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class wxSingleSlider;
+class wxNumTextCtrl;
 struct SaveProjectInfo
 {
 	bool prj_save;
@@ -131,7 +132,7 @@ private:
 	wxComboBox* m_mouse_int_comb;
 	//depth peeling
 	wxSingleSlider* m_peeling_layers_sldr;
-	wxTextCtrl* m_peeling_layers_text;
+	wxNumTextCtrl* m_peeling_layers_text;
 	//micro blending
 	wxCheckBox* m_micro_blend_chk;
 	//background
@@ -139,7 +140,7 @@ private:
 	wxCheckBox* m_clear_color_bg_chk;
 	//rot center anchor
 	wxSingleSlider* m_pin_threshold_sldr;
-	wxTextCtrl* m_pin_threshold_text;
+	wxNumTextCtrl* m_pin_threshold_text;
 	//rotations link
 	wxCheckBox* m_rot_link_chk;
 	//vr
@@ -148,11 +149,11 @@ private:
 	wxCheckBox* m_mv_hmd_chk;
 	wxCheckBox* m_sbs_chk;
 	wxSingleSlider* m_eye_dist_sldr;
-	wxTextCtrl* m_eye_dist_text;
+	wxNumTextCtrl* m_eye_dist_text;
 	wxTextCtrl* m_holo_ip_text;
 	wxCheckBox* m_looking_glass_chk;
 	wxSingleSlider* m_lg_offset_sldr;
-	wxTextCtrl* m_lg_offset_text;
+	wxNumTextCtrl* m_lg_offset_text;
 	wxComboBox* m_lg_quilt_cmb;
 	wxComboBox* m_lg_camera_mode_cmb;
 	//display
@@ -171,28 +172,28 @@ private:
 	wxComboBox* m_streaming_comb;
 	wxComboBox* m_update_order_comb;
 	wxSingleSlider* m_graphics_mem_sldr;
-	wxTextCtrl* m_graphics_mem_text;
+	wxNumTextCtrl* m_graphics_mem_text;
 	wxSingleSlider* m_large_data_sldr;
-	wxTextCtrl* m_large_data_text;
+	wxNumTextCtrl* m_large_data_text;
 	wxSingleSlider* m_block_size_sldr;
-	wxTextCtrl* m_block_size_text;
+	wxNumTextCtrl* m_block_size_text;
 	wxSingleSlider* m_response_time_sldr;
-	wxTextCtrl* m_response_time_text;
+	wxNumTextCtrl* m_response_time_text;
 	wxSingleSlider* m_detail_level_offset_sldr;
-	wxTextCtrl* m_detail_level_offset_text;
+	wxNumTextCtrl* m_detail_level_offset_text;
 	//font
 	wxComboBox* m_font_cmb;
 	wxComboBox* m_font_size_cmb;
 	wxComboBox* m_text_color_cmb;
 	//line width
 	wxSingleSlider* m_line_width_sldr;
-	wxTextCtrl* m_line_width_text;
+	wxNumTextCtrl* m_line_width_text;
 	//history depth
 	wxSingleSlider* m_paint_hist_depth_sldr;
-	wxTextCtrl* m_paint_hist_depth_text;
+	wxNumTextCtrl* m_paint_hist_depth_text;
 	//pencil distance
 	wxSingleSlider* m_pencil_dist_sldr;
-	wxTextCtrl* m_pencil_dist_text;
+	wxNumTextCtrl* m_pencil_dist_text;
 	//reset
 	wxButton* m_reset_btn;
 	wxButton* m_recommended_btn;

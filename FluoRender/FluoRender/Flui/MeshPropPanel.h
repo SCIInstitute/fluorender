@@ -34,6 +34,7 @@ class wxSingleSlider;
 class wxUndoableColorPicker;
 class wxColourPickerEvent;
 class wxUndoableToolbar;
+class wxNumTextCtrl;
 class MeshPropPanel: public AgentPanel
 {
 	enum
@@ -85,29 +86,29 @@ public:
 private:
 	wxUndoableToolbar* m_options_toolbar;
 
-	wxTextCtrl *m_color_text;
+	wxNumTextCtrl *m_color_text;
 	wxUndoableColorPicker* m_color_btn;
 
 	wxCheckBox* m_alpha_chk;
 	wxSingleSlider *m_alpha_sldr;
-	wxTextCtrl* m_alpha_text;
+	wxNumTextCtrl* m_alpha_text;
 
 	wxCheckBox *m_shading_chk;
 	wxSingleSlider *m_shading_sldr;
-	wxTextCtrl* m_shading_text;
+	wxNumTextCtrl* m_shading_text;
 	wxSingleSlider *m_shine_sldr;
-	wxTextCtrl* m_shine_text;
+	wxNumTextCtrl* m_shine_text;
 
 	wxCheckBox* m_shadow_chk;
 	wxSingleSlider* m_shadow_sldr;
-	wxTextCtrl* m_shadow_text;
+	wxNumTextCtrl* m_shadow_text;
 	wxUndoableToolbar* m_shadow_dir_chk;
 	wxSingleSlider* m_shadow_dir_sldr;
-	wxTextCtrl* m_shadow_dir_text;
+	wxNumTextCtrl* m_shadow_dir_text;
 
 	wxCheckBox* m_scale_chk;
 	wxSingleSlider *m_scale_sldr;
-	wxTextCtrl* m_scale_text;
+	wxNumTextCtrl* m_scale_text;
 
 private:
 	void OnOptions(wxCommandEvent& event);

@@ -36,6 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/clipbrd.h>
 
 class wxSingleSlider;
+class wxNumTextCtrl;
 class ComponentDlg : public TabbedPanel
 {
 public:
@@ -145,49 +146,49 @@ private:
 
 	//generate page
 	wxSingleSlider* m_iter_sldr;
-	wxTextCtrl* m_iter_text;
+	wxNumTextCtrl* m_iter_text;
 	wxSingleSlider* m_thresh_sldr;
-	wxTextCtrl* m_thresh_text;
+	wxNumTextCtrl* m_thresh_text;
 	//distance field
 	wxCheckBox* m_use_dist_field_check;
 	wxSingleSlider* m_dist_strength_sldr;
-	wxTextCtrl* m_dist_strength_text;
+	wxNumTextCtrl* m_dist_strength_text;
 	wxSingleSlider* m_dist_filter_size_sldr;
-	wxTextCtrl* m_dist_filter_size_text;
+	wxNumTextCtrl* m_dist_filter_size_text;
 	wxSingleSlider* m_max_dist_sldr;
-	wxTextCtrl* m_max_dist_text;
+	wxNumTextCtrl* m_max_dist_text;
 	wxSingleSlider* m_dist_thresh_sldr;
-	wxTextCtrl* m_dist_thresh_text;
+	wxNumTextCtrl* m_dist_thresh_text;
 	//diffusion
 	wxCheckBox* m_diff_check;
 	wxSingleSlider* m_falloff_sldr;
-	wxTextCtrl* m_falloff_text;
+	wxNumTextCtrl* m_falloff_text;
 	wxCheckBox* m_size_check;
 	wxSingleSlider* m_size_sldr;
-	wxTextCtrl* m_size_text;
+	wxNumTextCtrl* m_size_text;
 	//density
 	wxCheckBox* m_density_check;
 	wxSingleSlider* m_density_sldr;
-	wxTextCtrl* m_density_text;
+	wxNumTextCtrl* m_density_text;
 	wxSingleSlider* m_varth_sldr;
-	wxTextCtrl* m_varth_text;
+	wxNumTextCtrl* m_varth_text;
 	wxSingleSlider* m_density_window_size_sldr;
-	wxTextCtrl* m_density_window_size_text;
+	wxNumTextCtrl* m_density_window_size_text;
 	wxSingleSlider* m_density_stats_size_sldr;
-	wxTextCtrl* m_density_stats_size_text;
+	wxNumTextCtrl* m_density_stats_size_text;
 	//fixate
 	wxCheckBox* m_fixate_check;
 	wxCheckBox* m_grow_fixed_check;
 	wxButton* m_fix_update_btn;
 	wxSingleSlider* m_fix_size_sldr;
-	wxTextCtrl* m_fix_size_text;
+	wxNumTextCtrl* m_fix_size_text;
 	//clean
 	wxCheckBox* m_clean_check;
 	wxButton* m_clean_btn;
 	wxSingleSlider* m_clean_iter_sldr;
-	wxTextCtrl* m_clean_iter_text;
+	wxNumTextCtrl* m_clean_iter_text;
 	wxSingleSlider* m_clean_limit_sldr;
-	wxTextCtrl* m_clean_limit_text;
+	wxNumTextCtrl* m_clean_limit_text;
 	//record
 	wxTextCtrl* m_cmd_count_text;
 	wxToggleButton* m_record_cmd_btn;
@@ -203,19 +204,19 @@ private:
 	wxRadioButton* m_cluster_method_kmeans_rd;
 	//parameters
 	wxSingleSlider* m_cluster_clnum_sldr;
-	wxTextCtrl* m_cluster_clnum_text;
+	wxNumTextCtrl* m_cluster_clnum_text;
 	wxSingleSlider* m_cluster_maxiter_sldr;
-	wxTextCtrl* m_cluster_maxiter_text;
+	wxNumTextCtrl* m_cluster_maxiter_text;
 	wxSingleSlider* m_cluster_tol_sldr;
-	wxTextCtrl* m_cluster_tol_text;
+	wxNumTextCtrl* m_cluster_tol_text;
 	wxSingleSlider* m_cluster_size_sldr;
-	wxTextCtrl* m_cluster_size_text;
+	wxNumTextCtrl* m_cluster_size_text;
 	wxSingleSlider* m_cluster_eps_sldr;
-	wxTextCtrl* m_cluster_eps_text;
+	wxNumTextCtrl* m_cluster_eps_text;
 
 	//analysis page
 	//selection
-	wxTextCtrl* m_comp_id_text;
+	wxNumTextCtrl* m_comp_id_text;
 	wxButton* m_comp_id_x_btn;
 	wxButton* m_comp_full_btn;
 	wxButton* m_comp_exclusive_btn;
@@ -235,7 +236,7 @@ private:
 	wxSpinCtrl* m_analysis_max_spin;
 	//options
 	wxSingleSlider* m_con_size_sldr;
-	wxTextCtrl* m_con_size_text;
+	wxNumTextCtrl* m_con_size_text;
 	wxCheckBox* m_consistent_check;
 	wxCheckBox* m_colocal_check;
 	//output
@@ -250,7 +251,7 @@ private:
 	wxCheckBox* m_dist_neighbor_check;
 	wxCheckBox* m_dist_all_chan_check;
 	wxSingleSlider* m_dist_neighbor_sldr;
-	wxTextCtrl* m_dist_neighbor_text;
+	wxNumTextCtrl* m_dist_neighbor_text;
 	wxButton* m_dist_output_btn;
 	//align
 	wxCheckBox* m_align_center_chk;
