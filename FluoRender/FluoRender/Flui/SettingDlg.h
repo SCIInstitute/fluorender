@@ -83,6 +83,16 @@ struct DeviceTreeInfo
 	int platform_id{ -1 };
 	int device_id{ -1 };
 };
+struct DeviceSel
+{
+	int platform_id{ -1 };
+	int device_id{ -1 };
+};
+struct AutomationSel
+{
+	int id;
+	int index;
+};
 class SettingDlg : public TabbedPanel
 {
 public:
@@ -98,7 +108,8 @@ public:
 	void UpdatePencilDist(double dval);
 	void UpdateMicroBlendEnable(bool bval);
 	void UpdatePeelNum(int ival);
-	void UpdateSettingRot(double dval);
+	void UpdatePinThreshold(double dval);
+	void UpdateRotLink(bool bval);
 	void UpdateGradBg(bool bval);
 	void UpdateClearColorBg(bool bval);
 	void UpdateMouseInt(int ival);
@@ -114,6 +125,53 @@ public:
 
 	//get
 	bool GetProjectSave() const;
+	bool GetProjectSaveInc() const;
+	bool GetRealtimeCompress() const;
+	bool GetScriptBreak() const;
+	bool GetInverseSliders() const;
+	int GetMulFuncBtnUse() const;
+	int GetConfigFileType() const;
+	int GetYDir() const;
+	int GetMouseInt() const;
+	int GetPeelNum() const;
+	bool GetMicroBlend() const;
+	bool GetGradBg() const;
+	bool GetClearColorBg() const;
+	double GetPinThreshold() const;
+	bool GetRotLink() const;
+	int GetHologramMode() const;
+	int GetXrApi() const;
+	bool GetMvHmd() const;
+	bool GetSbs() const;
+	double GetEyeDist() const;
+	std::string GetHoloIp() const;
+	double GetLgOffset() const;
+	int GetLgQuilt() const;
+	int GetLgCameraMode() const;
+	int GetDispId() const;
+	int GetDispColorDepth() const;
+	int GetWavelengthColorSel() const;
+	int GetWavelengthColor() const;
+	bool GetMaxTextureSizeUse() const;
+	int GetMaxTextureSize() const;
+	int GetStreamEnable() const;
+	int GetUpdateOrder() const;
+	double GetGraphicsMem() const;
+	double GetLargeDataSize() const;
+	double GetBrickSize() const;
+	int GetResponseTime() const;
+	int GetDetailLevelOffset() const;
+	std::wstring GetFontFileName() const;
+	int GetFontSize() const;
+	int GetTextColor() const;
+	int GetLineWidth() const;
+	int GetPaintHistDepth() const;
+	int GetPencilDist() const;
+	std::wstring GetJavaJvm() const;
+	std::wstring GetJavaIJ() const;
+	std::wstring GetJavaBioformats() const;
+	DeviceSel GetDeviceSelection() const;
+	AutomationSel GetAutomationSel() const;
 
 private:
 	//save project
@@ -224,6 +282,10 @@ private:
 		wxComboBox* combo;
 	};
 	std::unordered_map<std::string, ComboEntry> m_automate_combo;
+
+	int m_wave_color_sel = 0;
+	int m_auto_id = 0;
+	int m_auto_index = 0;
 
 private:
 	wxWindow* CreateProjectPage(wxWindow* parent);

@@ -260,5 +260,11 @@ public:
 
 	//python settings
 	int m_python_ver;//minor version no of python3
+
+	//help url
+	std::string help_url_;
+
+	//linked rotation
+	bool m_linked_rot;
 };
 #endif

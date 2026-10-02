@@ -511,7 +511,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstPointVolumeMode "point volume mode"//0: use view plane; 1: use max value; 2: use accumulated value
 #define gstRulerUseTransf "ruler use transf"//ruler use volume transfer function
 #define gstRulerTransient "ruler transient"//ruler is time dependent
-#define gstSettingsRot "settings rot"//settings for rotations
+#define gstPinThreshold "pin threshold"//pin rotation center
 #define gstLinkedRot "linked rot"//link rotation to views
 #define gstMouseInt "mouse int"//reduce computations for mouse interactions
 #define gstFullscreenDisplay "fullscreen display"
@@ -1290,5 +1290,34 @@ DEALINGS IN THE SOFTWARE.
 
 //drag and drop file
 #define gstDragDropFile "drag drop file"
+
+//settings dialog
+#define gstSaveProjectInc "save project inc"
+#define gstRealtimeCompress "realtime compress"
+#define gstScriptBreakEnable "script break enable"
+#define gstInverseSliders "inverse sliders"
+#define gstMulFuncBtn "mul func btn"
+#define gstYDir "y dir"
+#define gstRotLink "rot link"
+#define gstXrApi "xr api"
+#define gstMvHmd "mv hmd"
+#define gstSbs "sbs"
+#define gstEyeDist "eye dist"
+#define gstHoloIp "holo ip"
+#define gstLgOffset "lg offset"
+#define gstLgQuilt "lg quilt"
+#define gstLgCameraMode "lg camera mode"
+#define gstGraphicsMem "graphics mem"
+#define gstFontSize "font size"
+#define gstJavaJvm "java jvm"
+#define gstJavaIJ "java ij"
+#define gstJavaBioformats "java bioformats"
+#define gstJavaJvmBrowse "java jvm browse"
+#define gstJavaIJBrowse "java ij browse"
+#define gstJavaBioformatsBrowse "java bioformats browse"
+#define gstJavaEnable "java enable"
+#define gstJavaIJEnable "java ij enable"
+#define gstResetSettings "reset settings"
+#define gstRecommendedSettings "recommended settings"
 
 #endif//NAMES_HPP

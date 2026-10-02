@@ -308,8 +308,7 @@ Global::Global() :
 	coordinator_(std::make_unique<Coordinator>()),
 	flui_builder_(std::make_unique<FluiBuilder>()),
 	current_objects_(std::make_unique<CurrentObjects>()),
-	project_(std::make_unique<Project>()),
-	m_linked_rot(false)
+	project_(std::make_unique<Project>())
 {
 	Init();
 }
@@ -334,7 +333,6 @@ void Global::Init()
 {
 	InitDatabase();
 	BuildFactories();
-	help_url_ = "https://github.com/SCIInstitute/fluorender";
 	InitLocale();
 }
 

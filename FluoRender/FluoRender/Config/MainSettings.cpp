@@ -203,6 +203,10 @@ MainSettings::MainSettings()
 	m_vp_auto_apply = false;
 
 	m_python_ver = 10;
+
+	help_url_ = "https://github.com/SCIInstitute/fluorender";
+
+	m_linked_rot = false;
 }
 
 MainSettings::~MainSettings()
@@ -351,6 +355,7 @@ void MainSettings::Read(const std::string& filename)
 		fconfig->Read("clip mode", &m_clip_mode, static_cast<int>(flrd::ClippingRenderMode::ColoredFront));
 		fconfig->Read("clip link", &m_clip_link, false);
 		fconfig->Read("clip hold", &m_clip_hold, false);
+		fconfig->Read("linked rot", &m_linked_rot, false);
 	}
 	//shadow
 	if (fconfig->Exists("/shadow"))
@@ -625,6 +630,7 @@ void MainSettings::Save()
 	fconfig->Write("clip mode", m_clip_mode);
 	fconfig->Write("clip link", m_clip_link);
 	fconfig->Write("clip hold", m_clip_hold);
+	fconfig->Write("linked rot", m_linked_rot);
 
 	//shadow
 	fconfig->SetPath("/shadow");

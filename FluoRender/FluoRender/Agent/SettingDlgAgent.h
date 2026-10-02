@@ -56,12 +56,121 @@ protected:
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstSaveProjectEnable,
+		gstFontFile,
+		gstSettingsFont,
+		gstLineWidth,
+		gstPaintHistory,
+		gstPencilDist,
+		gstMicroBlendEnable,
+		gstPeelNum,
+		gstPinThreshold,
+		gstRotLink,
+		gstGradBg,
+		gstClearColorBg,
+		gstMouseInt,
+		gstStreamEnable,
+		gstAutomate,
+		gstHologramMode,
+		gstFullscreenDisplay,
+		gstDisplayColorDepth,
+		gstWavelengthColors,
+		gstMaxTextureSize,
+		gstDeviceTree,
+		gstSettingsJava,
+		gstSaveProjectInc,
+		gstRealtimeCompress,
+		gstScriptBreakEnable,
+		gstInverseSliders,
+		gstMulFuncBtn,
+		gstConfigFileType,
+		gstYDir,
+		gstXrApi,
+		gstMvHmd,
+		gstSbs,
+		gstEyeDist,
+		gstHoloIp,
+		gstLgOffset,
+		gstLgQuilt,
+		gstLgCameraMode,
+		gstMaxTextureSizeEnable,
+		gstUpdateOrder,
+		gstGraphicsMem,
+		gstLargeDataSize,
+		gstBrickSize,
+		gstResponseTime,
+		gstLodOffset,
+		gstFontSize,
+		gstTextColor,
+		gstJavaJvm,
+		gstJavaIJ,
+		gstJavaBioformats,
+		gstJavaJvmBrowse,
+		gstJavaIJBrowse,
+		gstJavaBioformatsBrowse,
+		gstJavaEnable,
+		gstJavaIJEnable,
+		gstAutomate,
+		gstResetSettings,
+		gstRecommendedSettings
 	};
 
 	bool GetFontList(std::vector<std::string>& list) const;
 	
 	void SetProjectSave();
+	void SetProjectSaveInc();
+	void SetRealtimeCompress();
+	void SetScriptBreak();
+	void SetInverseSliders();
+	void SetMulFuncBtn();
+	void SetConfigFileType();
+	void SetYDir();
+	void SetInteractiveQuality();
+	void SetPeelingLayers();
+	void SetMicroBlend();
+	void SetGradBg();
+	void SetClearColorBg();
+	void SetPinThreshold();
+	void SetRotLink();
+	void SetHologramMode();
+	void SetXrApi();
+	void SetMvHmd();
+	void SetSbs();
+	void SetEyeDist();
+	void SetHoloIp();
+	void SetLgOffset();
+	void SetLgQuilt();
+	void SetLgCameraMode();
+	void SetDispId();
+	void SetColorDepth();
+	void SetWavelengthColor();
+	void SetMaxTextureSizeEnable();
+	void SetMaxTextureSize();
+	void SetStreamEnable();
+	void SetUpdateOrder();
+	void SetGraphicsMem();
+	void SetLargeData();
+	void SetBrickSize();
+	void SetResponseTime();
+	void SetDetailLevelOffset();
+	void SetFont();
+	void SetFontSize();
+	void SetTextColor();
+	void SetLineWidth();
+	void SetPaintHistDepth();
+	void SetPencilDist();
+	void SetJavaJvm();
+	void SetJavaIJ();
+	void SetJavaBioformats();
+	void SetJavaJvmBrowse();
+	void SetJavaIJBrowse();
+	void SetJavaBioformatsBrowse();
+	void SetJavaEnable();
+	void SetJavaIJEnable();
+	void SetDevice();
+	void SetAutomation();
+	void Reset();
+	void SetRecommended();
 };
 
 #endif // SettingDlgAgent_h

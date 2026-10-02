@@ -282,12 +282,6 @@ namespace fluo
 		//project
 		Project& get_project();
 
-		std::string& get_help_url() { return help_url_; }
-
-		//linked rotation
-		bool get_linked_rot() { return m_linked_rot; }
-		void set_linked_rot(bool value) { m_linked_rot = value; }
-
 	private:
 		static Global instance_;
 
@@ -375,12 +369,6 @@ namespace fluo
 
 		//project management
 		std::unique_ptr<Project> project_;
-
-		//help url
-		std::string help_url_;
-
-		//linked rotation
-		bool m_linked_rot;
 
 	private:
 		Global();
