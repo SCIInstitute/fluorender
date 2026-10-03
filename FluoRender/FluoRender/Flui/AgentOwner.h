@@ -43,7 +43,7 @@ public:
 
 	Agent* GetAgent() const { return m_agent.get(); }
 
-	void SetAgent(std::unique_ptr<Agent> agent) { m_agent = std::move(agent); }
+	void SetAgent(std::unique_ptr<Agent> agent);
 
 protected:
 	std::unique_ptr<Agent> m_agent;

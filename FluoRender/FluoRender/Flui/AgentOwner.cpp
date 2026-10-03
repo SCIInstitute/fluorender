@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <AgentOwner.h>
+#include <Agent.h>
 #include <Global.h>
 #include <Names.h>
 #include <MainFrame.h>
@@ -36,6 +37,11 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <RenderCanvasAgent.h>
 #include <wxNotebookSerializer.h>
+
+void AgentOwner::SetAgent(std::unique_ptr<Agent> agent)
+{
+	m_agent = std::move(agent);
+}
 
 double AgentOwner::getDpiScaleFactor()
 {

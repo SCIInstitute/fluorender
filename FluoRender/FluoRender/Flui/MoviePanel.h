@@ -45,6 +45,7 @@ DEALINGS IN THE SOFTWARE.
 
 class wxUndoableScrollBar;
 class wxUndoableToolbar;
+class wxNumTextCtrl;
 class MoviePanel;
 
 struct KeyframeInfo
