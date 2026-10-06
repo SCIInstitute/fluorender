@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <FluiBuilder.h>
 #include <MainFrame.h>
+#include <MainFrameAgent.h>
 #include <DataManager.h>
 #include <compatibility.h>
 #include <cstdio>
