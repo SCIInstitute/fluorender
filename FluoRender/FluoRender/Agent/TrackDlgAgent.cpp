@@ -36,13 +36,21 @@ DEALINGS IN THE SOFTWARE.
 #include <MainSettings.h>
 #include <VolumeData.h>
 #include <Cell.h>
+#include <RenderView.h>
+#include <ModalDlg.h>
+#include <Directory.h>
+#include <CompSelector.h>
+#include <CompEditor.h>
+#include <CompAnalyzer.h>
+#include <MovieMaker.h>
 #include <compatibility.h>
 
 TrackDlgAgent::TrackDlgAgent(
 	TrackDlg* dlg) :
 	Agent(dlg)
 {
-
+	glbin_trackmap_proc.RegisterInfoOutFunc(
+		std::bind(&TrackDlgAgent::WriteInfo, this, std::placeholders::_1));
 }
 
 void TrackDlgAgent::UpdateUI(const UpdateRequest& request)
@@ -179,7 +187,115 @@ void TrackDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void TrackDlgAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstClearTrack))
+		ClearTrack();
+	if (request.HasValue(gstTrackFile))
+		LoadTrackFile();
+	if (request.HasValue(gstSaveTrackFile))
+		SaveTrackFile();
+	if (request.HasValue(gstSaveAsTrackFile))
+		SaveAsTrackFile();
+	if (request.HasValue(gstGenerateMap))
+		GenerateMap();
+	if (request.HasValue(gstRefineTime))
+		RefineTime();
+	if (request.HasValue(gstRefineAll))
+		RefineAll();
+	if (request.HasValue(gstTrackIter))
+		SetMapIter();
+	if (request.HasValue(gstTrackSize))
+		SetMapSize();
+	if (request.HasValue(gstTrackConsistent))
+		SetMapConsistent();
+	if (request.HasValue(gstTrackMerge))
+		SetTryMerge();
+	if (request.HasValue(gstTrackSplit))
+		SetTrySplit();
+	if (request.HasValue(gstTrackSimilarity))
+		SetMapSimilarity();
+	if (request.HasValue(gstTrackContactFactor))
+		SetMapContact();
+	if (request.HasValue(gstTrackCompId))
+		SetCompId();
+	if (request.HasValue(gstTrackClearCompId))
+		ClearCompId();
+	if (request.HasValue(gstCompFull))
+		SetCompFull();
+	if (request.HasValue(gstCompExclusive))
+		SetCompExclusive();
+	if (request.HasValue(gstCompAppend))
+		SetCompAppend();
+	if (request.HasValue(gstCompClear))
+		SetCompClear();
+	if (request.HasValue(gstShuffle))
+		SetShuffle();
 
+	if (request.HasValue(gstTrackCellSize))
+		SetCellSize();
+	if (request.HasValue(gstComputeUncertainty))
+		ComputeUncertainty();
+	if (request.HasValue(gstTrackUncertainLow))
+		SetCompUncertaintyLow();
+	if (request.HasValue(gstTrackCompId2))
+		SetCompId2();
+	if (request.HasValue(gstCellExclusiveLink))
+		SetCellExclusiveLink();
+	if (request.HasValue(gstCellLink))
+		SetCellLink();
+	if (request.HasValue(gstCellLinkAll))
+		SetCellLinkAll();
+	if (request.HasValue(gstCellIsolate))
+		SetCellIsolate();
+	if (request.HasValue(gstCellUnlink))
+		SetCellUnlink();
+	if (request.HasValue(gstTrackNewCompId))
+		SetCellNewId();
+	if (request.HasValue(gstTrackClearCompNewId))
+		ClearCompNewId();
+	if (request.HasValue(gstCreateCellNewId))
+		CreateCellNewId();
+	if (request.HasValue(gstCellAppendId))
+		SetCellAppendId();
+	if (request.HasValue(gstCellReplaceId))
+		SetCellReplaceId();
+	if (request.HasValue(gstCellCombineId))
+		SetCellCombineId();
+	if (request.HasValue(gstCellSeparateId))
+		SetCellSeparateId();
+	if (request.HasValue(gstCellSegment))
+		SetCellSegment();
+	if (request.HasValue(gstCellClusterNum))
+		SetClusterNum();
+
+	if (request.HasValue(gstTrackConvertRulers))
+		ConvertRulers();
+	if (request.HasValue(gstTrackConsistent))
+		ConvertConsistent();
+	if (request.HasValue(gstAnalyzeComps))
+		AnalyzeComps();
+	if (request.HasValue(gstAnalyzeLinks))
+		AnalyzeLinks();
+	if (request.HasValue(gstAnalyzeUncertainty))
+		AnalyzeUncertainty();
+	if (request.HasValue(gstAnalyzePaths))
+		AnalyzePaths();
+	if (request.HasValue(gstTrackSaveResult))
+		SaveTrackResult();
+	if (request.HasValue(gstCellPrev))
+		SetCellPrev();
+	if (request.HasValue(gstCellNext))
+		SetCellNext();
+	if (request.HasValue(gstGhostNum))
+		SetGhostNum();
+	if (request.HasValue(gstGhostShowTail))
+		SetGhostShowTail();
+	if (request.HasValue(gstGhostShowLead))
+		SetGhostShowLead();
+
+	if (request.HasValue(gstTrackListSel))
+		SetListSelection();
+	if (request.HasValue(gstTrackListDelete))
+		DeleteSelection();
 }
 
 TrackDlg* TrackDlgAgent::GetDialog() const
@@ -295,3 +411,564 @@ TrackViewData TrackDlgAgent::GetTrackViewData()
 
 	return data;
 }
+
+void TrackDlgAgent::WriteInfo(const std::wstring& str)
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		dlg->UpdateStatText(str);
+}
+
+void TrackDlgAgent::ClearTrack()
+{
+	auto trkg = glbin_current.GetTrackGroup();
+	if (trkg)
+		trkg->get().Clear();
+	UpdateDataToUI({ gstTrackFile });
+}
+
+void TrackDlgAgent::LoadTrackFile()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+
+	ModalDlg fopendlg(
+		dlg, "Choose a FluoRender track file",
+		"", "", "*.track", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	int rval = fopendlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		std::wstring filename = fopendlg.GetPath().ToStdWstring();
+		view->LoadTrackGroup(filename);
+		UpdateDataToUI({ gstTrackFile });
+	}
+}
+
+void TrackDlgAgent::SaveTrackFile()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	auto trkg = glbin_current.GetTrackGroup();
+	if (!trkg)
+		return;
+	std::wstring str = trkg->get().GetPath();
+	if (std::filesystem::exists(str))
+		view->SaveTrackGroup(str);
+	else
+		SaveAsTrackFile();
+}
+
+void TrackDlgAgent::SaveAsTrackFile()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+	ModalDlg fopendlg(
+		dlg, "Save a FluoRender track file",
+		"", "", "*.track", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+	int rval = fopendlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		std::wstring filename = fopendlg.GetPath().ToStdWstring();
+		view->SaveTrackGroup(filename);
+		UpdateDataToUI({ gstTrackFile });
+	}
+}
+
+void TrackDlgAgent::GenerateMap()
+{
+	glbin_trackmap_proc.GenMap();
+	//enable script
+	glbin_settings.m_run_script = true;
+	std::filesystem::path p = GetUserSettingsRoot();
+	p = p / "Scripts" / "track_selected_results.txt";
+	glbin_settings.m_script_file = p.wstring();
+	NotifyDataToUI({ gstMovPlay, gstRunScript, gstScriptFile, gstScriptSelect });
+}
+
+void TrackDlgAgent::RefineTime()
+{
+	auto view = glbin_current.render_view.lock();
+	if (!view)
+		return;
+
+	glbin_trackmap_proc.RefineMap(view->m_tseq_cur_num);
+}
+
+void TrackDlgAgent::RefineAll()
+{
+	glbin_trackmap_proc.RefineMap();
+}
+
+void TrackDlgAgent::SetMapIter()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_track_iter = dlg->GetMapIter();
+}
+
+void TrackDlgAgent::SetMapSize()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_component_size = dlg->GetMapSize();
+}
+
+void TrackDlgAgent::SetMapConsistent()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_consistent_color = dlg->GetMapConsistent();
+}
+
+void TrackDlgAgent::SetTryMerge()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_try_merge = dlg->GetMapMerge();
+}
+
+void TrackDlgAgent::SetTrySplit()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_try_split = dlg->GetMapSplit();
+}
+
+void TrackDlgAgent::SetMapSimilarity()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_similarity = dlg->GetMapSimilarity();
+}
+
+void TrackDlgAgent::SetMapContact()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_contact_factor = dlg->GetMapContact();
+}
+
+void TrackDlgAgent::SetCompId()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	m_comp_id = dlg->GetCompId();
+	unsigned long ival;
+	if (m_comp_id.empty())
+		glbin_comp_selector.SetId(0, true);
+	else if (TryToULong(m_comp_id, ival))
+		glbin_comp_selector.SetId(ival, false);
+
+	UpdateDataToUI({ gstTrackCompId });
+}
+
+void TrackDlgAgent::ClearCompId()
+{
+	m_comp_id.clear();
+	glbin_comp_selector.SetId(0, true);
+	UpdateDataToUI({ gstTrackCompId });
+}
+
+void TrackDlgAgent::SetCompFull()
+{
+	if (m_comp_id.empty())
+	{
+		glbin_comp_selector.CompFull();
+		NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+	}
+	else
+		SetCompAppend();
+}
+
+void TrackDlgAgent::SetCompExclusive()
+{
+	glbin_comp_selector.Exclusive();
+	auto view = glbin_current.render_view.lock();
+	if (view)
+		view->GetTraces(false);
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCompAppend()
+{
+	bool get_all = ToLower(m_comp_id) == "all" ? true : false;
+	glbin_comp_selector.Select(get_all);
+	auto view = glbin_current.render_view.lock();
+	if (view)
+		view->GetTraces(false);
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCompClear()
+{
+	glbin_comp_selector.Clear();
+	auto view = glbin_current.render_view.lock();
+	if (view)
+		view->GetTraces(false);
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetShuffle()
+{
+	//get current vd
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+
+	vd->IncShuffle();
+	NotifyViewUpdate({ gstNull });
+}
+
+void TrackDlgAgent::SetCellSize()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	int ival = dlg->GetCellSize();
+	if (ival > 0)
+	{
+		glbin_comp_selector.SetUseMin(true);
+		glbin_comp_selector.SetMinNum(ival);
+		auto trkg = glbin_current.GetTrackGroup();
+		if (trkg)
+			trkg->get().SetCellSize(ival);
+	}
+	else
+		glbin_comp_selector.SetUseMin(false);
+
+	UpdateDataToUI({ gstTrackCellSize });
+}
+
+void TrackDlgAgent::ComputeUncertainty()
+{
+	glbin_trackmap_proc.GetCellsByUncertainty(false);
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCompUncertaintyLow()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	glbin_trackmap_proc.SetUncertainLow(dlg->GetCompUncertainLow());
+	glbin_trackmap_proc.GetCellsByUncertainty(true);
+	NotifyViewUpdate({ gstTrackUncertainLow, gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCompId2()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	m_comp_id = dlg->GetCompId2();
+	unsigned long ival;
+	if (m_comp_id.empty())
+		glbin_comp_selector.SetId(0, true);
+	else if (TryToULong(m_comp_id, ival))
+		glbin_comp_selector.SetId(ival, false);
+
+	UpdateDataToUI({ gstTrackCompId });
+}
+
+void TrackDlgAgent::SetCellExclusiveLink()
+{
+	glbin_trackmap_proc.LinkCells(true);
+	NotifyViewUpdate({ gstNull });
+}
+
+void TrackDlgAgent::SetCellLink()
+{
+	glbin_trackmap_proc.LinkCells(false);
+	NotifyViewUpdate({ gstNull });
+}
+
+void TrackDlgAgent::SetCellLinkAll()
+{
+	glbin_trackmap_proc.LinkAllCells();
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCellIsolate()
+{
+	glbin_trackmap_proc.IsolateCells();
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCellUnlink()
+{
+	glbin_trackmap_proc.UnlinkCells();
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCellNewId()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	m_comp_id3 = dlg->GetCellNewId();
+	unsigned long ival;
+	if (m_comp_id3.empty())
+		glbin_comp_editor.SetId(0, true);
+	else if (TryToULong(m_comp_id3, ival))
+		glbin_comp_editor.SetId(ival, false);
+
+	UpdateDataToUI({ gstTrackNewCompId });
+}
+
+void TrackDlgAgent::ClearCompNewId()
+{
+	m_comp_id3.clear();
+	glbin_comp_editor.SetId(0, true);
+	UpdateDataToUI({ gstTrackNewCompId });
+}
+
+void TrackDlgAgent::CreateCellNewId()
+{
+	glbin_comp_editor.NewId(false, true);
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCellAppendId()
+{
+	glbin_comp_editor.NewId(true, true);
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCellReplaceId()
+{
+	glbin_comp_editor.ReplaceList();
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCellCombineId()
+{
+	glbin_comp_editor.CombineList();
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCellSeparateId()
+{
+	glbin_trackmap_proc.DivideCells();
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetCellSegment()
+{
+	glbin_trackmap_proc.SegmentCells();
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::SetClusterNum()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_trackmap_proc.SetClusterNum(dlg->GetClusterNum());
+}
+
+void TrackDlgAgent::ConvertRulers()
+{
+	glbin_trackmap_proc.ConvertRulers();
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo, gstRulerList });
+}
+
+void TrackDlgAgent::ConvertConsistent()
+{
+	glbin_trackmap_proc.ConvertConsistent();
+	NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+}
+
+void TrackDlgAgent::AnalyzeComps()
+{
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+
+	glbin_comp_analyzer.SetVolume(vd);
+	glbin_comp_analyzer.Analyze();
+	std::string str;
+	glbin_comp_analyzer.OutputCompListStr(str, 1);
+	auto dlg = GetDialog();
+	if (dlg)
+		dlg->UpdateStatText(s2ws(str));
+}
+
+void TrackDlgAgent::AnalyzeLinks()
+{
+	glbin_trackmap_proc.AnalyzeLink();
+}
+
+void TrackDlgAgent::AnalyzeUncertainty()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		dlg->UpdateStatText(L"");
+	glbin_trackmap_proc.AnalyzeUncertainty();
+}
+
+void TrackDlgAgent::AnalyzePaths()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		dlg->UpdateStatText(L"");
+	glbin_trackmap_proc.AnalyzePath();
+}
+
+void TrackDlgAgent::SaveTrackResult()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	ModalDlg fopendlg(
+		dlg, "Save results", "", "",
+		"Text file (*.txt)|*.txt",
+		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxString filename = fopendlg.GetPath();
+		std::ofstream os;
+		OutputStreamOpen(os, filename.ToStdString());
+
+		wxString str;
+		str = dlg->GetStatText();
+
+		os << str;
+
+		os.close();
+	}
+}
+
+void TrackDlgAgent::SetCellPrev()
+{
+	if (glbin_moviemaker.IsRunning())
+		return;
+	int frame = glbin_moviemaker.GetCurrentFrame();
+	frame--;
+	glbin_moviemaker.SetCurrentFrame(frame);
+	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum, gstTrackList };
+	NotifyViewUpdate(vc);
+}
+
+void TrackDlgAgent::SetCellNext()
+{
+	if (glbin_moviemaker.IsRunning())
+		return;
+	int frame = glbin_moviemaker.GetCurrentFrame();
+	frame++;
+	glbin_moviemaker.SetCurrentFrame(frame);
+	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum, gstTrackList };
+	NotifyViewUpdate(vc);
+}
+
+void TrackDlgAgent::SetGhostNum()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	int ival = dlg->GetGhostNum();
+	auto trkg = glbin_current.GetTrackGroup();
+	if (!trkg)
+		return;
+
+	trkg->get().SetGhostNum(ival);
+	NotifyViewUpdate({ gstGhostNum });
+}
+
+void TrackDlgAgent::SetGhostShowTail()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	bool bval = dlg->GetGhostShowTail();
+
+	auto trkg = glbin_current.GetTrackGroup();
+	if (!trkg)
+		return;
+
+	trkg->get().SetDrawTail(bval);
+	NotifyViewUpdate({ gstNull });
+}
+
+void TrackDlgAgent::SetGhostShowLead()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	bool bval = dlg->GetGhostShowLead();
+
+	auto trkg = glbin_current.GetTrackGroup();
+	if (!trkg)
+		return;
+
+	trkg->get().SetDrawLead(bval);
+	NotifyViewUpdate({ gstNull });
+}
+
+void TrackDlgAgent::SetListSelection()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	int sel = dlg->GetActiveList();
+	auto list = dlg->GetSelection();
+
+	flrd::CelpList celp_list;
+	for (auto& i : list)
+	{
+		flrd::Celp cell(new flrd::Cell(i.id));
+		cell->SetSizeUi(i.size);
+		cell->SetSizeD(i.size);
+		fluo::Point p(i.x, i.y, i.z);
+		cell->SetCenter(p);
+		celp_list.insert(std::pair<unsigned int, flrd::Celp>
+			(i.id, cell));
+	}
+
+	switch (sel)
+	{
+	case 0:
+		glbin_trackmap_proc.SetListIn(celp_list);
+		glbin_comp_editor.SetList(celp_list);
+		glbin_comp_selector.SetList(celp_list);
+		break;
+	case 1:
+		glbin_trackmap_proc.SetListOut(celp_list);
+		break;
+	}
+}
+
+void TrackDlgAgent::DeleteSelection()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	int sel = dlg->GetActiveList();
+	if (sel == 0)
+	{
+		glbin_comp_selector.DeleteList();
+		NotifyViewUpdate({ gstTrackList, gstSelUndoRedo });
+	}
+}
+

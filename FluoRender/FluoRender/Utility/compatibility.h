@@ -359,18 +359,30 @@ inline std::string split_host_name_and_port(const std::string& address, uint16_t
 	}
 }
 
+inline std::wstring ToLower(const std::wstring& str)
+{
+	auto s = str;
+	std::transform(s.begin(), s.end(), s.begin(), [](wchar_t c){ return std::tolower(c); });
+	return s;
+}
+
+inline std::string ToLower(const std::string& str)
+{
+	auto s = str;
+	std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return std::tolower(c); });
+	return s;
+}
+
 inline std::wstring GET_SUFFIX(const std::wstring& pathname)
 {
 	std::wstring extension = std::filesystem::path(pathname).extension().wstring();
-	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-	return extension;
+	return ToLower(extension);
 }
 
 inline std::string GET_SUFFIX(const std::string& pathname)
 {
 	std::string extension = std::filesystem::path(pathname).extension().string();
-	std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-	return extension;
+	return ToLower(extension);
 }
 
 inline unsigned long long TIME()

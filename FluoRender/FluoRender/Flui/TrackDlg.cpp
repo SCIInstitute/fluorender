@@ -26,6 +26,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <TrackDlg.h>
+#include <TrackDlgAgent.h>
 #include <wxSingleSlider.h>
 #include <wxNumTextCtrl.h>
 #include <wx/valnum.h>
@@ -167,8 +168,6 @@ TrackDlg::TrackDlg(wxWindow* parent)
 	m_notebook->AddPage(CreateOutputPage(m_notebook), "Information");
 
 	Bind(wxEVT_MENU, &TrackDlg::OnMenuItem, this);
-	glbin_trackmap_proc.RegisterInfoOutFunc(
-		std::bind(&TrackDlg::WriteInfo, this, std::placeholders::_1));
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -892,616 +891,110 @@ void TrackDlg::UpdateTracks(
 	}
 }
 
-void TrackDlg::LoadTrackFile(const std::wstring& file)
-{
-	auto view = glbin_current.render_view.lock();
-	view->LoadTrackGroup(file);
-	FluoUpdate({ gstTrackFile });
-}
-
-bool TrackDlg::SaveTrackFile()
-{
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return false;
-	auto trkg = glbin_current.GetTrackGroup();
-	if (!trkg)
-		return false;
-	std::wstring str = trkg->get().GetPath();
-	if (std::filesystem::exists(str))
-		return view->SaveTrackGroup(str);
-	return false;
-}
-
-void TrackDlg::SaveTrackFile(const std::wstring& file)
-{
-	auto view = glbin_current.render_view.lock();
-	view->SaveTrackGroup(file);
-}
-
-void TrackDlg::SaveasTrackFile()
-{
-	ModalDlg fopendlg(
-		m_frame, "Save a FluoRender track file",
-		"", "", "*.track", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		std::wstring filename = fopendlg.GetPath().ToStdWstring();
-		SaveTrackFile(filename);
-	}
-}
-
-void TrackDlg::DeleteSelection(int type)
-{
-	if (type == 0)
-	{
-		glbin_comp_selector.DeleteList();
-		FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-			{ glbin_current.GetViewId() });
-	}
-	else
-		m_active_list->DeleteSelection();
-}
-
-void TrackDlg::WriteInfo(const std::wstring& str)
+void TrackDlg::UpdateStatText(const std::wstring& str)
 {
 	(*m_stat_text) << str;
 }
 
-void TrackDlg::OnClearTrace(wxCommandEvent& event)
+int TrackDlg::GetMapIter()
 {
-	auto trkg = glbin_current.GetTrackGroup();
-	if (trkg)
-		trkg->get().Clear();
-	FluoUpdate({ gstTrackFile });
+	return m_map_iter_spin->GetValue();
 }
 
-void TrackDlg::OnLoadTrace(wxCommandEvent& event)
+int TrackDlg::GetMapSize()
 {
-	ModalDlg fopendlg(
-		m_frame, "Choose a FluoRender track file",
-		"", "", "*.track", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		std::wstring filename = fopendlg.GetPath().ToStdWstring();
-		LoadTrackFile(filename);
-	}
+	return m_map_size_spin->GetValue();
 }
 
-void TrackDlg::OnSaveTrace(wxCommandEvent& event)
+bool TrackDlg::GetMapConsistent()
 {
-	if (!SaveTrackFile())
-		SaveasTrackFile();
+	return m_map_consistent_btn->GetValue();
 }
 
-void TrackDlg::OnSaveasTrace(wxCommandEvent& event)
+bool TrackDlg::GetMapMerge()
 {
-	SaveasTrackFile();
+	return m_map_merge_btn->GetValue();
 }
 
-//auto tracking
-void TrackDlg::OnGenMapBtn(wxCommandEvent& event)
+bool TrackDlg::GetMapSplit()
 {
-	glbin_trackmap_proc.GenMap();
-	//enable script
-	glbin_settings.m_run_script = true;
-	std::filesystem::path p = GetUserSettingsRoot();
-	p = p / "Scripts" / "track_selected_results.txt";
-	glbin_settings.m_script_file = p.wstring();
-	m_frame->UpdateProps({ gstMovPlay, gstRunScript, gstScriptFile, gstScriptSelect });
+	return m_map_split_btn->GetValue();
 }
 
-void TrackDlg::OnRefineTBtn(wxCommandEvent& event)
+std::string TrackDlg::GetCompId()
 {
-	auto view = glbin_current.render_view.lock();
-	if (!view)
-		return;
-
-	glbin_trackmap_proc.RefineMap(view->m_tseq_cur_num);
+	return m_comp_id_text->GetValue().ToStdString();
 }
 
-void TrackDlg::OnRefineAllBtn(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.RefineMap();
-}
-
-//settings
-void TrackDlg::OnMapIterSpin(wxSpinEvent& event)
-{
-	glbin_settings.m_track_iter = m_map_iter_spin->GetValue();
-}
-
-void TrackDlg::OnMapIterText(wxCommandEvent& event)
-{
-	glbin_settings.m_track_iter = m_map_iter_spin->GetValue();
-}
-
-void TrackDlg::OnMapSizeSpin(wxSpinEvent& event)
-{
-	glbin_settings.m_component_size = m_map_size_spin->GetValue();
-}
-
-void TrackDlg::OnMapSizeText(wxCommandEvent& event)
-{
-	glbin_settings.m_component_size = m_map_size_spin->GetValue();
-}
-
-void TrackDlg::OnMapConsistentBtn(wxCommandEvent& event)
-{
-	glbin_settings.m_consistent_color = m_map_consistent_btn->GetValue();
-}
-
-void TrackDlg::OnMapMergeBtn(wxCommandEvent& event)
-{
-	glbin_settings.m_try_merge = m_map_merge_btn->GetValue();
-}
-
-void TrackDlg::OnMapSplitBtn(wxCommandEvent& event)
-{
-	glbin_settings.m_try_split = m_map_split_btn->GetValue();
-}
-
-void TrackDlg::OnMapSimilarSpin(wxSpinDoubleEvent& event)
-{
-	glbin_settings.m_similarity = m_map_similar_spin->GetValue();
-}
-
-void TrackDlg::OnMapSimilarText(wxCommandEvent& event)
-{
-	glbin_settings.m_similarity = m_map_similar_spin->GetValue();
-}
-
-void TrackDlg::OnMapContactSpin(wxSpinDoubleEvent& event)
-{
-	glbin_settings.m_contact_factor = m_map_contact_spin->GetValue();
-}
-
-void TrackDlg::OnMapContactText(wxCommandEvent& event)
-{
-	glbin_settings.m_contact_factor = m_map_contact_spin->GetValue();
-}
-
-//selection page
-void TrackDlg::OnCompIDText(wxCommandEvent& event)
-{
-	m_comp_id = m_comp_id_text->GetValue();
-	unsigned long ival;
-	if (m_comp_id.IsEmpty())
-		glbin_comp_selector.SetId(0, true);
-	else if (m_comp_id.ToULong(&ival))
-		glbin_comp_selector.SetId(ival, false);
-
-	FluoUpdate({ gstTrackCompId });
-}
-
-void TrackDlg::OnCompIDXBtn(wxCommandEvent& event)
-{
-	m_comp_id = "";
-	glbin_comp_selector.SetId(0, true);
-	FluoUpdate({ gstTrackCompId });
-}
-
-void TrackDlg::OnCompFull(wxCommandEvent& event)
-{
-	if (m_comp_id.empty())
-		glbin_comp_selector.CompFull();
-	else
-	{
-		wxCommandEvent e;
-		OnCompAppend(e);
-	}
-}
-
-void TrackDlg::OnCompExclusive(wxCommandEvent& event)
-{
-	glbin_comp_selector.Exclusive();
-	auto view = glbin_current.render_view.lock();
-	if (view)
-		view->GetTraces(false);
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCompAppend(wxCommandEvent& event)
-{
-	bool get_all = m_comp_id.Lower() == "all" ? true : false;
-	glbin_comp_selector.Select(get_all);
-	auto view = glbin_current.render_view.lock();
-	if (view)
-		view->GetTraces(false);
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCompClear(wxCommandEvent& event)
-{
-	glbin_comp_selector.Clear();
-	auto view = glbin_current.render_view.lock();
-	if (view)
-		view->GetTraces(false);
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnShuffle(wxCommandEvent& event)
-{
-	//get current vd
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-
-	vd->IncShuffle();
-	FluoRefresh(3, { gstNull },
-		{ glbin_current.GetViewId() });
-}
-
-//cell size filter
-void TrackDlg::OnCellSizeChange(wxScrollEvent& event)
-{
-	int ival = m_cell_size_sldr->GetValue();
-	wxString str = wxString::Format("%d", ival);
-	if (str != m_cell_size_text->GetValue())
-		m_cell_size_text->SetValue(str);
-}
-
-void TrackDlg::OnCellSizeText(wxCommandEvent& event)
+int TrackDlg::GetCellSize()
 {
 	wxString str = m_cell_size_text->GetValue();
 	unsigned long ival = 0;
-	str.ToULong(&ival);
-	m_cell_size_sldr->ChangeValue(ival);
-
-	if (ival > 0)
-	{
-		glbin_comp_selector.SetUseMin(true);
-		glbin_comp_selector.SetMinNum(ival);
-		auto trkg = glbin_current.GetTrackGroup();
-		if (trkg)
-			trkg->get().SetCellSize(ival);
-	}
-	else
-		glbin_comp_selector.SetUseMin(false);
+	if (str.ToULong(&ival))
+		return static_cast<int>(ival);
+	return 0;
 }
 
-void TrackDlg::OnCompUncertainBtn(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.GetCellsByUncertainty(false);
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCompUncertainLowChange(wxScrollEvent& event)
-{
-	int ival = m_comp_uncertain_low_sldr->GetValue();
-	wxString str = wxString::Format("%d", ival);
-	if (str != m_comp_uncertain_low_text->GetValue())
-		m_comp_uncertain_low_text->SetValue(str);
-}
-
-void TrackDlg::OnCompUncertainLowText(wxCommandEvent& event)
+int TrackDlg::GetCompUncertainLow()
 {
 	wxString str = m_comp_uncertain_low_text->GetValue();
 	long ival;
-	str.ToLong(&ival);
-	m_comp_uncertain_low_sldr->ChangeValue(ival);
-
-	glbin_trackmap_proc.SetUncertainLow(ival);
-	glbin_trackmap_proc.GetCellsByUncertainty(true);
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
+	if (str.ToLong(&ival))
+		return static_cast<int>(ival);
+	return 0;
 }
 
-//link page
-void TrackDlg::OnCompId2Text(wxCommandEvent& event)
+std::string TrackDlg::GetCompId2()
 {
-	m_comp_id = m_comp_id_text2->GetValue();
-	unsigned long ival;
-	if (m_comp_id.IsEmpty())
-		glbin_comp_selector.SetId(0, true);
-	else if (m_comp_id.ToULong(&ival))
-		glbin_comp_selector.SetId(ival, false);
-
-	FluoUpdate({ gstTrackCompId });
+	return m_comp_id_text2->GetValue().ToStdString();
 }
 
-void TrackDlg::OnCompId2XBtn(wxCommandEvent& event)
+std::string TrackDlg::GetCellNewId()
 {
-	m_comp_id = "";
-	glbin_comp_selector.SetId(0, true);
-	FluoUpdate({ gstTrackCompId });
+	return m_cell_new_id_text->GetValue().ToStdString();
 }
 
-void TrackDlg::OnCellExclusiveLink(wxCommandEvent& event)
+int TrackDlg::GetClusterNum()
 {
-	glbin_trackmap_proc.LinkCells(true);
-	FluoRefresh(3, { gstNull },
-		{ glbin_current.GetViewId() });
+	return m_cell_segment_spin->GetValue();
 }
 
-void TrackDlg::OnCellLink(wxCommandEvent& event)
+std::string TrackDlg::GetStatText()
 {
-	glbin_trackmap_proc.LinkCells(false);
-	FluoRefresh(3, { gstNull },
-		{ glbin_current.GetViewId() });
+	return m_stat_text->GetValue().ToStdString();
 }
 
-void TrackDlg::OnCellLinkAll(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.LinkAllCells();
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCellIsolate(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.IsolateCells();
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCellUnlink(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.UnlinkCells();
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-//modify page
-//ID edit controls
-void TrackDlg::OnCellNewIDText(wxCommandEvent& event)
-{
-	m_comp_id3 = m_cell_new_id_text->GetValue();
-	unsigned long ival;
-	if (m_comp_id3.IsEmpty())
-		glbin_comp_editor.SetId(0, true);
-	else if (m_comp_id.ToULong(&ival))
-		glbin_comp_editor.SetId(ival, false);
-
-	FluoUpdate({ gstTrackNewCompId });
-}
-
-void TrackDlg::OnCellNewIDX(wxCommandEvent& event)
-{
-	m_comp_id3 = "";
-	glbin_comp_editor.SetId(0, true);
-	FluoUpdate({ gstTrackNewCompId });
-}
-
-void TrackDlg::OnCellNewID(wxCommandEvent& event)
-{
-	glbin_comp_editor.NewId(false, true);
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCellAppendID(wxCommandEvent& event)
-{
-	glbin_comp_editor.NewId(true, true);
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCellReplaceID(wxCommandEvent& event)
-{
-	glbin_comp_editor.ReplaceList();
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCellCombineID(wxCommandEvent& event)
-{
-	glbin_comp_editor.CombineList();
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCellSeparateID(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.DivideCells();
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCellSegment(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.SegmentCells();
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnCellSegSpin(wxSpinEvent& event)
-{
-	glbin_trackmap_proc.SetClusterNum(m_cell_segment_spin->GetValue());
-}
-
-void TrackDlg::OnCellSegText(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.SetClusterNum(m_cell_segment_spin->GetValue());
-}
-
-//analysis
-void TrackDlg::OnConvertToRulers(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.ConvertRulers();
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo, gstRulerList },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnConvertConsistent(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.ConvertConsistent();
-	FluoRefresh(0, { gstTrackList, gstSelUndoRedo },
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnAnalyzeComp(wxCommandEvent& event)
-{
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-
-	glbin_comp_analyzer.SetVolume(vd);
-	glbin_comp_analyzer.Analyze();
-	std::string str;
-	glbin_comp_analyzer.OutputCompListStr(str, 1);
-	m_stat_text->ChangeValue(str);
-}
-
-void TrackDlg::OnAnalyzeLink(wxCommandEvent& event)
-{
-	glbin_trackmap_proc.AnalyzeLink();
-}
-
-void TrackDlg::OnAnalyzeUncertainHist(wxCommandEvent& event)
-{
-	m_stat_text->ChangeValue("");
-	glbin_trackmap_proc.AnalyzeUncertainty();
-}
-
-void TrackDlg::OnAnalyzePath(wxCommandEvent& event)
-{
-	m_stat_text->ChangeValue("");
-	glbin_trackmap_proc.AnalyzePath();
-}
-
-void TrackDlg::SaveOutputResult(wxString &filename)
-{
-	std::ofstream os;
-	OutputStreamOpen(os, filename.ToStdString());
-
-	wxString str;
-	str = m_stat_text->GetValue();
-
-	os << str;
-
-	os.close();
-}
-
-void TrackDlg::OnSaveResult(wxCommandEvent& event)
-{
-	ModalDlg fopendlg(
-		m_frame, "Save results", "", "",
-		"Text file (*.txt)|*.txt",
-		wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxString filename = fopendlg.GetPath();
-		SaveOutputResult(filename);
-	}
-}
-
-void TrackDlg::OnCellPrev(wxCommandEvent& event)
-{
-	if (glbin_moviemaker.IsRunning())
-		return;
-	int frame = glbin_moviemaker.GetCurrentFrame();
-	frame--;
-	glbin_moviemaker.SetCurrentFrame(frame);
-	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum, gstTrackList };
-	FluoRefresh(0, vc,
-		{ glbin_current.GetViewId()});
-}
-
-void TrackDlg::OnCellNext(wxCommandEvent& event)
-{
-	if (glbin_moviemaker.IsRunning())
-		return;
-	int frame = glbin_moviemaker.GetCurrentFrame();
-	frame++;
-	glbin_moviemaker.SetCurrentFrame(frame);
-	fluo::ValueCollection vc = { gstMovCurTime, gstMovProgSlider, gstCurrentFrame, gstMovSeqNum, gstTrackList };
-	FluoRefresh(0, vc,
-		{ glbin_current.GetViewId() });
-}
-
-void TrackDlg::OnGhostNumChange(wxScrollEvent& event)
-{
-	int ival = m_ghost_num_sldr->GetValue();
-	wxString str = wxString::Format("%d", ival);
-	if (str != m_ghost_num_text->GetValue())
-		m_ghost_num_text->SetValue(str);
-}
-
-void TrackDlg::OnGhostNumText(wxCommandEvent& event)
+int TrackDlg::GetGhostNum()
 {
 	wxString str = m_ghost_num_text->GetValue();
 	long ival;
-	str.ToLong(&ival);
-	m_ghost_num_sldr->ChangeValue(ival);
-
-	auto trkg = glbin_current.GetTrackGroup();
-	if (!trkg)
-		return;
-
-	trkg->get().SetGhostNum(ival);
-	FluoRefresh(3, { gstNull },
-		{ glbin_current.GetViewId() });
+	if (str.ToLong(&ival))
+		return static_cast<int>(ival);
+	return 0;
 }
 
-void TrackDlg::OnGhostShowTail(wxCommandEvent& event)
+bool TrackDlg::GetGhostShowTail()
 {
-	bool bval = m_ghost_show_tail_chk->GetValue();
-
-	auto trkg = glbin_current.GetTrackGroup();
-	if (!trkg)
-		return;
-
-	trkg->get().SetDrawTail(bval);
-	FluoRefresh(3, { gstNull },
-		{ glbin_current.GetViewId() });
+	return m_ghost_show_tail_chk->GetValue();
 }
 
-void TrackDlg::OnGhostShowLead(wxCommandEvent& event)
+bool TrackDlg::GetGhostShowLead()
 {
-	bool bval = m_ghost_show_lead_chk->GetValue();
-
-	auto trkg = glbin_current.GetTrackGroup();
-	if (!trkg)
-		return;
-
-	trkg->get().SetDrawLead(bval);
-	FluoRefresh(3, { gstNull },
-		{ glbin_current.GetViewId() });
+	return m_ghost_show_lead_chk->GetValue();
 }
 
-void TrackDlg::AddLabel(long item, TrackListCtrl* trace_list_ctrl, flrd::CelpList& list)
+int TrackDlg::GetActiveList()
 {
-	wxString str;
-	unsigned long id;
-	unsigned long size;
-	double x, y, z;
-
-	str = trace_list_ctrl->GetText(item, 1);
-	str.ToULong(&id);
-	str = trace_list_ctrl->GetText(item, 2);
-	str.ToULong(&size);
-	str = trace_list_ctrl->GetText(item, 3);
-	str.ToDouble(&x);
-	str = trace_list_ctrl->GetText(item, 4);
-	str.ToDouble(&y);
-	str = trace_list_ctrl->GetText(item, 5);
-	str.ToDouble(&z);
-
-	flrd::Celp cell(new flrd::Cell(id));
-	cell->SetSizeUi(size);
-	cell->SetSizeD(size);
-	fluo::Point p(x, y, z);
-	cell->SetCenter(p);
-	list.insert(std::pair<unsigned int, flrd::Celp>
-		(id, cell));
+	if (m_active_list == m_trace_list_curr)
+		return 0;
+	else if (m_active_list == m_trace_list_prev)
+		return 1;
+	return -1;
 }
 
-void TrackDlg::OnSelectionChanged(wxListEvent& event)
+std::vector<TrackItem> TrackDlg::GetSelection()
 {
-	m_active_list = dynamic_cast<TrackListCtrl*>(event.GetEventObject());
-	if (!m_active_list)
-		return;
-	flrd::CelpList list;
+	std::vector<TrackItem> list;
 	long item = -1;
 	while (true)
 	{
@@ -1525,15 +1018,474 @@ void TrackDlg::OnSelectionChanged(wxListEvent& event)
 				AddLabel(item, m_active_list, list);
 		}
 	}
+	return list;
+}
 
-	if (m_active_list == m_trace_list_curr)
-	{
-		glbin_trackmap_proc.SetListIn(list);
-		glbin_comp_editor.SetList(list);
-		glbin_comp_selector.SetList(list);
-	}
-	else if (m_active_list == m_trace_list_prev)
-		glbin_trackmap_proc.SetListOut(list);
+void TrackDlg::OnClearTrace(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstClearTrack });
+}
+
+void TrackDlg::OnLoadTrace(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackFile });
+}
+
+void TrackDlg::OnSaveTrace(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSaveTrackFile });
+}
+
+void TrackDlg::OnSaveasTrace(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSaveAsTrackFile });
+}
+
+//auto tracking
+void TrackDlg::OnGenMapBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstGenerateMap });
+}
+
+void TrackDlg::OnRefineTBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRefineTime });
+}
+
+void TrackDlg::OnRefineAllBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstRefineAll });
+}
+
+//settings
+void TrackDlg::OnMapIterSpin(wxSpinEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackIter });
+}
+
+void TrackDlg::OnMapIterText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackIter });
+}
+
+void TrackDlg::OnMapSizeSpin(wxSpinEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackSize });
+}
+
+void TrackDlg::OnMapSizeText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackSize });
+}
+
+void TrackDlg::OnMapConsistentBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackConsistent });
+}
+
+void TrackDlg::OnMapMergeBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackMerge });
+}
+
+void TrackDlg::OnMapSplitBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackSplit });
+}
+
+void TrackDlg::OnMapSimilarSpin(wxSpinDoubleEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackSimilarity });
+}
+
+void TrackDlg::OnMapSimilarText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackSimilarity });
+}
+
+void TrackDlg::OnMapContactSpin(wxSpinDoubleEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackContactFactor });
+}
+
+void TrackDlg::OnMapContactText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackContactFactor });
+}
+
+//selection page
+void TrackDlg::OnCompIDText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackCompId });
+}
+
+void TrackDlg::OnCompIDXBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackClearCompId });
+}
+
+void TrackDlg::OnCompFull(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompFull });
+}
+
+void TrackDlg::OnCompExclusive(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompExclusive });
+}
+
+void TrackDlg::OnCompAppend(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompAppend });
+}
+
+void TrackDlg::OnCompClear(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCompClear });
+}
+
+void TrackDlg::OnShuffle(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstShuffle });
+}
+
+//cell size filter
+void TrackDlg::OnCellSizeChange(wxScrollEvent& event)
+{
+	int ival = m_cell_size_sldr->GetValue();
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_cell_size_text->GetValue())
+		m_cell_size_text->SetValue(str);
+}
+
+void TrackDlg::OnCellSizeText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackCellSize });
+}
+
+void TrackDlg::OnCompUncertainBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstComputeUncertainty });
+}
+
+void TrackDlg::OnCompUncertainLowChange(wxScrollEvent& event)
+{
+	int ival = m_comp_uncertain_low_sldr->GetValue();
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_comp_uncertain_low_text->GetValue())
+		m_comp_uncertain_low_text->SetValue(str);
+}
+
+void TrackDlg::OnCompUncertainLowText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackUncertainLow });
+}
+
+//link page
+void TrackDlg::OnCompId2Text(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackCompId2 });
+}
+
+void TrackDlg::OnCompId2XBtn(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackClearCompId });
+}
+
+void TrackDlg::OnCellExclusiveLink(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellExclusiveLink });
+}
+
+void TrackDlg::OnCellLink(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellLink });
+}
+
+void TrackDlg::OnCellLinkAll(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellLinkAll });
+}
+
+void TrackDlg::OnCellIsolate(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellIsolate });
+}
+
+void TrackDlg::OnCellUnlink(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellUnlink });
+}
+
+//modify page
+//ID edit controls
+void TrackDlg::OnCellNewIDText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackNewCompId });
+}
+
+void TrackDlg::OnCellNewIDX(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackClearCompNewId });
+}
+
+void TrackDlg::OnCellNewID(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCreateCellNewId });
+}
+
+void TrackDlg::OnCellAppendID(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellAppendId });
+}
+
+void TrackDlg::OnCellReplaceID(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellReplaceId });
+}
+
+void TrackDlg::OnCellCombineID(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellCombineId });
+}
+
+void TrackDlg::OnCellSeparateID(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellSeparateId });
+}
+
+void TrackDlg::OnCellSegment(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellSegment });
+}
+
+void TrackDlg::OnCellSegSpin(wxSpinEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellClusterNum });
+}
+
+void TrackDlg::OnCellSegText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellClusterNum });
+}
+
+//analysis
+void TrackDlg::OnConvertToRulers(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackConvertRulers });
+}
+
+void TrackDlg::OnConvertConsistent(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackConsistent });
+}
+
+void TrackDlg::OnAnalyzeComp(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAnalyzeComps });
+}
+
+void TrackDlg::OnAnalyzeLink(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAnalyzeLinks });
+}
+
+void TrackDlg::OnAnalyzeUncertainHist(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAnalyzeUncertainty });
+}
+
+void TrackDlg::OnAnalyzePath(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAnalyzePaths });
+}
+
+void TrackDlg::OnSaveResult(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackSaveResult });
+}
+
+void TrackDlg::OnCellPrev(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellPrev });
+}
+
+void TrackDlg::OnCellNext(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCellNext });
+}
+
+void TrackDlg::OnGhostNumChange(wxScrollEvent& event)
+{
+	int ival = m_ghost_num_sldr->GetValue();
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_ghost_num_text->GetValue())
+		m_ghost_num_text->SetValue(str);
+}
+
+void TrackDlg::OnGhostNumText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstGhostNum });
+}
+
+void TrackDlg::OnGhostShowTail(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstGhostShowTail });
+}
+
+void TrackDlg::OnGhostShowLead(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstGhostShowLead });
+}
+
+void TrackDlg::AddLabel(long item, TrackListCtrl* trace_list_ctrl, std::vector<TrackItem>& list)
+{
+	wxString str;
+	unsigned long id;
+	unsigned long size;
+	double x, y, z;
+
+	str = trace_list_ctrl->GetText(item, 1);
+	str.ToULong(&id);
+	str = trace_list_ctrl->GetText(item, 2);
+	str.ToULong(&size);
+	str = trace_list_ctrl->GetText(item, 3);
+	str.ToDouble(&x);
+	str = trace_list_ctrl->GetText(item, 4);
+	str.ToDouble(&y);
+	str = trace_list_ctrl->GetText(item, 5);
+	str.ToDouble(&z);
+
+	list.push_back(TrackItem(
+		L"",
+		static_cast<unsigned int>(id),
+		fluo::Color(),
+		static_cast<int>(size),
+		x, y, z));
+}
+
+void TrackDlg::OnSelectionChanged(wxListEvent& event)
+{
+	m_active_list = dynamic_cast<TrackListCtrl*>(event.GetEventObject());
+	if (!m_active_list)
+		return;
+	auto agent = m_agent->As<TrackDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTrackListSel });
 }
 
 void TrackDlg::OnContextMenu(wxContextMenuEvent& event)
@@ -1576,7 +1528,8 @@ void TrackDlg::OnMenuItem(wxCommandEvent& event)
 		m_active_list->CopySelection();
 		break;
 	case ID_Delete:
-		DeleteSelection(m_active_list->m_type);
+		if (auto agent = m_agent->As<TrackDlgAgent>())
+			agent->UpdateUIToData({ gstTrackListDelete });
 		break;
 	}
 }
@@ -1588,9 +1541,14 @@ void TrackDlg::OnKeyDown(wxKeyEvent& event)
 
 	if (event.GetKeyCode() == WXK_DELETE ||
 		event.GetKeyCode() == WXK_BACK)
-		DeleteSelection(m_active_list->m_type);
+	{
+		if (auto agent = m_agent->As<TrackDlgAgent>())
+			agent->UpdateUIToData({ gstTrackListDelete });
+	}
 	if (event.GetKeyCode() == wxKeyCode('C') &&
 		wxGetKeyState(WXK_CONTROL))
+	{
 		m_active_list->CopySelection();
+	}
 }
 

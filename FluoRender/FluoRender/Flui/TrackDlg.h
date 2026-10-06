@@ -34,10 +34,6 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/tglbtn.h>
 #include <vector>
 
-namespace flrd
-{
-	class CelpList;
-}
 class TrackDlg;
 class wxSingleSlider;
 class wxNumTextCtrl;
@@ -123,14 +119,29 @@ public:
 	void UpdateTracks(
 		const TrackViewData& data);
 
-	void LoadTrackFile(const std::wstring &file);
-	bool SaveTrackFile();
-	void SaveTrackFile(const std::wstring &file);
-	void SaveasTrackFile();
-	void DeleteSelection(int type);
+	void UpdateStatText(const std::wstring& str);
 
-	//output
-	void WriteInfo(const std::wstring& str);
+	//get
+	int GetMapIter();
+	int GetMapSize();
+	bool GetMapConsistent();
+	bool GetMapMerge();
+	bool GetMapSplit();
+	double GetMapSimilarity();
+	double GetMapContact();
+	std::string GetCompId();
+
+	int GetCellSize();
+	int GetCompUncertainLow();
+	std::string GetCompId2();
+	std::string GetCellNewId();
+	int GetClusterNum();
+	std::string GetStatText();
+	int GetGhostNum();
+	bool GetGhostShowTail();
+	bool GetGhostShowLead();
+	int GetActiveList();
+	std::vector<TrackItem> GetSelection();
 
 private:
 	typedef struct
@@ -314,7 +325,6 @@ private:
 	void OnAnalyzeLink(wxCommandEvent& event);
 	void OnAnalyzeUncertainHist(wxCommandEvent& event);
 	void OnAnalyzePath(wxCommandEvent& event);
-	void SaveOutputResult(wxString& filename);
 	void OnSaveResult(wxCommandEvent& event);
 
 	//time controls
@@ -328,7 +338,7 @@ private:
 	void OnGhostShowLead(wxCommandEvent& event);
 
 	//list
-	void AddLabel(long item, TrackListCtrl* trace_list_ctrl, flrd::CelpList& list);
+	void AddLabel(long item, TrackListCtrl* trace_list_ctrl, std::vector<TrackItem>& list);
 	void OnSelectionChanged(wxListEvent& event);
 	void OnContextMenu(wxContextMenuEvent& event);
 	void OnMenuItem(wxCommandEvent& event);
