@@ -32,6 +32,14 @@ DEALINGS IN THE SOFTWARE.
 #include <Names.h>
 
 class TreePanel;
+struct TreeUpdateData;
+class RenderView;
+class TreeLayer;
+class VolumeData;
+class MeshData;
+class AnnotData;
+class VolumeGroup;
+class MeshGroup;
 class TreePanelAgent : public Agent
 {
 public:
@@ -58,6 +66,68 @@ private:
 	{
 		gstCurrentSelect,
 	};
+
+private:
+	//helpers for update
+	template<class T>
+	TreeNodeId GetNodeId(
+		const std::shared_ptr<T>& obj) const
+	{
+		return reinterpret_cast<TreeNodeId>(obj.get());
+	}
+
+	TreeUpdateData BuildTreeData();
+	TreeIconUpdateData BuildTreeIconData();
+	TreeColorUpdateData BuildTreeColorData();
+	TreeSelectionData BuildTreeSelectionData();
+	void BuildViewNode(std::shared_ptr<RenderView> view, TreeItemData& node);
+	void BuildLayerNode(std::shared_ptr<TreeLayer> layer, TreeItemData& node);
+	void BuildVolumeNode(std::shared_ptr<VolumeData> vd, TreeItemData& node);
+	void BuildMeshNode(std::shared_ptr<MeshData> md, TreeItemData& node);
+	void BuildAnnotNode(std::shared_ptr<AnnotData> ann, TreeItemData& node);
+	void BuildVolumeGroupNode(std::shared_ptr<VolumeGroup> group, TreeItemData& node);
+	void BuildMeshGroupNode(std::shared_ptr<MeshGroup> group, TreeItemData& node);
+	void CollectIconUpdates(std::shared_ptr<TreeLayer> layer, TreeIconUpdateData& data);
+	void CollectColorUpdates(std::shared_ptr<TreeLayer> layer, TreeColorUpdateData& data);
+
+	//selection change
+	void Select();
+
+	//double click
+	void Action();
+	void AddVolGroup();
+	void AddMeshGroup();
+	void RemoveData();
+	void RulerLocator();
+	void RulerLine();
+	void RulerPolyline();
+	void RulerPencil();
+	void RulerEdit();
+	void RulerDeletePoint();
+	void BrushRuler();
+	void BrushGrow();
+	void BrushAppend();
+	void BrushComp();
+	void BrushDiffuse();
+	void BrushUnselect();
+	void BrushClear();
+	void BrushExtract();
+	void BrushDelete();
+	void MeshConvert();
+
+	//delete all
+	void DeleteSelection();
+	void DeleteAll();
+
+	//menu operations
+	void Expand();
+	void ToggleDisplay();
+	void RandomizeColor();
+	void CloseView();
+	void Isolate();
+	void ShowAll();
+	void ManipulateData();
+
 };
 
 #endif // TreePanelAgent_h

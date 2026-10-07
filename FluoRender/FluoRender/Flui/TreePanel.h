@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentOwner.h>
 #include <wx/wx.h>
 #include <wx/treectrl.h>
+#include <vector>
+#include <unordered_map>
 
 //tree icon
 #define icon_change	1
@@ -118,12 +120,89 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+using TreeNodeId = std::uintptr_t;
 enum class InteractiveMode : int;
 namespace flrd
 {
 	enum class SelectMode : int;
 	enum class RulerMode : int;
 }
+enum class TreeNodeType : int
+{
+	Root = 0,
+	View,
+	Volume,
+	Mesh,
+	Annotation,
+	VolumeGroup,
+	MeshGroup
+};
+
+struct TreeColor
+{
+	uint8_t r = 255;
+	uint8_t g = 255;
+	uint8_t b = 255;
+};
+
+struct TreeItemData
+{
+	TreeNodeId id = 0;
+
+	TreeNodeType type = TreeNodeType::Root;
+
+	std::wstring name;
+
+	bool visible = true;
+
+	TreeColor color;
+
+	std::vector<TreeItemData> children;
+};
+
+struct TreeUpdateData
+{
+	TreeItemData root;
+
+	TreeNodeId selectedId = 0;
+};
+
+struct TreeIconUpdate
+{
+	TreeNodeId id = 0;
+
+	bool visible = true;
+};
+
+struct TreeIconUpdateData
+{
+	std::vector<TreeIconUpdate> items;
+};
+
+struct TreeColorUpdate
+{
+	TreeNodeId id = 0;
+
+	TreeColor color;
+};
+
+struct TreeColorUpdateData
+{
+	std::vector<TreeColorUpdate> items;
+};
+
+struct TreeSelectionData
+{
+	TreeNodeId selectedId = 0;
+};
+
+struct TreeUiInfo
+{
+	TreeNodeType type;
+
+	int iconIndex = -1;
+};
+
 class TreePanel : public AgentPanel
 {
 public:
@@ -191,51 +270,16 @@ public:
 	//update
 	void UpdateFreehandToolState(InteractiveMode int_mode,
 		flrd::SelectMode sel_mode, flrd::RulerMode rul_mode);
-	void UpdateTree();
-	void UpdateTreeIcons();
-	void UpdateTreeColors();
-	void UpdateTreeSel();
-
-	//selection change
-	void Select();
-
-	//double click
-	void Action();
-	void AddVolGroup();
-	void AddMeshGroup();
-	void RemoveData();
-	void RulerLocator();
-	void RulerLine();
-	void RulerPolyline();
-	void RulerPencil();
-	void RulerEdit();
-	void RulerDeletePoint();
-	void BrushRuler();
-	void BrushGrow();
-	void BrushAppend();
-	void BrushComp();
-	void BrushDiffuse();
-	void BrushUnselect();
-	void BrushClear();
-	void BrushExtract();
-	void BrushDelete();
-	void MeshConvert();
-
-	//delete all
-	void DeleteSelection();
-	void DeleteAll();
-
-	//menu operations
-	void Expand();
-	void ToggleDisplay();
-	void RandomizeColor();
-	void CloseView();
-	void Isolate();
-	void ShowAll();
-	void ManipulateData();
+	void UpdateTree(const TreeUpdateData& data);
+	void UpdateTreeIcons(const TreeIconUpdateData& data);
+	void UpdateTreeColors(const TreeColorUpdateData& data);
+	void UpdateTreeSelection(const TreeSelectionData& data);
 
 private:
-	void traversalSel(wxTreeItemId item);
+	wxTreeItemId BuildTreeItem(const TreeItemData& node, wxTreeItemId parent = wxTreeItemId());
+	void SelectItem(TreeNodeId id);
+	void UpdateItemColor(TreeNodeId id, const TreeColor& color);
+	void UpdateItemIcon(TreeNodeId id, bool visible);
 
 private:
 	DataTreeCtrl* m_datatree;
@@ -247,6 +291,9 @@ private:
 	bool m_suppress_event = false;
 	//drag
 	wxTreeItemId m_drag_item;
+	//for updates
+	std::unordered_map<TreeNodeId, wxTreeItemId> itemMap_;
+	std::unordered_map<TreeNodeId, TreeUiInfo> itemInfo_;
 
 	void OnContextMenu(wxContextMenuEvent& event);
 	void OnToolbar(wxCommandEvent& event);
