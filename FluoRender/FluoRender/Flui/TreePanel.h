@@ -203,6 +203,27 @@ struct TreeUiInfo
 	int iconIndex = -1;
 };
 
+struct MenuItemData
+{
+	enum class Type
+	{
+		Action,
+		Separator,
+		SubMenu
+	};
+
+	Type type = Type::Action;
+
+	int id = -1;
+	std::wstring label;
+
+	bool enabled = true;
+	bool checked = false;
+
+	std::vector<MenuItemData> children;
+};
+using MenuData = std::vector<MenuItemData>;
+
 class TreePanel : public AgentPanel
 {
 public:
@@ -274,6 +295,17 @@ public:
 	void UpdateTreeIcons(const TreeIconUpdateData& data);
 	void UpdateTreeColors(const TreeColorUpdateData& data);
 	void UpdateTreeSelection(const TreeSelectionData& data);
+	void UpdateExpandSelectedItem();
+	void UpdateScrollPos();
+
+	void ShowContextMenu(const MenuData& data);
+
+	//get
+	bool GetTreeExpanded();
+	std::wstring GetSelItemText();
+	std::wstring GetSelItemParentText();
+	LayerInfo* GetSelItemData();
+	bool GetCtrlDown();
 
 private:
 	wxTreeItemId BuildTreeItem(const TreeItemData& node, wxTreeItemId parent = wxTreeItemId());
@@ -289,6 +321,8 @@ private:
 	//save the pos
 	int m_scroll_pos;
 	bool m_suppress_event = false;
+	//context menu pos
+	wxPoint m_context_pos;
 	//drag
 	wxTreeItemId m_drag_item;
 	//for updates

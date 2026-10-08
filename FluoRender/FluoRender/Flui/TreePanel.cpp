@@ -501,6 +501,116 @@ void TreePanel::UpdateTreeSelection(
 	SelectItem(data.selectedId);
 }
 
+namespace
+{
+	void BuildWxMenu(wxMenu& menu, const MenuData& data)
+	{
+		for (const auto& item : data)
+		{
+			switch (item.type)
+			{
+			case MenuItemData::Type::Separator:
+			{
+				menu.AppendSeparator();
+				break;
+			}
+
+			case MenuItemData::Type::Action:
+			{
+				wxMenuItem* menu_item =
+					menu.Append(item.id, item.label);
+
+				menu_item->Enable(item.enabled);
+
+				if (item.checked)
+				{
+					menu_item->SetItemLabel(item.label);
+					menu_item->Check(true);
+				}
+
+				break;
+			}
+
+			case MenuItemData::Type::SubMenu:
+			{
+				auto submenu = std::make_unique<wxMenu>();
+
+				BuildWxMenu(*submenu, item.children);
+
+				menu.AppendSubMenu(
+					submenu.release(),
+					item.label);
+
+				break;
+			}
+			}
+		}
+	}
+}
+
+void TreePanel::UpdateExpandSelectedItem()
+{
+	auto sel_item = m_datatree->GetSelection();
+	if (!sel_item.IsOk())
+		return;
+	if (m_datatree->IsExpanded(sel_item))
+		m_datatree->Collapse(sel_item);
+	else
+		m_datatree->Expand(sel_item);
+}
+
+void TreePanel::UpdateScrollPos()
+{
+	m_scroll_pos = GetScrollPos(wxVERTICAL);
+	SetScrollPos(wxVERTICAL, m_scroll_pos);
+}
+
+void TreePanel::ShowContextMenu(const MenuData& data)
+{
+	wxMenu menu;
+
+	BuildWxMenu(menu, data);
+
+	PopupMenu(&menu, m_context_pos.x, m_context_pos.y);
+}
+
+bool TreePanel::GetTreeExpanded()
+{
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	if (sel_item.IsOk())
+		return m_datatree->IsExpanded(sel_item);
+	return false;
+}
+
+std::wstring TreePanel::GetSelItemText()
+{
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	if (sel_item.IsOk())
+		return m_datatree->GetItemText(sel_item).ToStdWstring();
+	return L"";
+}
+
+std::wstring TreePanel::GetSelItemParentText()
+{
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	if (sel_item.IsOk())
+		return m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdWstring();
+	return L"";
+}
+
+LayerInfo* TreePanel::GetSelItemData()
+{
+	wxTreeItemId sel_item = m_datatree->GetSelection();
+	if (sel_item.IsOk())
+		return static_cast<LayerInfo*>(m_datatree->GetItemData(sel_item));
+	return nullptr;
+}
+
+bool TreePanel::GetCtrlDown()
+{
+	return wxGetKeyState(WXK_CONTROL);
+}
+
 wxTreeItemId TreePanel::BuildTreeItem(
 	const TreeItemData& node,
 	wxTreeItemId parent)
@@ -709,7 +819,7 @@ void TreePanel::UpdateItemIcon(
 void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 {
 	int flag;
-	wxTreeItemId sel_item = m_datatree->HitTest(
+	auto sel_item = m_datatree->HitTest(
 		m_datatree->ScreenToClient(event.GetPosition()), flag);
 
 	if (!sel_item.IsOk())
@@ -717,333 +827,192 @@ void TreePanel::OnContextMenu(wxContextMenuEvent& event)
 
 	m_datatree->SelectItem(sel_item);
 
-	wxPoint point = event.GetPosition();
+	m_context_pos = event.GetPosition();
 	// If from keyboard
-	if (point.x == -1 && point.y == -1) {
+	if (m_context_pos.x == -1 && m_context_pos.y == -1) {
 		wxSize size = GetSize();
-		point.x = size.x / 2;
-		point.y = size.y / 2;
+		m_context_pos.x = size.x / 2;
+		m_context_pos.y = size.y / 2;
 	}
 	else {
-		point = ScreenToClient(point);
+		m_context_pos = ScreenToClient(m_context_pos);
 	}
 
-	wxMenu menu;
-	int type = glbin_current.GetType();
-	switch (type)
-	{
-	case 0:  //root
-		if (m_datatree->IsExpanded(sel_item))
-			menu.Append(TreePanel::ID_Expand, "Collapse");
-		else
-			menu.Append(TreePanel::ID_Expand, "Expand");
-		break;
-	case 1:  //view
-	{
-		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-		if (m_datatree->IsExpanded(sel_item))
-			menu.Append(TreePanel::ID_Expand, "Collapse");
-		else
-			menu.Append(TreePanel::ID_Expand, "Expand");
-		menu.AppendSeparator();
-		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-		menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
-		menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
-		Root* root = glbin_data_manager.GetRoot();
-		wxString view_name;
-		if (root)
-			view_name = root->GetView(0)->GetName();
-		if (m_datatree->GetItemText(sel_item) != view_name)
-			menu.Append(TreePanel::ID_CloseView, "Close");
-	}
-	break;
-	case 2:  //volume data
-		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-		menu.Append(TreePanel::ID_Isolate, "Isolate");
-		menu.Append(TreePanel::ID_ShowAll, "Show All");
-		menu.AppendSeparator();
-		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-		menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
-		menu.Append(TreePanel::ID_RemoveData, "Delete");
-		menu.AppendSeparator();
-		menu.Append(TreePanel::ID_CopyMask, "Copy Mask");
-		if (glbin_vol_selector.GetCopyMaskVolume())
-		{
-			menu.Append(TreePanel::ID_PasteMask, "Paste Mask");
-			menu.Append(TreePanel::ID_MergeMask, "Merge Mask");
-			menu.Append(TreePanel::ID_ExcludeMask, "Exclude Mask");
-			menu.Append(TreePanel::ID_IntersectMask, "Intersect Mask");
-		}
-		menu.AppendSeparator();
-		menu.Append(TreePanel::ID_Ocl, "Volume Filter...");
-		menu.Append(TreePanel::ID_Brush, "Paint Brush...");
-		menu.Append(TreePanel::ID_Measurement, "Measurement...");
-		menu.Append(TreePanel::ID_Component, "Component Analyzer...");
-		menu.Append(TreePanel::ID_Track, "Tracking...");
-		menu.Append(TreePanel::ID_Calculation, "Calculations...");
-		menu.Append(TreePanel::ID_NoiseReduct, "Noise Reduction...");
-		menu.Append(TreePanel::ID_VolumeSize, "Volume Size...");
-		menu.Append(TreePanel::ID_Colocalization, "Colocalization...");
-		menu.Append(TreePanel::ID_Convert, "Convert...");
-		menu.Append(TreePanel::ID_MachineLearning, "Machine Learning Manager...");
-		break;
-	case 3:  //mesh data
-		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-		menu.Append(TreePanel::ID_Isolate, "Isolate");
-		menu.Append(TreePanel::ID_ShowAll, "Show All");
-		menu.AppendSeparator();
-		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-		menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
-		menu.Append(TreePanel::ID_RemoveData, "Delete");
-		menu.AppendSeparator();
-		menu.Append(TreePanel::ID_ManipulateData, "Manipulate");
-		break;
-	case 4:  //annotations
-		break;
-	case 5:  //data group
-		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-		menu.Append(TreePanel::ID_Isolate, "Isolate");
-		menu.Append(TreePanel::ID_ShowAll, "Show All");
-		menu.AppendSeparator();
-		if (m_datatree->IsExpanded(sel_item))
-			menu.Append(TreePanel::ID_Expand, "Collapse");
-		else
-			menu.Append(TreePanel::ID_Expand, "Expand");
-		menu.AppendSeparator();
-		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-		menu.Append(TreePanel::ID_AddVolGroup, "Add Volume Group");
-		menu.Append(TreePanel::ID_RemoveData, "Delete");
-		break;
-	case 6:  //mesh group
-		menu.Append(TreePanel::ID_ToggleDisp, "Toggle Visibility");
-		menu.Append(TreePanel::ID_Isolate, "Isolate");
-		menu.Append(TreePanel::ID_ShowAll, "Show All");
-		menu.AppendSeparator();
-		if (m_datatree->IsExpanded(sel_item))
-			menu.Append(TreePanel::ID_Expand, "Collapse");
-		else
-			menu.Append(TreePanel::ID_Expand, "Expand");
-		menu.AppendSeparator();
-		menu.Append(TreePanel::ID_RandomizeColor, "Randomize Colors");
-		menu.Append(TreePanel::ID_AddMeshGroup, "Add Mesh Group");
-		menu.Append(TreePanel::ID_RemoveData, "Delete");
-		break;
-	}
-	PopupMenu(&menu, point.x, point.y);
+	auto agent = m_agent->As<TreePanelAgent>();
+	if (agent)
+		agent->UpdateDataToUI({ gstTreeContextMenu });
 }
 
 void TreePanel::OnToolbar(wxCommandEvent& event)
 {
+	fluo::ValueCollection vc;
 	int id = event.GetId();
 
 	switch (id)
 	{
 	case ID_ToggleDisp:
-		Action();
+		vc.insert(gstTreeAction);
 		break;
 	case ID_AddVolGroup:
-		AddVolGroup();
+		vc.insert(gstAddVolumeGroup);
 		break;
 	case ID_AddMeshGroup:
-		AddMeshGroup();
+		vc.insert(gstAddMeshGroup);
 		break;
 	case ID_RemoveData:
-		RemoveData();
+		vc.insert(gstRemoveData);
 		break;
 	case ID_RulerLocator:
-		RulerLocator();
+		vc.insert(gstRulerLocator);
 		break;
 	case ID_RulerLine:
-		RulerLine();
+		vc.insert(gstRulerLine);
 		break;
 	case ID_RulerPolyline:
-		RulerPolyline();
+		vc.insert(gstRulerPolyline);
 		break;
 	case ID_RulerPencil:
-		RulerPencil();
+		vc.insert(gstRulerPencil);
 		break;
 	case ID_RulerEdit:
-		RulerEdit();
+		vc.insert(gstRulerMovePoint);
 		break;
 	case ID_RulerDeletePoint:
-		RulerDeletePoint();
+		vc.insert(gstRulerDeletePoint);
 		break;
 	case ID_BrushRuler:
-		BrushRuler();
+		vc.insert(gstBrushLocator);
 		break;
 	case ID_BrushGrow:
-		BrushGrow();
+		vc.insert(gstBrushGrow);
 		break;
 	case ID_BrushAppend:
-		BrushAppend();
+		vc.insert(gstBrushAppend);
 		break;
 	case ID_MeshConvert:
-		MeshConvert();
+		vc.insert(gstMeshConvert);
 		break;
 	case ID_BrushComp:
-		BrushComp();
+		vc.insert(gstBrushComp);
 		break;
 	case ID_BrushDiffuse:
-		BrushDiffuse();
+		vc.insert(gstBrushDiffuse);
 		break;
 	case ID_BrushUnselect:
-		BrushUnselect();
+		vc.insert(gstBrushUnsel);
 		break;
 	case ID_BrushClear:
-		BrushClear();
+		vc.insert(gstBrushClear);
 		break;
 	case ID_BrushExtract:
-		BrushExtract();
+		vc.insert(gstBrushExtract);
 		break;
 	case ID_BrushDelete:
-		BrushDelete();
+		vc.insert(gstBrushDelete);
 		break;
 	case ID_MachineLearning:
-		m_frame->ShowMachineLearningDlg();
+		vc.insert(gstMachineLearningDlg);
 		break;
 	case ID_ManipulateData:
-		ManipulateData();
+		vc.insert(gstManipPropPanel);
 		break;
 	}
+
+	auto agent = m_agent->As<TreePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData(vc);
 }
 
 void TreePanel::OnMenu(wxCommandEvent& event)
 {
-	int id = event.GetId();
-	int excl_self = 0;
 	fluo::ValueCollection vc;
-	std::set<int> views;
+	int id = event.GetId();
 
 	switch (id)
 	{
 	case ID_ToggleDisp:
-		Action();
+		vc.insert(gstTreeAction);
 		return;
 	case ID_AddVolGroup:
-		AddVolGroup();
+		vc.insert(gstAddVolumeGroup);
 		return;
 	case ID_AddMeshGroup:
-		AddMeshGroup();
+		vc.insert(gstAddMeshGroup);
 		return;
 	case ID_RemoveData:
-		DeleteSelection();
-		glbin_current.SetRoot();
-		vc.insert(gstTreeCtrl);
+		vc.insert(gstRemoveData);
 		break;
 	case ID_Expand:
-		Expand();
-		vc.insert(gstNull);
-		views.insert(-1);
+		vc.insert(gstTreeExpandSelItem);
 		break;
 	case ID_RandomizeColor:
-		RandomizeColor();
-		vc.insert(gstTreeColors);
+		vc.insert(gstRandomizeColor);
 		break;
 	case ID_CloseView:
-		CloseView();
+		vc.insert(gstCloseView);
 		break;
 	case ID_Isolate:
+		vc.insert(gstIsolate);
+		break;
 	case ID_ShowAll:
-		switch (id)
-		{
-		case ID_Isolate:
-			Isolate();
-			break;
-		case ID_ShowAll:
-			ShowAll();
-			break;
-		}
-		excl_self = 2;
-		vc.insert(gstTreeIcons);
+		vc.insert(gstShowAll);
 		break;
 	case ID_CopyMask:
-		glbin_vol_selector.CopyMask(false);
-		vc.insert(gstNull);
-		views.insert(-1);
+		vc.insert(gstCopyMask);
 		break;
 	case ID_PasteMask:
+		vc.insert(gstPasteMask);
+		break;
 	case ID_MergeMask:
+		vc.insert(gstMergeMask);
+		break;
 	case ID_ExcludeMask:
+		vc.insert(gstExcludeMask);
+		break;
 	case ID_IntersectMask:
-	{
-		int ival = 0;
-		switch (id)
-		{
-		case ID_CopyMask:
-			ival = 0;
-			break;
-		case ID_MergeMask:
-			ival = 1;
-			break;
-		case ID_ExcludeMask:
-			ival = 2;
-			break;
-		case ID_IntersectMask:
-			ival = 3;
-			break;
-		}
-		glbin_vol_selector.PasteMask(ival);
-		vc.insert({ gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-	}
+		vc.insert(gstIntersectMask);
 		break;
 	case ID_Brush:
+		vc.insert(gstBrushToolDlg);
+		break;
 	case ID_Measurement:
+		vc.insert(gstMeasureDlg);
+		break;
 	case ID_Component:
+		vc.insert(gstComponentDlg);
+		break;
 	case ID_Track:
+		vc.insert(gstTrackDlg);
+		break;
 	case ID_Calculation:
+		vc.insert(gstCalculationDlg);
+		break;
 	case ID_NoiseReduct:
+		vc.insert(gstNoiseCancellingDlg);
+		break;
 	case ID_VolumeSize:
+		vc.insert(gstCountingDlg);
+		break;
 	case ID_Colocalization:
+		vc.insert(gstColocalizationDlg);
+		break;
 	case ID_Convert:
+		vc.insert(gstConvertDlg);
+		break;
 	case ID_Ocl:
+		vc.insert(gstOclDlg);
+		break;
 	case ID_MachineLearning:
+		vc.insert(gstMachineLearningDlg);
+		break;
 	case ID_ManipulateData:
-		switch (id)
-		{
-			case ID_Brush:
-				m_frame->ShowBrushDlg();
-				break;
-			case ID_Measurement:
-				m_frame->ShowMeasureDlg();
-				break;
-			case ID_Component:
-				m_frame->ShowComponentDlg();
-				break;
-			case ID_Track:
-				m_frame->ShowTrackDlg();
-				break;
-			case ID_Calculation:
-				m_frame->ShowCalculationDlg();
-				break;
-			case ID_NoiseReduct:
-				m_frame->ShowNoiseCancellingDlg();
-				break;
-			case ID_VolumeSize:
-				m_frame->ShowCountingDlg();
-				break;
-			case ID_Colocalization:
-				m_frame->ShowColocalizationDlg();
-				break;
-			case ID_Convert:
-				m_frame->ShowConvertDlg();
-				break;
-			case ID_Ocl:
-				m_frame->ShowOclDlg();
-				break;
-			case ID_MachineLearning:
-				m_frame->ShowMachineLearningDlg();
-				break;
-			case ID_ManipulateData:
-				ManipulateData();
-				break;
-		}
-		excl_self = 3;
-		vc.insert(gstNull);
-		views.insert(-1);
+		vc.insert(gstManipPropPanel);
 		break;
 	}
 
-	FluoRefresh(excl_self, vc, views);
+	auto agent = m_agent->As<TreePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData(vc);
 }
 
 void TreePanel::OnSelChanged(wxTreeEvent& event)
@@ -1053,7 +1022,10 @@ void TreePanel::OnSelChanged(wxTreeEvent& event)
 	if (m_datatree && m_datatree->m_silent_select)
 		return;
 
-	Select();
+	auto agent = m_agent->As<TreePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTreeSelection });
+
 	event.Skip();
 }
 
@@ -1061,12 +1033,16 @@ void TreePanel::OnDeleting(wxTreeEvent& event)
 {
 	if (m_suppress_event)
 		return;
-	FluoUpdate({ gstCurrentSelect });
+	auto agent = m_agent->As<TreePanelAgent>();
+	if (agent)
+		agent->NotifyDataToUI({ gstCurrentSelect });
 }
 
 void TreePanel::OnAct(wxTreeEvent& event)
 {
-	Action();
+	auto agent = m_agent->As<TreePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstTreeAction });
 }
 
 void TreePanel::OnBeginDrag(wxTreeEvent& event)
@@ -1368,8 +1344,10 @@ void TreePanel::OnKeyDown(wxKeyEvent& event)
 {
 	if (event.GetKeyCode() == WXK_DELETE ||
 		event.GetKeyCode() == WXK_BACK)
-		DeleteSelection();
-	glbin_current.SetRoot();
-	FluoRefresh(0, { gstTreeCtrl });
+	{
+		auto agent = m_agent->As<TreePanelAgent>();
+		if (agent)
+			agent->UpdateUIToData({ gstRemoveData });
+	}
 }
 

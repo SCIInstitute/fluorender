@@ -46,6 +46,12 @@ MainFrameAgent::MainFrameAgent(
 
 void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 {
+	if (request.HasValue(gstRenderViewPanel))
+		SyncRenderViewPanels();
+	if (request.HasValue(gstMachineLearningDlg))
+		ShowMachineLearningDlg();
+	if (request.HasValue(gstManipPropPanel))
+		ShowManipPropPanel();
 }
 
 void MainFrameAgent::UpdateData(const UpdateRequest& request)
@@ -82,3 +88,17 @@ void MainFrameAgent::SetFocusVRenderViews(wxBasisSlider* slider)
 	}
 }
 
+void MainFrameAgent::SyncRenderViewPanels()
+{
+	//update render view panels by views under root
+}
+
+void MainFrameAgent::ShowMachineLearningDlg()
+{
+
+}
+
+void MainFrameAgent::ShowManipPropPanel()
+{
+
+}

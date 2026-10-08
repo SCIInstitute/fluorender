@@ -833,43 +833,43 @@ bool MeasureDlgAgent::GetSelectedRulerText(
 void MeasureDlgAgent::Locator()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Locator);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Probe()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Probe);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerLine()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Line);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Protractor()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Protractor);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Ellipse()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Ellipse);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerPolyline()
 {
 	glbin_states.ToggleRulerMode(flrd::RulerMode::Polyline);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Pencil()
 {
 	glbin_states.ToggleIntMode(InteractiveMode::Pencil);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Grow()
@@ -888,31 +888,31 @@ void MeasureDlgAgent::Grow()
 		}
 	}
 
-	NotifyViewUpdate({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
 }
 
 void MeasureDlgAgent::RulerMove()
 {
 	glbin_states.ToggleIntMode(InteractiveMode::MoveRuler);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerMovePoint()
 {
 	glbin_states.ToggleIntMode(InteractiveMode::EditRulerPoint);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::Magnet()
 {
 	glbin_states.ToggleMagnet(false);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerMovePencil()
 {
 	glbin_states.ToggleMagnet(true);
-	NotifyViewUpdate({ gstFreehandToolState });
+	NotifyDataToUI({ gstFreehandToolState });
 }
 
 void MeasureDlgAgent::RulerFlip()

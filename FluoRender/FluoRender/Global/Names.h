@@ -1356,4 +1356,36 @@ DEALINGS IN THE SOFTWARE.
 #define gstTrackListSel "track list sel"
 #define gstTrackListDelete "track list delete"
 
+//tree panel
+#define gstTreeContextMenu "tree context menu"
+#define gstTreeAction "tree action"
+#define gstTreeExpandSelItem "tree expand sel item"
+#define gstTreeScrollPos "tree scroll pos"
+#define gstAddVolumeGroup "add volume group"
+#define gstAddMeshGroup "add mesh group"
+#define gstRemoveData "remove data"
+#define gstBrushLocator "brush locator"
+#define gstCloseView "close view"
+#define gstIsolate "isolate"
+#define gstShowAll "show all"
+#define gstCopyMask "copy mask"
+#define gstPasteMask "paste mask"
+#define gstMergeMask "merge mask"
+#define gstExcludeMask "exclude mask"
+#define gstIntersectMask "intersect mask"
+
+//main frame
+#define gstRenderViewPanel "render view panel"
+#define gstMachineLearningDlg "machine learning dlg"
+#define gstBrushToolDlg "brush tool dlg"
+#define gstMeasureDlg "measure dlg"
+#define gstComponentDlg "component dlg"
+#define gstTrackDlg "track dlg"
+#define gstCalculationDlg "calculation dlg"
+#define gstNoiseCancellingDlg "noise cancelling dlg"
+#define gstCountingDlg "counting dlg"
+#define gstColocalizationDlg "colocalization dlg"
+#define gstConvertDlg "convert dlg"
+#define gstOclDlg "ocl dlg"
+
 #endif//NAMES_HPP

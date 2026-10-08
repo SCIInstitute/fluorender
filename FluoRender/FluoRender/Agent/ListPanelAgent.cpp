@@ -375,7 +375,7 @@ void ListPanelAgent::AddSelectionToView()
 		view->InitView(INIT_BOUNDS | INIT_CENTER);
 	vc.insert({ gstListCtrl, gstTreeCtrl, gstCurrentSelect });
 
-	NotifyViewUpdate(vc, { glbin_coordinator.FindRenderCanvasAgent(view) });
+	NotifyViewUpdate(vc);
 }
 
 void ListPanelAgent::SaveSelection()

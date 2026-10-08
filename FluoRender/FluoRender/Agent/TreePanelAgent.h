@@ -40,6 +40,9 @@ class MeshData;
 class AnnotData;
 class VolumeGroup;
 class MeshGroup;
+struct MenuItemData;
+using MenuData = std::vector<MenuItemData>;
+
 class TreePanelAgent : public Agent
 {
 public:
@@ -90,8 +93,7 @@ private:
 	void CollectIconUpdates(std::shared_ptr<TreeLayer> layer, TreeIconUpdateData& data);
 	void CollectColorUpdates(std::shared_ptr<TreeLayer> layer, TreeColorUpdateData& data);
 
-	//selection change
-	void Select();
+	void ShowContextMenu();
 
 	//double click
 	void Action();
@@ -116,17 +118,20 @@ private:
 	void MeshConvert();
 
 	//delete all
-	void DeleteSelection();
 	void DeleteAll();
 
 	//menu operations
-	void Expand();
 	void ToggleDisplay();
 	void RandomizeColor();
 	void CloseView();
 	void Isolate();
 	void ShowAll();
-	void ManipulateData();
+
+	void CopyMask();
+	void PasteMask(int ival);
+
+	//selection change
+	void Select();
 
 };
 

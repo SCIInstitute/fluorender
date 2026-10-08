@@ -42,6 +42,9 @@ DEALINGS IN THE SOFTWARE.
 #include <AnnotData.h>
 #include <VolumeGroup.h>
 #include <MeshGroup.h>
+#include <Coordinator.h>
+#include <GlobalStates.h>
+#include <ConvVolMesh.h>
 
 TreePanelAgent::TreePanelAgent(
 	TreePanel* panel) :
@@ -105,11 +108,108 @@ void TreePanelAgent::UpdateUI(const UpdateRequest& request)
 		flrd::RulerMode rul_mode = glbin_ruler_handler.GetRulerMode();
 		panel->UpdateFreehandToolState(int_mode, sel_mode, rul_mode);
 	}
+
+	if (request.HasValue(gstTreeContextMenu))
+		ShowContextMenu();
+
+	if (request.HasValue(gstTreeExpandSelItem))
+		panel->UpdateExpandSelectedItem();
+
+	if (request.HasValue(gstTreeScrollPos))
+		panel->UpdateScrollPos();
 }
 
 void TreePanelAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstTreeAction))
+		Action();
+	if (request.HasValue(gstAddVolumeGroup))
+		AddVolGroup();
+	if (request.HasValue(gstAddMeshGroup))
+		AddMeshGroup();
+	if (request.HasValue(gstRemoveData))
+		RemoveData();
+	if (request.HasValue(gstRulerLocator))
+		RulerLocator();
+	if (request.HasValue(gstRulerLine))
+		RulerLine();
+	if (request.HasValue(gstRulerPolyline))
+		RulerPolyline();
+	if (request.HasValue(gstRulerPencil))
+		RulerPencil();
+	if (request.HasValue(gstRulerMovePoint))
+		RulerEdit();
+	if (request.HasValue(gstRulerDeletePoint))
+		RulerDeletePoint();
+	if (request.HasValue(gstBrushLocator))
+		BrushRuler();
+	if (request.HasValue(gstBrushGrow))
+		BrushGrow();
+	if (request.HasValue(gstBrushAppend))
+		BrushAppend();
+	if (request.HasValue(gstMeshConvert))
+		MeshConvert();
+	if (request.HasValue(gstBrushComp))
+		BrushComp();
+	if (request.HasValue(gstBrushDiffuse))
+		BrushDiffuse();
+	if (request.HasValue(gstBrushUnsel))
+		BrushUnselect();
+	if (request.HasValue(gstBrushClear))
+		BrushClear();
+	if (request.HasValue(gstBrushExtract))
+		BrushExtract();
+	if (request.HasValue(gstBrushDelete))
+		BrushDelete();
 
+	if (request.HasValue(gstRandomizeColor))
+		RandomizeColor();
+	if (request.HasValue(gstCloseView))
+		CloseView();
+	if (request.HasValue(gstIsolate))
+		Isolate();
+	if (request.HasValue(gstShowAll))
+		ShowAll();
+	if (request.HasValue(gstCopyMask))
+		CopyMask();
+	if (request.HasValue(gstPasteMask))
+		PasteMask(0);
+	if (request.HasValue(gstMergeMask))
+		PasteMask(1);
+	if (request.HasValue(gstExcludeMask))
+		PasteMask(2);
+	if (request.HasValue(gstIntersectMask))
+		PasteMask(3);
+
+	if (request.HasValue(gstTreeExpandSelItem))
+		UpdateDataToUI({ gstTreeExpandSelItem });
+	if (request.HasValue(gstBrushToolDlg))
+		NotifyDataToUI({ gstBrushToolDlg });
+	if (request.HasValue(gstMeasureDlg))
+		NotifyDataToUI({ gstMeasureDlg });
+	if (request.HasValue(gstComponentDlg))
+		NotifyDataToUI({ gstComponentDlg });
+	if (request.HasValue(gstTrackDlg))
+		NotifyDataToUI({ gstTrackDlg });
+	if (request.HasValue(gstCalculationDlg))
+		NotifyDataToUI({ gstCalculationDlg });
+	if (request.HasValue(gstNoiseCancellingDlg))
+		NotifyDataToUI({ gstNoiseCancellingDlg });
+	if (request.HasValue(gstCountingDlg))
+		NotifyDataToUI({ gstCountingDlg });
+	if (request.HasValue(gstColocalizationDlg))
+		NotifyDataToUI({ gstColocalizationDlg });
+	if (request.HasValue(gstConvertDlg))
+		NotifyDataToUI({ gstConvertDlg });
+	if (request.HasValue(gstOclDlg))
+		NotifyDataToUI({ gstOclDlg });
+	if (request.HasValue(gstMachineLearningDlg))
+		NotifyDataToUI({ gstMachineLearningDlg });
+	if (request.HasValue(gstManipPropPanel))
+		NotifyDataToUI({ gstManipPropPanel });
+
+	if (request.HasValue(gstTreeSelection))
+		Select();
 }
 
 TreeUpdateData TreePanelAgent::BuildTreeData()
@@ -709,98 +809,304 @@ void TreePanelAgent::CollectColorUpdates(
 	}
 }
 
-void TreePanelAgent::Select()
+void TreePanelAgent::ShowContextMenu()
 {
-	if (!m_datatree)
+	auto panel = GetPanel();
+	if (!panel)
 		return;
 
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-
-	if (!sel_item.IsOk())
-		return;
-
-	fluo::ValueCollection vc;
-
-	//select data
-	std::wstring name = m_datatree->GetItemText(sel_item).ToStdWstring();
-	LayerInfo* item_data = (LayerInfo*)m_datatree->GetItemData(sel_item);
-	Root* root = glbin_data_manager.GetRoot();
-
-	if (item_data)
+	MenuData data;
+	int type = glbin_current.GetType();
+	bool expanded = panel->GetTreeExpanded();
+	switch (type)
 	{
-		switch (item_data->type)
-		{
-		case 0://root
-			glbin_current.SetRoot();
-			break;
-		case 1://view
-		{
-			if (root)
-			{
-				auto view = root->GetView(name);
-				glbin_current.SetRenderView(view);
-			}
-		}
+	case 0:  //root
+		if (expanded)
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_Expand,
+				L"Collapse"});
+		else
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_Expand,
+				L"Expand"});
 		break;
-		case 2://volume data
-		{
-			auto vd = glbin_data_manager.GetVolumeData(name);
-			glbin_current.SetVolumeData(vd);
-			vc.insert(gstVolumePropPanel);
-		}
-		break;
-		case 3://mesh data
-		{
-			auto md = glbin_data_manager.GetMeshData(name);
-			glbin_current.SetMeshData(md);
-			vc.insert(gstMeshPropPanel);
-		}
-		break;
-		case 4://annotations
-		{
-			auto ann = glbin_data_manager.GetAnnotData(name);
-			glbin_current.SetAnnotData(ann);
-			vc.insert(gstAnnotatPropPanel);
-		}
-		break;
-		case 5://volume group
-		{
-			std::wstring par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdWstring();
-			if (root)
-			{
-				auto view = root->GetView(par_name);
-				if (view)
-				{
-					auto group = view->GetGroup(name);
-					glbin_current.SetVolumeGroup(group);
-				}
-			}
-		}
-		break;
-		case 6://mesh group
-		{
-			std::wstring par_name = m_datatree->GetItemText(m_datatree->GetItemParent(sel_item)).ToStdWstring();
-			if (root)
-			{
-				auto view = root->GetView(par_name);
-				if (view)
-				{
-					auto group = view->GetMGroup(name);
-					glbin_current.SetMeshGroup(group);
-				}
-			}
-		}
-		break;
-		}
+	case 1:  //view
+	{
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ToggleDisp,
+			L"Toggle Visibility"});
+		if (expanded)
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_Expand,
+				L"Collapse" });
+		else
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_Expand,
+				L"Expand" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RandomizeColor,
+			L"Randomize Colors" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_AddVolGroup,
+			L"Add Volume Group" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_AddMeshGroup,
+			L"Add Mesh Group" });
+		Root* root = glbin_data_manager.GetRoot();
+		std::wstring view_name;
+		if (root)
+			view_name = root->GetView(0)->GetName();
+		if (panel->GetSelItemText() != view_name)
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_CloseView,
+				L"Close" });
 	}
-
-	vc.insert({ gstCurrentSelect, gstUpdateSync });
-	FluoRefresh(1, { vc });
+	break;
+	case 2:  //volume data
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ToggleDisp,
+			L"Toggle Visibility" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Isolate,
+			L"Isolate" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ShowAll,
+			L"Show All" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RandomizeColor,
+			L"Randomize Colors" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_AddVolGroup,
+			L"Add Volume Group" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RemoveData,
+			L"Delete" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_CopyMask,
+			L"Copy Mask" });
+		if (glbin_vol_selector.GetCopyMaskVolume())
+		{
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_PasteMask,
+				L"Paste Mask" });
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_MergeMask,
+				L"Merge Mask" });
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_ExcludeMask,
+				L"Exclude Mask" });
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_IntersectMask,
+				L"Intersect Mask" });
+		}
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Ocl,
+			L"Volume Filter..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Brush,
+			L"Paint Brush..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Measurement,
+			L"Measurement..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Component,
+			L"Component Analyzer..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Track,
+			L"Tracking..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Calculation,
+			L"Calculations..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_NoiseReduct,
+			L"Noise Reduction..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_VolumeSize,
+			L"Volume Size..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Colocalization,
+			L"Colocalization..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Convert,
+			L"Convert..." });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_MachineLearning,
+			L"Machine Learning Manager..." });
+		break;
+	case 3:  //mesh data
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ToggleDisp,
+			L"Toggle Visibility" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Isolate,
+			L"Isolate" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ShowAll,
+			L"Show All" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RandomizeColor,
+			L"Randomize Colors" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_AddMeshGroup,
+			L"Add Mesh Group" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RemoveData,
+			L"Delete" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ManipulateData,
+			L"Manipulate" });
+		break;
+	case 4:  //annotations
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ToggleDisp,
+			L"Toggle Visibility" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RemoveData,
+			L"Delete" });
+		break;
+	case 5:  //data group
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ToggleDisp,
+			L"Toggle Visibility" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Isolate,
+			L"Isolate" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ShowAll,
+			L"Show All" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		if (expanded)
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_Expand,
+				L"Collapse" });
+		else
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_Expand,
+				L"Expand" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RandomizeColor,
+			L"Randomize Colors" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_AddVolGroup,
+			L"Add Volume Group" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RemoveData,
+			L"Delete" });
+		break;
+	case 6:  //mesh group
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ToggleDisp,
+			L"Toggle Visibility" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_Isolate,
+			L"Isolate" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_ShowAll,
+			L"Show All" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		if (expanded)
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_Expand,
+				L"Collapse" });
+		else
+			data.push_back(MenuItemData{
+				MenuItemData::Type::Action,
+				TreePanel::ID_Expand,
+				L"Expand" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Separator });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RandomizeColor,
+			L"Randomize Colors" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_AddMeshGroup,
+			L"Add Mesh Group" });
+		data.push_back(MenuItemData{
+			MenuItemData::Type::Action,
+			TreePanel::ID_RemoveData,
+			L"Delete" });
+		break;
+	}
+	panel->ShowContextMenu(data);
 }
 
 void TreePanelAgent::Action()
 {
-	bool bval = wxGetKeyState(WXK_CONTROL);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	bool bval = panel->GetCtrlDown();
 	fluo::ValueCollection vc;
 
 	if (bval)
@@ -813,7 +1119,10 @@ void TreePanelAgent::Action()
 		ToggleDisplay();
 		vc.insert(gstTreeIcons);
 	}
-	FluoRefresh(2, vc);
+	std::set<Agent*> target{ this };
+	auto view = glbin_current.render_view.lock();
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	NotifyViewUpdate(vc, target);
 }
 
 void TreePanelAgent::AddVolGroup()
@@ -826,7 +1135,7 @@ void TreePanelAgent::AddVolGroup()
 	auto group = view->GetGroup(name);
 	glbin_current.SetVolumeGroup(group);
 
-	FluoRefresh(0, { gstTreeCtrl, gstCurrentSelect }, { -1 });
+	NotifyDataToUI({ gstTreeCtrl, gstCurrentSelect });
 }
 
 void TreePanelAgent::AddMeshGroup()
@@ -839,136 +1148,10 @@ void TreePanelAgent::AddMeshGroup()
 	auto group = view->GetMGroup(name);
 	glbin_current.SetMeshGroup(group);
 
-	FluoRefresh(0, { gstTreeCtrl, gstCurrentSelect }, { -1 });
+	NotifyDataToUI({ gstTreeCtrl, gstCurrentSelect });
 }
 
 void TreePanelAgent::RemoveData()
-{
-	DeleteSelection();
-	glbin_current.SetRoot();
-
-	FluoRefresh(0, { gstTreeCtrl, gstCurrentSelect });
-}
-
-void TreePanelAgent::RulerLocator()
-{
-	glbin_states.ToggleRulerMode(flrd::RulerMode::Locator);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
-}
-
-void TreePanelAgent::RulerLine()
-{
-	glbin_states.ToggleRulerMode(flrd::RulerMode::Line);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
-}
-
-void TreePanelAgent::RulerPolyline()
-{
-	glbin_states.ToggleRulerMode(flrd::RulerMode::Polyline);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
-}
-
-void TreePanelAgent::RulerPencil()
-{
-	glbin_states.ToggleIntMode(InteractiveMode::Pencil);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
-}
-
-void TreePanelAgent::RulerEdit()
-{
-	glbin_states.ToggleIntMode(InteractiveMode::EditRulerPoint);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
-}
-
-void TreePanelAgent::RulerDeletePoint()
-{
-	glbin_states.ToggleIntMode(InteractiveMode::RulerDelPoint);
-	FluoRefresh(0, { gstFreehandToolState }, { -1 });
-}
-
-void TreePanelAgent::BrushRuler()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::SingleSelect);
-	glbin_states.ToggleRulerMode(flrd::RulerMode::Locator);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, { -1 });
-}
-
-void TreePanelAgent::BrushGrow()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Grow);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, { -1 });
-}
-
-void TreePanelAgent::BrushAppend()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Append);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, { -1 });
-}
-
-void TreePanelAgent::BrushComp()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Segment);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, { -1 });
-}
-
-void TreePanelAgent::BrushDiffuse()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Diffuse);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, { -1 });
-}
-
-void TreePanelAgent::BrushUnselect()
-{
-	glbin_states.ToggleBrushMode(flrd::SelectMode::Eraser);
-	FluoRefresh(0, { gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter }, { -1 });
-}
-
-void TreePanelAgent::BrushClear()
-{
-	glbin_vol_selector.Clear();
-	FluoRefresh(3, { gstNull });
-}
-
-void TreePanelAgent::BrushExtract()
-{
-	glbin_vol_selector.Extract();
-	FluoRefresh(0, { gstTreeCtrl, gstTreeSelection });
-}
-
-void TreePanelAgent::BrushDelete()
-{
-	glbin_vol_selector.Erase();
-	FluoRefresh(3, { gstTreeCtrl, gstTreeSelection });
-}
-
-void TreePanelAgent::MeshConvert()
-{
-	auto vd = glbin_current.vol_data.lock();
-	if (!vd)
-		return;
-	glbin_conv_vol_mesh.SetVolumeData(vd);
-	glbin_conv_vol_mesh.Update(true);
-	auto md = glbin_conv_vol_mesh.GetMeshData();
-	if (md)
-	{
-		auto temp = glbin_data_manager.GetMeshData(md->GetName());
-		if (!temp)
-		{
-			glbin_data_manager.AddMeshData(md);
-			auto view = glbin_current.render_view.lock();
-			if (view)
-				view->AddMeshData(md);
-		}
-	}
-	if (!glbin_conv_vol_mesh.GetMerged())
-		glbin_conv_vol_mesh.MergeVertices(false);
-	glbin_conv_vol_mesh.Smooth(true);
-
-	FluoRefresh(0, { gstVolMeshInfo, gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstListCtrl, gstTreeCtrl },
-		{ glbin_current.GetViewId() });
-}
-
-void TreePanelAgent::DeleteSelection()
 {
 	int type = glbin_current.GetType();
 	auto view = glbin_current.render_view.lock();
@@ -986,7 +1169,8 @@ void TreePanelAgent::DeleteSelection()
 		std::wstring name = view->GetName();
 		if (name != view0_name)
 		{
-			m_frame->DeleteRenderViewPanel(name);
+			//moved to request for sync panel with scenegraph
+			//m_frame->DeleteRenderViewPanel(name);
 			root->DeleteView(name);
 		}
 	}
@@ -1047,7 +1231,124 @@ void TreePanelAgent::DeleteSelection()
 
 	glbin_current.SetRoot();
 
-	FluoRefresh(0, { gstTreeCtrl, gstListCtrl, gstMovViewList, gstMovViewIndex });
+	NotifyViewUpdate({ gstTreeCtrl, gstListCtrl, gstMovViewList, gstMovViewIndex, gstRenderViewPanel });
+}
+
+void TreePanelAgent::RulerLocator()
+{
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Locator);
+	NotifyDataToUI({ gstFreehandToolState });
+}
+
+void TreePanelAgent::RulerLine()
+{
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Line);
+	NotifyDataToUI({ gstFreehandToolState });
+}
+
+void TreePanelAgent::RulerPolyline()
+{
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Polyline);
+	NotifyDataToUI({ gstFreehandToolState });
+}
+
+void TreePanelAgent::RulerPencil()
+{
+	glbin_states.ToggleIntMode(InteractiveMode::Pencil);
+	NotifyDataToUI({ gstFreehandToolState });
+}
+
+void TreePanelAgent::RulerEdit()
+{
+	glbin_states.ToggleIntMode(InteractiveMode::EditRulerPoint);
+	NotifyDataToUI({ gstFreehandToolState });
+}
+
+void TreePanelAgent::RulerDeletePoint()
+{
+	glbin_states.ToggleIntMode(InteractiveMode::RulerDelPoint);
+	NotifyDataToUI({ gstFreehandToolState });
+}
+
+void TreePanelAgent::BrushRuler()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::SingleSelect);
+	glbin_states.ToggleRulerMode(flrd::RulerMode::Locator);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void TreePanelAgent::BrushGrow()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Grow);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void TreePanelAgent::BrushAppend()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Append);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void TreePanelAgent::MeshConvert()
+{
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+	glbin_conv_vol_mesh.SetVolumeData(vd);
+	glbin_conv_vol_mesh.Update(true);
+	auto md = glbin_conv_vol_mesh.GetMeshData();
+	if (md)
+	{
+		auto temp = glbin_data_manager.GetMeshData(md->GetName());
+		if (!temp)
+		{
+			glbin_data_manager.AddMeshData(md);
+			auto view = glbin_current.render_view.lock();
+			if (view)
+				view->AddMeshData(md);
+		}
+	}
+	if (!glbin_conv_vol_mesh.GetMerged())
+		glbin_conv_vol_mesh.MergeVertices(false);
+	glbin_conv_vol_mesh.Smooth(true);
+
+	NotifyViewUpdate({ gstVolMeshInfo, gstBrushThreshold, gstCompThreshold, gstVolMeshThresh, gstListCtrl, gstTreeCtrl });
+}
+
+void TreePanelAgent::BrushComp()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Segment);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void TreePanelAgent::BrushDiffuse()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Diffuse);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void TreePanelAgent::BrushUnselect()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Eraser);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void TreePanelAgent::BrushClear()
+{
+	glbin_vol_selector.Clear();
+	NotifyViewUpdate({ gstNull });
+}
+
+void TreePanelAgent::BrushExtract()
+{
+	glbin_vol_selector.Extract();
+	NotifyViewUpdate({ gstTreeCtrl, gstTreeSelection });
+}
+
+void TreePanelAgent::BrushDelete()
+{
+	glbin_vol_selector.Erase();
+	NotifyViewUpdate({ gstTreeCtrl, gstTreeSelection });
 }
 
 //delete
@@ -1059,7 +1360,7 @@ void TreePanelAgent::DeleteAll()
 	{
 		for (int i = root->GetViewNum(); i > 1; --i)
 		{
-			m_frame->DeleteRenderViewPanel(i - 1);
+			//m_frame->DeleteRenderViewPanel(i - 1);
 			root->DeleteView(i - 1);
 		}
 	}
@@ -1068,16 +1369,7 @@ void TreePanelAgent::DeleteAll()
 
 	glbin_current.SetRoot();
 
-	FluoRefresh(0, { gstTreeCtrl, gstListCtrl, gstMovViewList, gstMovViewIndex });
-}
-
-void TreePanelAgent::Expand()
-{
-	wxTreeItemId sel_item = m_datatree->GetSelection();
-	if (m_datatree->IsExpanded(sel_item))
-		m_datatree->Collapse(sel_item);
-	else
-		m_datatree->Expand(sel_item);
+	NotifyViewUpdate({ gstTreeCtrl, gstListCtrl, gstMovViewList, gstMovViewIndex, gstRenderViewPanel });
 }
 
 void TreePanelAgent::ToggleDisplay()
@@ -1150,10 +1442,7 @@ void TreePanelAgent::ToggleDisplay()
 	}
 	}
 
-	m_scroll_pos = GetScrollPos(wxVERTICAL);
-	SetScrollPos(wxVERTICAL, m_scroll_pos);
-
-	FluoRefresh(0, { gstTreeIcons });
+	NotifyViewUpdate({ gstTreeIcons, gstTreeScrollPos });
 }
 
 void TreePanelAgent::RandomizeColor()
@@ -1203,7 +1492,7 @@ void TreePanelAgent::RandomizeColor()
 	}
 	}
 
-	FluoRefresh(0, { gstTreeIcons });
+	NotifyViewUpdate({ gstTreeIcons });
 }
 
 void TreePanelAgent::CloseView()
@@ -1212,14 +1501,14 @@ void TreePanelAgent::CloseView()
 	if (view)
 	{
 		std::wstring name = view->GetName();
-		m_frame->DeleteRenderViewPanel(name);
+		//m_frame->DeleteRenderViewPanel(name);
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
 			root->DeleteView(name);
 	}
 
 	glbin_current.SetRoot();
-	FluoRefresh(0, { gstTreeCtrl, gstListCtrl, gstMovViewList, gstMovViewIndex });
+	NotifyViewUpdate({ gstTreeCtrl, gstListCtrl, gstMovViewList, gstMovViewIndex, gstRenderViewPanel });
 }
 
 void TreePanelAgent::Isolate()
@@ -1257,7 +1546,7 @@ void TreePanelAgent::Isolate()
 	}
 
 	view->Isolate(type, name);
-	FluoRefresh(2, { gstTreeIcons });
+	NotifyViewUpdate({ gstTreeIcons });
 }
 
 void TreePanelAgent::ShowAll()
@@ -1267,11 +1556,101 @@ void TreePanelAgent::ShowAll()
 		return;
 
 	view->ShowAll();
-	FluoRefresh(2, { gstTreeIcons });
+	NotifyViewUpdate({ gstTreeIcons });
 }
 
-void TreePanelAgent::ManipulateData()
+void TreePanelAgent::CopyMask()
 {
-	m_frame->UpdateProps({ gstManipPropPanel });
+	glbin_vol_selector.CopyMask(false);
+}
+
+void TreePanelAgent::PasteMask(int ival)
+{
+	glbin_vol_selector.PasteMask(ival);
+	NotifyViewUpdate({ gstBrushCountAutoUpdate, gstColocalAutoUpdate });
+}
+
+void TreePanelAgent::Select()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	//select data
+	auto name = panel->GetSelItemText();
+	LayerInfo* item_data = panel->GetSelItemData();
+	Root* root = glbin_data_manager.GetRoot();
+
+	fluo::ValueCollection vc;
+	if (item_data)
+	{
+		switch (item_data->type)
+		{
+		case 0://root
+			glbin_current.SetRoot();
+			break;
+		case 1://view
+		{
+			if (root)
+			{
+				auto view = root->GetView(name);
+				glbin_current.SetRenderView(view);
+			}
+		}
+		break;
+		case 2://volume data
+		{
+			auto vd = glbin_data_manager.GetVolumeData(name);
+			glbin_current.SetVolumeData(vd);
+			vc.insert(gstVolumePropPanel);
+		}
+		break;
+		case 3://mesh data
+		{
+			auto md = glbin_data_manager.GetMeshData(name);
+			glbin_current.SetMeshData(md);
+			vc.insert(gstMeshPropPanel);
+		}
+		break;
+		case 4://annotations
+		{
+			auto ann = glbin_data_manager.GetAnnotData(name);
+			glbin_current.SetAnnotData(ann);
+			vc.insert(gstAnnotatPropPanel);
+		}
+		break;
+		case 5://volume group
+		{
+			auto par_name = panel->GetSelItemParentText();
+			if (root)
+			{
+				auto view = root->GetView(par_name);
+				if (view)
+				{
+					auto group = view->GetGroup(name);
+					glbin_current.SetVolumeGroup(group);
+				}
+			}
+		}
+		break;
+		case 6://mesh group
+		{
+			auto par_name = panel->GetSelItemParentText();
+			if (root)
+			{
+				auto view = root->GetView(par_name);
+				if (view)
+				{
+					auto group = view->GetMGroup(name);
+					glbin_current.SetMeshGroup(group);
+				}
+			}
+		}
+		break;
+		}
+	}
+
+	vc.insert({ gstCurrentSelect, gstUpdateSync });
+	NotifyViewUpdate({ vc });
 }
 

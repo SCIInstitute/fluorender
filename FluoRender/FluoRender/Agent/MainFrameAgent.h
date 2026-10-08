@@ -63,6 +63,12 @@ private:
 	{
 		gstCurrentSelect,
 	};
+
+private:
+	void SyncRenderViewPanels();
+	void ShowMachineLearningDlg();
+	void ShowManipPropPanel();
+
 };
 
 #endif // MainFrameAgent_h
