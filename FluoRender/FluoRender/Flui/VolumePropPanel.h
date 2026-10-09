@@ -34,9 +34,6 @@ namespace flvr
 {
 	enum class ColorMode : int;
 }
-class RenderView;
-class VolumeData;
-class VolumeGroup;
 class wxFadeButton;
 class wxBasisSlider;
 class wxMapDoubleSlider;
@@ -129,18 +126,10 @@ public:
 	void UpdateNoiseRedct(bool bval);
 	void UpdateChannelMixMode(bool bval);
 
-	void InitViews(unsigned int type);
-
-	//sync group
-	void SetGroup(const std::shared_ptr<VolumeGroup>& group);
-
-	//sync view in depth mode
-	void SetView(const std::shared_ptr<RenderView>& view);
-
-	void ApplyMl();
-	void SaveMl();
-
 	void ClearUndo();
+
+	//get
+	double GetGamma();
 
 private:
 	//1
@@ -230,70 +219,6 @@ private:
 	wxUndoableToolbar* m_options_toolbar;
 
 private:
-	bool SetSpacing();
-
-	//update max value
-	void UpdateMaxVal(double value);
-
-	//enable/disable
-	//1
-	void EnableMinMax(bool);
-	void EnableGamma(bool);
-	void EnableAlpha(bool);
-	void EnableLuminance(bool);
-	void EnableSample(bool);
-	//2
-	void EnableThresh(bool);
-	void EnableBoundary(bool);
-	void EnableShading(bool);
-	void EnableShadow(bool);
-	void EnableShadowDir(bool);
-	void EnableColormap(bool);
-	//3
-	void EnableMip(bool);
-	void EnableTransparent(bool);
-
-	//set values
-	void SetMinMax(double, double, bool);
-	void SetGamma(double, bool);
-	void SetAlpha(double, bool);
-	void SetLuminance(double, bool);
-	void SetSampleRate(double, bool);
-	void SetThresh(double, double, bool);
-	void SetBoundary(double, double, bool);
-	void SetShadingStrength(double, bool);
-	void SetShadingShine(double, bool);
-	void SetShadowInt(double, bool);
-	void SetShadowDir(double, bool);
-	void SetColormapVal(double, double, bool);
-
-	//sync values
-	void SyncMinMax(double, double);
-	void SyncGamma(double);
-	void SyncAlpha(double);
-	void SyncLuminance(double);
-	void SyncSampleRate(double);
-	void SyncThresh(double, double);
-	void SyncBoundary(double, double);
-	void SyncShadingStrength(double);
-	void SyncShadingShine(double);
-	void SyncShadowInt(double);
-	void SyncColormapVal(double, double);
-
-	//options
-	void SetMachineLearning();
-	void SetTransparent();
-	void SetMIP();
-	void SetInvert();
-	void SetOutline();
-	void SetInterpolate();
-	void SetNoiseReduction();
-	void SetSyncGroup();
-	void SetChannelMixDepth();
-	void SetLegend();
-	void SaveDefault();
-	void ResetDefault();
-
 	//1
 	void OnMinMaxMF(wxCommandEvent& event);
 	void OnMinMaxChange(wxScrollEvent& event);

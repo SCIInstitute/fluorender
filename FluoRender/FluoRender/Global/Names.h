@@ -1375,6 +1375,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstIntersectMask "intersect mask"
 #define gstTreeDrag "tree drag"
 
+//volume property panel
+#define gstVolumeGradient "volume gradient"
+
 //main frame
 #define gstRenderViewPanel "render view panel"
 #define gstMachineLearningDlg "machine learning dlg"
