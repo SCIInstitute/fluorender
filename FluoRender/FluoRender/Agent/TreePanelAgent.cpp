@@ -210,6 +210,8 @@ void TreePanelAgent::UpdateData(const UpdateRequest& request)
 
 	if (request.HasValue(gstTreeSelection))
 		Select();
+	if (request.HasValue(gstTreeDrag))
+		ProcessDrag();
 }
 
 TreeUpdateData TreePanelAgent::BuildTreeData()
@@ -1654,3 +1656,330 @@ void TreePanelAgent::Select()
 	NotifyViewUpdate({ vc });
 }
 
+void TreePanelAgent::ProcessDrag()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	const auto& drag = panel->GetDragData();
+
+	if (!drag.valid)
+		return;
+
+	Root* root = glbin_data_manager.GetRoot();
+	if (!root)
+		return;
+
+	bool refresh = false;
+
+	// -------------------------------------------------
+	// Dropped outside the tree
+	// -------------------------------------------------
+
+	if (drag.droppedOutside)
+	{
+		if (drag.srcType == TreeItemType::Volume &&
+			drag.srcParentType == TreeItemType::VolumeGroup)
+		{
+			auto view = root->GetView(drag.srcViewName);
+
+			if (view)
+			{
+				view->MoveLayertoView(
+					drag.srcParentName,
+					drag.srcName,
+					L"");
+
+				refresh = true;
+			}
+		}
+
+		else if (drag.srcType == TreeItemType::Mesh &&
+			drag.srcParentType == TreeItemType::MeshGroup)
+		{
+			auto view = root->GetView(drag.srcViewName);
+
+			if (view)
+			{
+				view->MoveMeshtoView(
+					drag.srcParentName,
+					drag.srcName,
+					L"");
+
+				refresh = true;
+			}
+		}
+	}
+
+	// -------------------------------------------------
+	// Normal drop
+	// -------------------------------------------------
+
+	else
+	{
+		// same view reorder
+
+		if (drag.srcParentType == TreeItemType::View &&
+			drag.dstParentType == TreeItemType::View &&
+			drag.srcParentName == drag.dstParentName &&
+			drag.srcName != drag.dstName)
+		{
+			auto view = root->GetView(drag.srcParentName);
+
+			if (view)
+			{
+				if (drag.srcType == TreeItemType::Volume &&
+					drag.dstType == TreeItemType::VolumeGroup)
+				{
+					view->MoveLayertoGroup(
+						drag.dstName,
+						drag.srcName,
+						L"");
+				}
+				else if (drag.srcType == TreeItemType::Mesh &&
+					drag.dstType == TreeItemType::MeshGroup)
+				{
+					view->MoveMeshtoGroup(
+						drag.dstName,
+						drag.srcName,
+						L"");
+				}
+				else
+				{
+					view->MoveLayerinView(
+						drag.srcName,
+						drag.dstName);
+				}
+
+				refresh = true;
+			}
+		}
+
+		// volume within same group
+
+		else if (drag.srcParentType == TreeItemType::VolumeGroup &&
+			drag.dstParentType == TreeItemType::VolumeGroup &&
+			drag.srcParentName == drag.dstParentName &&
+			drag.srcName != drag.dstName)
+		{
+			auto view = root->GetView(drag.srcViewName);
+
+			if (view)
+			{
+				view->MoveLayerinGroup(
+					drag.srcParentName,
+					drag.srcName,
+					drag.dstName);
+
+				refresh = true;
+			}
+		}
+
+		// volume group -> view
+
+		else if (drag.srcParentType == TreeItemType::VolumeGroup &&
+			drag.srcType == TreeItemType::Volume &&
+			drag.dstParentType == TreeItemType::View &&
+			drag.srcViewName == drag.dstParentName)
+		{
+			auto view = root->GetView(drag.dstParentName);
+
+			if (view)
+			{
+				if (drag.dstType == TreeItemType::VolumeGroup)
+				{
+					view->MoveLayerfromtoGroup(
+						drag.srcParentName,
+						drag.dstName,
+						drag.srcName,
+						L"");
+				}
+				else
+				{
+					view->MoveLayertoView(
+						drag.srcParentName,
+						drag.srcName,
+						drag.dstName);
+				}
+
+				refresh = true;
+			}
+		}
+
+		// volume view -> group
+
+		else if (drag.srcParentType == TreeItemType::View &&
+			drag.srcType == TreeItemType::Volume &&
+			drag.dstParentType == TreeItemType::VolumeGroup &&
+			drag.srcParentName == drag.dstViewName)
+		{
+			auto view = root->GetView(drag.srcParentName);
+
+			if (view)
+			{
+				view->MoveLayertoGroup(
+					drag.dstParentName,
+					drag.srcName,
+					drag.dstName);
+
+				refresh = true;
+			}
+		}
+
+		// volume group -> group
+
+		else if (drag.srcParentType == TreeItemType::VolumeGroup &&
+			drag.dstParentType == TreeItemType::VolumeGroup &&
+			drag.dstType == TreeItemType::Volume &&
+			drag.srcViewName == drag.dstViewName &&
+			drag.srcParentName != drag.dstParentName)
+		{
+			auto view = root->GetView(drag.srcViewName);
+
+			if (view)
+			{
+				view->MoveLayerfromtoGroup(
+					drag.srcParentName,
+					drag.dstParentName,
+					drag.srcName,
+					drag.dstName);
+
+				refresh = true;
+			}
+		}
+
+		// volume group -> view node
+
+		else if (drag.srcType == TreeItemType::Volume &&
+			drag.srcParentType == TreeItemType::VolumeGroup &&
+			drag.dstType == TreeItemType::View &&
+			drag.srcViewName == drag.dstName)
+		{
+			auto view = root->GetView(drag.dstName);
+
+			if (view)
+			{
+				view->MoveLayertoView(
+					drag.srcParentName,
+					drag.srcName,
+					L"");
+
+				refresh = true;
+			}
+		}
+
+		// ===== mesh cases =====
+		// same conversion as volume logic
+
+		else if (drag.srcParentType == TreeItemType::MeshGroup &&
+			drag.dstParentType == TreeItemType::MeshGroup &&
+			drag.srcParentName == drag.dstParentName &&
+			drag.srcName != drag.dstName)
+		{
+			auto view = root->GetView(drag.srcViewName);
+
+			if (view)
+			{
+				view->MoveMeshinGroup(
+					drag.srcParentName,
+					drag.srcName,
+					drag.dstName);
+
+				refresh = true;
+			}
+		}
+
+		else if (drag.srcParentType == TreeItemType::MeshGroup &&
+			drag.srcType == TreeItemType::Mesh &&
+			drag.dstParentType == TreeItemType::View &&
+			drag.srcViewName == drag.dstParentName)
+		{
+			auto view = root->GetView(drag.dstParentName);
+
+			if (view)
+			{
+				if (drag.dstType == TreeItemType::MeshGroup)
+				{
+					view->MoveMeshfromtoGroup(
+						drag.srcParentName,
+						drag.dstName,
+						drag.srcName,
+						L"");
+				}
+				else
+				{
+					view->MoveMeshtoView(
+						drag.srcParentName,
+						drag.srcName,
+						drag.dstName);
+				}
+
+				refresh = true;
+			}
+		}
+
+		else if (drag.srcParentType == TreeItemType::View &&
+			drag.srcType == TreeItemType::Mesh &&
+			drag.dstParentType == TreeItemType::MeshGroup &&
+			drag.srcParentName == drag.dstViewName)
+		{
+			auto view = root->GetView(drag.srcParentName);
+
+			if (view)
+			{
+				view->MoveMeshtoGroup(
+					drag.dstParentName,
+					drag.srcName,
+					drag.dstName);
+
+				refresh = true;
+			}
+		}
+
+		else if (drag.srcParentType == TreeItemType::MeshGroup &&
+			drag.dstParentType == TreeItemType::MeshGroup &&
+			drag.dstType == TreeItemType::Mesh &&
+			drag.srcViewName == drag.dstViewName &&
+			drag.srcParentName != drag.dstParentName)
+		{
+			auto view = root->GetView(drag.srcViewName);
+
+			if (view)
+			{
+				view->MoveMeshfromtoGroup(
+					drag.srcParentName,
+					drag.dstParentName,
+					drag.srcName,
+					drag.dstName);
+
+				refresh = true;
+			}
+		}
+
+		else if (drag.srcType == TreeItemType::Mesh &&
+			drag.srcParentType == TreeItemType::MeshGroup &&
+			drag.dstType == TreeItemType::View &&
+			drag.srcViewName == drag.dstName)
+		{
+			auto view = root->GetView(drag.dstName);
+
+			if (view)
+			{
+				view->MoveMeshtoView(
+					drag.srcParentName,
+					drag.srcName,
+					L"");
+
+				refresh = true;
+			}
+		}
+	}
+
+	if (refresh)
+	{
+		glbin_current.SetSel(drag.srcName);
+
+		NotifyViewUpdate(
+			{ gstTreeCtrl, gstCurrentSelect, gstUpdateSync });
+	}
+}

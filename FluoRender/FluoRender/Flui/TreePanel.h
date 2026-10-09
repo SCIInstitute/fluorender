@@ -33,6 +33,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/treectrl.h>
 #include <vector>
 #include <unordered_map>
+#include <string>
 
 //tree icon
 #define icon_change	1
@@ -224,6 +225,37 @@ struct MenuItemData
 };
 using MenuData = std::vector<MenuItemData>;
 
+enum class TreeItemType
+{
+	Unknown = 0,
+	View = 1,
+	Volume = 2,
+	Mesh = 3,
+	VolumeGroup = 5,
+	MeshGroup = 6
+};
+
+struct TreeDragData
+{
+	bool valid = false;
+	bool droppedOutside = false;
+
+	TreeItemType srcType = TreeItemType::Unknown;
+	TreeItemType srcParentType = TreeItemType::Unknown;
+	TreeItemType dstType = TreeItemType::Unknown;
+	TreeItemType dstParentType = TreeItemType::Unknown;
+
+	std::wstring srcName;
+	std::wstring srcParentName;
+
+	std::wstring dstName;
+	std::wstring dstParentName;
+
+	// view names for group items
+	std::wstring srcViewName;
+	std::wstring dstViewName;
+};
+
 class TreePanel : public AgentPanel
 {
 public:
@@ -306,12 +338,16 @@ public:
 	std::wstring GetSelItemParentText();
 	LayerInfo* GetSelItemData();
 	bool GetCtrlDown();
+	const TreeDragData& GetDragData() const;
 
 private:
 	wxTreeItemId BuildTreeItem(const TreeItemData& node, wxTreeItemId parent = wxTreeItemId());
 	void SelectItem(TreeNodeId id);
 	void UpdateItemColor(TreeNodeId id, const TreeColor& color);
 	void UpdateItemIcon(TreeNodeId id, bool visible);
+	TreeDragData BuildDragData(
+		wxTreeItemId srcItem,
+		wxTreeItemId dstItem) const;
 
 private:
 	DataTreeCtrl* m_datatree;
@@ -325,6 +361,7 @@ private:
 	wxPoint m_context_pos;
 	//drag
 	wxTreeItemId m_drag_item;
+	TreeDragData m_drag_data;
 	//for updates
 	std::unordered_map<TreeNodeId, wxTreeItemId> itemMap_;
 	std::unordered_map<TreeNodeId, TreeUiInfo> itemInfo_;

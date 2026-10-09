@@ -138,7 +138,8 @@ private:
 
 	//selection change
 	void Select();
-
+	//drag
+	void ProcessDrag();
 };
 
 #endif // TreePanelAgent_h

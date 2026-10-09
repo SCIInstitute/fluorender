@@ -611,6 +611,11 @@ bool TreePanel::GetCtrlDown()
 	return wxGetKeyState(WXK_CONTROL);
 }
 
+const TreeDragData& TreePanel::GetDragData() const
+{
+	return m_drag_data;
+}
+
 wxTreeItemId TreePanel::BuildTreeItem(
 	const TreeItemData& node,
 	wxTreeItemId parent)
@@ -814,6 +819,94 @@ void TreePanel::UpdateItemIcon(
 	default:
 		break;
 	}
+}
+
+TreeDragData TreePanel::BuildDragData(
+	wxTreeItemId srcItem,
+	wxTreeItemId dstItem) const
+{
+	TreeDragData data;
+
+	if (!srcItem.IsOk())
+		return data;
+
+	auto srcParent = m_datatree->GetItemParent(srcItem);
+	if (!srcParent.IsOk())
+		return data;
+
+	data.valid = true;
+
+	data.srcType =
+		static_cast<TreeItemType>(
+			static_cast<LayerInfo*>(m_datatree->GetItemData(srcItem))->type);
+
+	data.srcParentType =
+		static_cast<TreeItemType>(
+			static_cast<LayerInfo*>(m_datatree->GetItemData(srcParent))->type);
+
+	data.srcName =
+		m_datatree->GetItemText(srcItem).ToStdWstring();
+
+	data.srcParentName =
+		m_datatree->GetItemText(srcParent).ToStdWstring();
+
+	// source view name if source is inside a group
+	if (data.srcParentType == TreeItemType::VolumeGroup ||
+		data.srcParentType == TreeItemType::MeshGroup)
+	{
+		auto viewItem = m_datatree->GetItemParent(srcParent);
+		if (viewItem.IsOk())
+		{
+			data.srcViewName =
+				m_datatree->GetItemText(viewItem).ToStdWstring();
+		}
+	}
+	else if (data.srcParentType == TreeItemType::View)
+	{
+		data.srcViewName = data.srcParentName;
+	}
+
+	// dropped outside tree
+	if (!dstItem.IsOk())
+	{
+		data.droppedOutside = true;
+		return data;
+	}
+
+	auto dstParent = m_datatree->GetItemParent(dstItem);
+	if (!dstParent.IsOk())
+		return data;
+
+	data.dstType =
+		static_cast<TreeItemType>(
+			static_cast<LayerInfo*>(m_datatree->GetItemData(dstItem))->type);
+
+	data.dstParentType =
+		static_cast<TreeItemType>(
+			static_cast<LayerInfo*>(m_datatree->GetItemData(dstParent))->type);
+
+	data.dstName =
+		m_datatree->GetItemText(dstItem).ToStdWstring();
+
+	data.dstParentName =
+		m_datatree->GetItemText(dstParent).ToStdWstring();
+
+	if (data.dstParentType == TreeItemType::VolumeGroup ||
+		data.dstParentType == TreeItemType::MeshGroup)
+	{
+		auto viewItem = m_datatree->GetItemParent(dstParent);
+		if (viewItem.IsOk())
+		{
+			data.dstViewName =
+				m_datatree->GetItemText(viewItem).ToStdWstring();
+		}
+	}
+	else if (data.dstParentType == TreeItemType::View)
+	{
+		data.dstViewName = data.dstParentName;
+	}
+
+	return data;
 }
 
 void TreePanel::OnContextMenu(wxContextMenuEvent& event)
@@ -1084,257 +1177,18 @@ void TreePanel::OnBeginDrag(wxTreeEvent& event)
 
 void TreePanel::OnEndDrag(wxTreeEvent& event)
 {
-	wxTreeItemId src_item = m_drag_item,
-		dst_item = event.GetItem(),
-		src_par_item = src_item.IsOk() ? m_datatree->GetItemParent(src_item) : 0,
-		dst_par_item = dst_item.IsOk() ? m_datatree->GetItemParent(dst_item) : 0;
-	m_drag_item = (wxTreeItemId)0l;
-	bool refresh = false;
-	std::wstring src_name, src_par_name, dst_name, dst_par_name;
-	Root* root = glbin_data_manager.GetRoot();
+	auto srcItem = m_drag_item;
+	auto dstItem = event.GetItem();
 
-	if (src_item.IsOk() && dst_item.IsOk() &&
-		src_par_item.IsOk() &&
-		dst_par_item.IsOk() && m_frame)
+	m_drag_item = wxTreeItemId();
+
+	m_drag_data = BuildDragData(srcItem, dstItem);
+
+	if (m_drag_data.valid)
 	{
-		int src_type = ((LayerInfo*)m_datatree->GetItemData(src_item))->type;
-		int src_par_type = ((LayerInfo*)m_datatree->GetItemData(src_par_item))->type;
-		int dst_type = ((LayerInfo*)m_datatree->GetItemData(dst_item))->type;
-		int dst_par_type = ((LayerInfo*)m_datatree->GetItemData(dst_par_item))->type;
-
-		src_name = m_datatree->GetItemText(src_item).ToStdWstring();
-		src_par_name = m_datatree->GetItemText(src_par_item).ToStdWstring();
-		dst_name = m_datatree->GetItemText(dst_item).ToStdWstring();
-		dst_par_name = m_datatree->GetItemText(dst_par_item).ToStdWstring();
-
-		if (src_par_type == 1 &&
-			dst_par_type == 1 &&
-			src_par_name == dst_par_name &&
-			src_name != dst_name)
-		{
-			if (root)
-			{
-				auto view = root->GetView(src_par_name);
-				//move within the same view
-				if (view)
-				{
-					if (src_type == 2 && dst_type == 5)
-					{
-						//move volume to the group in the same view
-						view->MoveLayertoGroup(dst_name, src_name, L"");
-					}
-					else if (src_type == 3 && dst_type == 6)
-					{
-						//move mesh into a group
-						view->MoveMeshtoGroup(dst_name, src_name, L"");
-					}
-					else
-					{
-						view->MoveLayerinView(src_name, dst_name);
-					}
-				}
-			}
-		}
-		else if (src_par_type == 5 &&
-			dst_par_type == 5 &&
-			src_par_name == dst_par_name &&
-			src_name != dst_name)
-		{
-			//move volume within the same group
-			std::wstring view_name = m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring();
-			if (root)
-			{
-				auto view = root->GetView(view_name);
-				if (view)
-					view->MoveLayerinGroup(src_par_name, src_name, dst_name);
-			}
-		}
-		else if (src_par_type == 5 && //par is group
-			src_type == 2 && //src is volume
-			dst_par_type == 1 && //dst's par is view
-			dst_par_name == m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item))) //in same view
-		{
-			if (root)
-			{
-				auto view = root->GetView(dst_par_name);
-				//move volume outside of the group
-				if (view)
-				{
-					if (dst_type == 5) //dst is group
-					{
-						view->MoveLayerfromtoGroup(src_par_name, dst_name, src_name, L"");
-					}
-					else
-					{
-						view->MoveLayertoView(src_par_name, src_name, dst_name);
-					}
-				}
-			}
-		}
-		else if (src_par_type == 1 && //src's par is view
-			src_type == 2 && //src is volume
-			dst_par_type == 5 && //dst's par is group
-			src_par_name == m_datatree->GetItemText(m_datatree->GetItemParent(dst_par_item))) //in the same view
-		{
-			//move volume into group
-			if (root)
-			{
-				auto view = root->GetView(src_par_name);
-				if (view)
-					view->MoveLayertoGroup(dst_par_name, src_name, dst_name);
-			}
-		}
-		else if (src_par_type == 5 && //src's par is group
-			src_type == 2 && // src is volume
-			dst_par_type == 5 && //dst's par is group
-			dst_type == 2 && //dst is volume
-			m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)) == m_datatree->GetItemText(m_datatree->GetItemParent(dst_par_item)) && // in the same view
-			m_datatree->GetItemText(src_par_item) != m_datatree->GetItemText(dst_par_item))// par groups are different
-		{
-			//move volume from one group to another
-			std::wstring view_name = m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring();
-			if (root)
-			{
-				auto view = root->GetView(view_name);
-				if (view)
-					view->MoveLayerfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
-			}
-		}
-		else if (src_type == 2 && //src is volume
-			src_par_type == 5 && //src's par is group
-			dst_type == 1 && //dst is view
-			m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)) == dst_name) //in the same view
-		{
-			//move volume outside of the group
-			if (root)
-			{
-				auto view = root->GetView(dst_name);
-				if (view)
-				{
-					view->MoveLayertoView(src_par_name, src_name, L"");
-				}
-			}
-		}
-		else if (src_par_type == 6 &&
-			dst_par_type == 6 &&
-			src_par_name == dst_par_name &&
-			src_name != dst_name)
-		{
-			//move mesh within the same group
-			std::wstring view_name = m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring();
-			if (root)
-			{
-				auto view = root->GetView(view_name);
-				if (view)
-					view->MoveMeshinGroup(src_par_name, src_name, dst_name);
-			}
-		}
-		else if (src_par_type == 6 && //par is group
-			src_type == 3 && //src is mesh
-			dst_par_type == 1 && //dst's par is view
-			dst_par_name == m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item))) //in same view
-		{
-			//move mesh outside of the group
-			if (dst_type == 6) //dst is group
-			{
-				if (root)
-				{
-					auto view = root->GetView(dst_par_name);
-					if (view)
-					{
-						view->MoveMeshfromtoGroup(src_par_name, dst_name, src_name, L"");
-					}
-				}
-			}
-			else
-			{
-				if (root)
-				{
-					auto view = root->GetView(dst_par_name);
-					if (view)
-						view->MoveMeshtoView(src_par_name, src_name, dst_name);
-				}
-			}
-		}
-		else if (src_par_type == 1 && //src's par is view
-			src_type == 3 && //src is mesh
-			dst_par_type == 6 && //dst's par is group
-			src_par_name == m_datatree->GetItemText(m_datatree->GetItemParent(dst_par_item))) //in the same view
-		{
-			//move mesh into group
-			if (root)
-			{
-				auto view = root->GetView(src_par_name);
-				if (view)
-					view->MoveMeshtoGroup(dst_par_name, src_name, dst_name);
-			}
-		}
-		else if (src_par_type == 6 && //src's par is group
-			src_type == 3 && // src is mesh
-			dst_par_type == 6 && //dst's par is group
-			dst_type == 3 && //dst is mesh
-			m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)) == m_datatree->GetItemText(m_datatree->GetItemParent(dst_par_item)) && // in the same view
-			m_datatree->GetItemText(src_par_item) != m_datatree->GetItemText(dst_par_item))// par groups are different
-		{
-			//move mesh from one group to another
-			std::wstring view_name = m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring();
-			if (root)
-			{
-				auto view = root->GetView(view_name);
-				if (view)
-					view->MoveMeshfromtoGroup(src_par_name, dst_par_name, src_name, dst_name);
-			}
-		}
-		else if (src_type == 3 && //src is mesh
-			src_par_type == 6 && //src's par is group
-			dst_type == 1 && //dst is view
-			m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)) == dst_name) //in the same view
-		{
-			//move mesh outside of the group
-			if (root)
-			{
-				auto view = root->GetView(dst_name);
-				if (view)
-				{
-					view->MoveMeshtoView(src_par_name, src_name, L"");
-				}
-			}
-		}
-
-		//glbin.set_tree_selection(src_name.ToStdString());
-		refresh = true;
-	}
-	else if (src_item.IsOk() && src_par_item.IsOk() &&
-		!dst_item.IsOk() && m_frame)
-	{
-		//move volume out of the group
-		int src_type = ((LayerInfo*)m_datatree->GetItemData(src_item))->type;
-		int src_par_type = ((LayerInfo*)m_datatree->GetItemData(src_par_item))->type;
-
-		src_name = m_datatree->GetItemText(src_item);
-		src_par_name = m_datatree->GetItemText(src_par_item);
-
-		if (src_type == 2 && src_par_type == 5)
-		{
-			std::wstring view_name = m_datatree->GetItemText(m_datatree->GetItemParent(src_par_item)).ToStdWstring();
-			if (root)
-			{
-				auto view = root->GetView(view_name);
-				if (view)
-				{
-					view->MoveLayertoView(src_par_name, src_name, L"");
-
-					refresh = true;
-				}
-			}
-		}
-	}
-
-	if (refresh)
-	{
-		FluoUpdate({ gstTreeCtrl });
-		glbin_current.SetSel(src_name);
-		FluoRefresh(0, { gstCurrentSelect, gstUpdateSync });
+		auto agent = m_agent->As<TreePanelAgent>();
+		if (agent)
+			agent->UpdateUIToData({ gstTreeDrag });
 	}
 
 	SetScrollPos(wxVERTICAL, m_scroll_pos);

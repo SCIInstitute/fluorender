@@ -1373,6 +1373,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstMergeMask "merge mask"
 #define gstExcludeMask "exclude mask"
 #define gstIntersectMask "intersect mask"
+#define gstTreeDrag "tree drag"
 
 //main frame
 #define gstRenderViewPanel "render view panel"
