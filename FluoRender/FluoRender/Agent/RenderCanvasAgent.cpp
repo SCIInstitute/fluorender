@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <LookingGlassRenderer.h>
 #include <Value.hpp>
 #include <CurrentObjects.h>
+#include <MainSettings.h>
 
 RenderCanvasAgent::RenderCanvasAgent(
 	RenderCanvas* canvas,
@@ -108,7 +109,7 @@ void RenderCanvasAgent::Update(
 	auto sender = GetRenderSender(request);
 
 	// linked rotation
-	if (glbin_linked_rot &&
+	if (glbin_settings.m_linked_rot &&
 		request.HasValue(gstRotations))
 	{
 		SyncRotations(sender);
@@ -134,7 +135,7 @@ void RenderCanvasAgent::RequestDraw()
 	{
 		canvas->Refresh(false);
 
-		if (glbin_linked_rot)
+		if (glbin_settings.m_linked_rot)
 			canvas->Update();
 	}
 }

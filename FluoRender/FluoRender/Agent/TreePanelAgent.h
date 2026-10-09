@@ -30,9 +30,9 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Agent.h>
 #include <Names.h>
+#include <memory>
 
 class TreePanel;
-struct TreeUpdateData;
 class RenderView;
 class TreeLayer;
 class VolumeData;
@@ -42,6 +42,12 @@ class VolumeGroup;
 class MeshGroup;
 struct MenuItemData;
 using MenuData = std::vector<MenuItemData>;
+using TreeNodeId = std::uintptr_t;
+struct TreeItemData;
+struct TreeUpdateData;
+struct TreeIconUpdateData;
+struct TreeColorUpdateData;
+struct TreeSelectionData;
 
 class TreePanelAgent : public Agent
 {
