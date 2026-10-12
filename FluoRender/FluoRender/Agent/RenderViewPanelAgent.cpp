@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanelAgent.h>
 #include <RenderViewPanel.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <RenderView.h>
 #include <MainSettings.h>
 #include <VolumeData.h>

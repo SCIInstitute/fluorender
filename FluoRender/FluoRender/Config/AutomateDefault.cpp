@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Global.h>
 #include <AutomateDefault.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>
 

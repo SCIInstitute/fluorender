@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ListPanelAgent.h>
 #include <ListPanel.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <DataManager.h>
 #include <VolumeData.h>
 #include <MeshData.h>

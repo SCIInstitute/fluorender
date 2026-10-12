@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define CountingDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class CountingDlg;
 class CountingDlgAgent : public Agent

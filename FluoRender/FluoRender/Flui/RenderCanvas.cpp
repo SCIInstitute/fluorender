@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <GLAttribProvider.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainFrame.h>
 #include <RenderViewPanel.h>
 #include <VolumeSelector.h>

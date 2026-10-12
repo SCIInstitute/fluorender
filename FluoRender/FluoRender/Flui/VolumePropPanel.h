@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _VOLUMEPROPPANEL_H_
 
 #include <AgentOwner.h>
+#include <array>
 
 namespace flvr
 {
@@ -129,7 +130,21 @@ public:
 	void ClearUndo();
 
 	//get
+	std::array<int, 2> GetMinMax();
+	bool GetEnableMinMax();
 	double GetGamma();
+	bool GetEnableGamma();
+	int GetAlpha();
+	bool GetEnableAlpha();
+	int GetLuminance();
+	bool GetEnableLuminance();
+	double GetSampleRate();
+	bool GetEnableSampleRate();
+	std::array<int, 2> GetThreshold();
+	bool GetEnableThreshold();
+	std::array<double, 2> GetBoundary();
+	void TrySetBoundarySlider(int& low, int& high);
+	bool GetEnableBoundary();
 
 private:
 	//1

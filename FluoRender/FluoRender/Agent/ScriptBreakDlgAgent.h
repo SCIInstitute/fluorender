@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define ScriptBreakDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class ScriptBreakDlg;
 class ScriptBreakDlgAgent : public Agent

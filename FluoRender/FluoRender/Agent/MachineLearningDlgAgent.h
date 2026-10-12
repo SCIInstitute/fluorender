@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define MachineLearningDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <GridData.h>
 #include <string>
 

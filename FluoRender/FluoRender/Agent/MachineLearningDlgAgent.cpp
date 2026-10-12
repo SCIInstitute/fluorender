@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MachineLearningDlgAgent.h>
 #include <MachineLearningDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <Table.h>
 #include <TableHistParams.h>

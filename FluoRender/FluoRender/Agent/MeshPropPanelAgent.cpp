@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshData.h>
 #include <MeshGroup.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <CurrentObjects.h>
 #include <RenderView.h>

@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanelAgent.h>
 #include <RenderCanvas.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <RenderView.h>
 #include <RenderCanvasAgent.h>

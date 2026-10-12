@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define RenderViewPanelAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <AsyncTimer.hpp>
 #include <memory>
 

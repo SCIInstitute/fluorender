@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <RulerRenderer.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <RenderView.h>
 #include <Vector.h>
 #include <Quaternion.h>

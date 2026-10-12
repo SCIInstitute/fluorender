@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumePropPanelAgent.h>
 #include <VolumePropPanel.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <VolumeData.h>
 #include <VolumeGroup.h>
@@ -55,6 +55,29 @@ VolumePropPanelAgent::VolumePropPanelAgent(
 VolumePropPanel* VolumePropPanelAgent::GetPanel() const
 {
 	return static_cast<VolumePropPanel*>(GetOwner());
+}
+
+void VolumePropPanelAgent::SetGroup(const std::shared_ptr<VolumeGroup>& group)
+{
+	m_group = group;
+	if (group)
+	{
+		m_sync_group = group->GetVolumeSyncProp();
+		UpdateDataToUI({ gstSyncGroup });
+	}
+}
+
+void VolumePropPanelAgent::SetView(const std::shared_ptr<RenderView>& view)
+{
+	m_view = view;
+}
+
+double VolumePropPanelAgent::GetBoundaryMax()
+{
+	auto vd = m_vd.lock();
+	if (vd)
+		return vd->GetBoundaryMax();
+	return 1.0;
 }
 
 void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
@@ -404,8 +427,97 @@ void VolumePropPanelAgent::UpdateData(const UpdateRequest& request)
 {
 	if (request.HasValue(gstVolumeGradient))
 		UpdateGradient();
+
+	if (request.HasValue(gstMinMax))
+		SetMinMax();
+	if (request.HasValue(gstSyncMinMax))
+		SyncMinMax();
+	if (request.HasValue(gstSetDefaultMinMax))
+		SetDefaultMinMax();
+	if (request.HasValue(gstSetMlMinMax))
+		SetMlMinMax();
+	if (request.HasValue(gstEnableMinMax))
+		EnableMinMax();
+	if (request.HasValue(gstToggleMinMax))
+		ToggleMinMax();
+
 	if (request.HasValue(gstGamma3d))
 		SetGamma();
+	if (request.HasValue(gstSyncGamma3d))
+		SyncGamma();
+	if (request.HasValue(gstSetDefaultGamma3d))
+		SetDefaultGamma();
+	if (request.HasValue(gstSetMlGamma3d))
+		SetMlGamma();
+	if (request.HasValue(gstEnableGamma3d))
+		EnableGamma();
+	if (request.HasValue(gstToggleGamma3d))
+		ToggleGamma();
+
+	if (request.HasValue(gstAlpha))
+		SetAlpha();
+	if (request.HasValue(gstSyncAlpha))
+		SyncAlpha();
+	if (request.HasValue(gstSetDefaultAlpha))
+		SetDefaultAlpha();
+	if (request.HasValue(gstSetMlAlpha))
+		SetMlAlpha();
+	if (request.HasValue(gstEnableAlpha))
+		EnableAlpha();
+	if (request.HasValue(gstToggleAlpha))
+		ToggleAlpha();
+
+	if (request.HasValue(gstLuminance))
+		SetLuminance();
+	if (request.HasValue(gstSyncLuminance))
+		SyncLuminance();
+	if (request.HasValue(gstSetDefaultLuminance))
+		SetDefaultLuminance();
+	if (request.HasValue(gstSetMlLuminance))
+		SetMlLuminance();
+	if (request.HasValue(gstEnableLuminance))
+		EnableLuminance();
+	if (request.HasValue(gstToggleLuminance))
+		ToggleLuminance();
+
+	if (request.HasValue(gstSampleRate))
+		SetSampleRate();
+	if (request.HasValue(gstSyncSampleRate))
+		SyncSampleRate();
+	if (request.HasValue(gstSetDefaultSampleRate))
+		SetDefaultSampleRate();
+	if (request.HasValue(gstSetMlSampleRate))
+		SetMlSampleRate();
+	if (request.HasValue(gstEnableSampleRate))
+		EnableSampleRate();
+	if (request.HasValue(gstToggleSampleRate))
+		ToggleSampleRate();
+
+	if (request.HasValue(gstThreshold))
+		SetThreshold();
+	if (request.HasValue(gstSyncThreshold))
+		SyncThreshold();
+	if (request.HasValue(gstSetDefaultThreshold))
+		SetDefaultThreshold();
+	if (request.HasValue(gstSetMlThreshold))
+		SetMlThreshold();
+	if (request.HasValue(gstEnableThreshold))
+		EnableThreshold();
+	if (request.HasValue(gstToggleThreshold))
+		ToggleThreshold();
+
+	if (request.HasValue(gstBoundary))
+		SetBoundary();
+	if (request.HasValue(gstSyncBoundary))
+		SyncBoundary();
+	if (request.HasValue(gstSetDefaultBoundary))
+		SetDefaultBoundary();
+	if (request.HasValue(gstSetMlBoundary))
+		SetMlBoundary();
+	if (request.HasValue(gstEnableBoundary))
+		EnableBoundary();
+	if (request.HasValue(gstToggleBoundary))
+		ToggleBoundary();
 }
 
 void VolumePropPanelAgent::UpdateGradient()
@@ -422,6 +534,72 @@ void VolumePropPanelAgent::UpdateGradient()
 	}
 }
 
+void VolumePropPanelAgent::SetMinMax()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto [min, max] = panel->GetMinMax();
+	if (double(max) > m_max_val)
+		UpdateMaxVal(max);
+	double val1 = min / m_max_val;
+	double val2 = max / m_max_val;
+	//set gamma value
+	if (m_sync_group)
+		SyncMinMax(val1, val2);
+	else
+		SetMinMax(val1, val2);
+}
+
+void VolumePropPanelAgent::SyncMinMax()
+{
+	auto vd = m_vd.lock();
+	if (vd)
+		SyncMinMax(vd->GetLowOffset(), vd->GetHighOffset());
+}
+
+void VolumePropPanelAgent::SetDefaultMinMax()
+{
+	double val1 = glbin_vol_def.m_lo_offset;
+	double val2 = glbin_vol_def.m_hi_offset;
+	if (m_sync_group)
+		SyncMinMax(val1, val2);
+	else
+		SetMinMax(val1, val2);
+}
+
+void VolumePropPanelAgent::SetMlMinMax()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	double val1 = vd->GetMlLowOffset();
+	double val2 = vd->GetMlHighOffset();
+	if (m_sync_group)
+		SyncMinMax(val1, val2);
+	else
+		SetMinMax(val1, val2);
+}
+
+void VolumePropPanelAgent::EnableMinMax()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	bool bval = panel->GetEnableMinMax();
+	EnableMinMax(bval);
+}
+
+void VolumePropPanelAgent::ToggleMinMax()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	bool bval = !vd->GetMinMaxEnable();
+	EnableMinMax(bval);
+}
+
 void VolumePropPanelAgent::SetGamma()
 {
 	auto panel = GetPanel();
@@ -435,6 +613,387 @@ void VolumePropPanelAgent::SetGamma()
 	else
 		SetGamma(val);
 }
+
+void VolumePropPanelAgent::SyncGamma()
+{
+	auto vd = m_vd.lock();
+	if (vd)
+		SyncGamma(vd->GetGamma());
+}
+
+void VolumePropPanelAgent::SetDefaultGamma()
+{
+	double val = glbin_vol_def.m_gamma;
+	if (m_sync_group)
+		SyncGamma(val);
+	else
+		SetGamma(val);
+}
+
+void VolumePropPanelAgent::SetMlGamma()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	double val = vd->GetMlGamma();
+	if (m_sync_group)
+		SyncGamma(val);
+	else
+		SetGamma(val);
+}
+
+void VolumePropPanelAgent::EnableGamma()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	bool bval = panel->GetEnableGamma();
+	EnableGamma(bval);
+}
+
+void VolumePropPanelAgent::ToggleGamma()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	bool bval = !vd->GetGammaEnable();
+	EnableGamma(bval);
+}
+
+void VolumePropPanelAgent::SetAlpha()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int ival = panel->GetAlpha();
+	if (double(ival) > m_max_val)
+		UpdateMaxVal(ival);
+	double val = ival / m_max_val;
+
+	if (m_sync_group)
+		SyncAlpha(val);
+	else
+		SetAlpha(val);
+}
+
+void VolumePropPanelAgent::SyncAlpha()
+{
+	auto vd = m_vd.lock();
+	if (vd)
+		SyncAlpha(vd->GetAlpha());
+}
+
+void VolumePropPanelAgent::SetDefaultAlpha()
+{
+	double val = glbin_vol_def.m_alpha;
+	if (m_sync_group)
+		SyncAlpha(val);
+	else
+		SetAlpha(val);
+}
+
+void VolumePropPanelAgent::SetMlAlpha()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	double val = vd->GetMlAlpha();
+	if (m_sync_group)
+		SyncAlpha(val);
+	else
+		SetAlpha(val);
+}
+
+void VolumePropPanelAgent::EnableAlpha()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	bool bval = panel->GetEnableAlpha();
+	EnableAlpha(bval);
+}
+
+void VolumePropPanelAgent::ToggleAlpha()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	bool bval = !vd->GetAlphaEnable();
+	EnableAlpha(bval);
+}
+
+void VolumePropPanelAgent::SetLuminance()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int ival = panel->GetLuminance();
+	if (double(ival) > m_max_val)
+		UpdateMaxVal(ival);
+	double val = ival / m_max_val;
+
+	if (m_sync_group)
+		SyncLuminance(val);
+	else
+		SetLuminance(val);
+}
+
+void VolumePropPanelAgent::SyncLuminance()
+{
+	auto vd = m_vd.lock();
+	if (vd)
+		SyncLuminance(vd->GetLuminance());
+}
+
+void VolumePropPanelAgent::SetDefaultLuminance()
+{
+	double val = glbin_vol_def.m_luminance;
+	if (m_sync_group)
+		SyncLuminance(val);
+	else
+		SetLuminance(val);
+}
+
+void VolumePropPanelAgent::SetMlLuminance()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	double val = vd->GetMlLuminance();
+	if (m_sync_group)
+		SyncLuminance(val);
+	else
+		SetLuminance(val);
+}
+
+void VolumePropPanelAgent::EnableLuminance()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	bool bval = panel->GetEnableLuminance();
+	EnableLuminance(bval);
+}
+
+void VolumePropPanelAgent::ToggleLuminance()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	bool bval = !vd->GetLuminanceEnable();
+	EnableLuminance(bval);
+}
+
+void VolumePropPanelAgent::SetSampleRate()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double dval = panel->GetSampleRate();
+
+	if (m_sync_group)
+		SyncSampleRate(dval);
+	else
+		SetSampleRate(dval);
+}
+
+void VolumePropPanelAgent::SyncSampleRate()
+{
+	auto vd = m_vd.lock();
+	if (vd)
+		SyncSampleRate(vd->GetSampleRate());
+}
+
+void VolumePropPanelAgent::SetDefaultSampleRate()
+{
+	double val = glbin_vol_def.m_sample_rate;
+	if (m_sync_group)
+		SyncSampleRate(val);
+	else
+		SetSampleRate(val);
+}
+
+void VolumePropPanelAgent::SetMlSampleRate()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	double val = vd->GetMlSampleRate();
+	if (m_sync_group)
+		SyncSampleRate(val);
+	else
+		SetSampleRate(val);
+}
+
+void VolumePropPanelAgent::EnableSampleRate()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	bool bval = panel->GetEnableSampleRate();
+	EnableSampleRate(bval);
+}
+
+void VolumePropPanelAgent::ToggleSampleRate()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	bool bval = !vd->GetSampleRateEnable();
+	EnableSampleRate(bval);
+}
+
+void VolumePropPanelAgent::SetThreshold()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto [min, max] = panel->GetThreshold();
+	if (double(max) > m_max_val)
+		UpdateMaxVal(max);
+	double val1 = min / m_max_val;
+	double val2 = max / m_max_val;
+	//set gamma value
+	if (m_sync_group)
+		SyncThreshold(val1, val2);
+	else
+		SetThreshold(val1, val2);
+}
+
+void VolumePropPanelAgent::SyncThreshold()
+{
+	auto vd = m_vd.lock();
+	if (vd)
+		SyncThreshold(vd->GetLeftThresh(), vd->GetRightThresh());
+}
+
+void VolumePropPanelAgent::SetDefaultThreshold()
+{
+	double val1 = glbin_vol_def.m_lo_thresh;
+	double val2 = glbin_vol_def.m_hi_thresh;
+	if (m_sync_group)
+		SyncThreshold(val1, val2);
+	else
+		SetThreshold(val1, val2);
+}
+
+void VolumePropPanelAgent::SetMlThreshold()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	double val1 = vd->GetMlLeftThresh();
+	double val2 = vd->GetMlRightThresh();
+	if (m_sync_group)
+		SyncThreshold(val1, val2);
+	else
+		SetThreshold(val1, val2);
+}
+
+void VolumePropPanelAgent::EnableThreshold()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	bool bval = panel->GetEnableThreshold();
+	EnableThreshold(bval);
+}
+
+void VolumePropPanelAgent::ToggleThreshold()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	bool bval = !vd->GetThreshEnable();
+	EnableThreshold(bval);
+}
+
+void VolumePropPanelAgent::SetBoundary()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+
+	auto [val1, val2] = panel->GetBoundary();
+	double gmf = 1000 / vd->GetBoundaryMax();
+	int low = std::round(val1 * gmf);
+	int high = std::round(val2 * gmf);
+	int low_save = low;
+	int high_save = high;
+	panel->TrySetBoundarySlider(low, high);
+	if (low != low_save)
+	{
+		val1 = low / gmf;
+	}
+	if (high != high_save)
+	{
+		val2 = high / gmf;
+	}
+	//set gamma value
+	if (m_sync_group)
+		SyncBoundary(val1, val2);
+	else
+		SetBoundary(val1, val2);
+}
+
+void VolumePropPanelAgent::SyncBoundary()
+{
+	auto vd = m_vd.lock();
+	if (vd)
+		SyncBoundary(vd->GetBoundaryLow(), vd->GetBoundaryHigh());
+}
+
+void VolumePropPanelAgent::SetDefaultBoundary()
+{
+	double val1 = glbin_vol_def.m_boundary_low;
+	double val2 = glbin_vol_def.m_boundary_high;
+	if (m_sync_group)
+		SyncBoundary(val1, val2);
+	else
+		SetBoundary(val1, val2);
+}
+
+void VolumePropPanelAgent::SetMlBoundary()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	double val1 = vd->GetMlBoundaryLow();
+	double val2 = vd->GetMlBoundaryHigh();
+	if (m_sync_group)
+		SyncBoundary(val1, val2);
+	else
+		SetBoundary(val1, val2);
+}
+
+void VolumePropPanelAgent::EnableBoundary()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	bool bval = panel->GetEnableBoundary();
+	EnableBoundary(bval);
+}
+
+void VolumePropPanelAgent::ToggleBoundary()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+	bool bval = !vd->GetThreshEnable();
+	EnableBoundary(bval);
+}
+
+
+
+
 
 void VolumePropPanelAgent::InitViews(unsigned int type)
 {
@@ -451,22 +1010,6 @@ void VolumePropPanelAgent::InitViews(unsigned int type)
 		}
 	}
 }
-
-void VolumePropPanelAgent::SetGroup(const std::shared_ptr<VolumeGroup>& group)
-{
-	m_group = group;
-	if (group)
-	{
-		m_sync_group = group->GetVolumeSyncProp();
-		m_options_toolbar->ToggleTool(ID_SyncGroupChk, m_sync_group);
-	}
-}
-
-void VolumePropPanelAgent::SetView(const std::shared_ptr<RenderView>& view)
-{
-	m_view = view;
-}
-
 void VolumePropPanelAgent::ApplyMl()
 {
 	auto group = m_group.lock();
@@ -653,7 +1196,7 @@ void VolumePropPanelAgent::EnableShadowDir(bool bval)
 	FluoRefresh(0, { gstShadowDir }, { glbin_current.GetViewId() });
 }
 
-void VolumePropPanelAgent::EnableSample(bool bval)
+void VolumePropPanelAgent::EnableSampleRate(bool bval)
 {
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
@@ -734,7 +1277,7 @@ void VolumePropPanelAgent::SetGamma(double val)
 	NotifyViewUpdate({ gstGamma3d, gstConvVolMeshUpdateTransf });
 }
 
-void VolumePropPanelAgent::SetMinMax(double val1, double val2, bool notify)
+void VolumePropPanelAgent::SetMinMax(double val1, double val2)
 {
 	auto vd = m_vd.lock();
 	if (!vd)

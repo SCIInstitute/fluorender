@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <RenderView.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <MainFrame.h>
 #include <RenderViewPanel.h>

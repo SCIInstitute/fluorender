@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TrackDlgAgent.h>
 #include <TrackDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <CurrentObjects.h>
 #include <TrackGroup.h>
 #include <TrackMap.h>

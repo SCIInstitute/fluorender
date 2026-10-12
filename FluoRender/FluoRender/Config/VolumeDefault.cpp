@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <VolumeDefault.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <VolumeData.h>
 #include <VolumeGroup.h>
 #include <RenderView.h>

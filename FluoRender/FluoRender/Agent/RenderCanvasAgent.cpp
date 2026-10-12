@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderCanvas.h>
 #include <RenderView.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <FramebufferStateTracker.h>
 #include <LookingGlassRenderer.h>
 #include <Value.hpp>

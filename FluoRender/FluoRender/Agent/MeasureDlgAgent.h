@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define MeasureDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class MeasureDlg;
 struct RulerListInfo;

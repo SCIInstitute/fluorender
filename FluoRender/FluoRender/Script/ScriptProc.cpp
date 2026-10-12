@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <ScriptProc.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <MainFrame.h>
 #include <TrackDlg.h>

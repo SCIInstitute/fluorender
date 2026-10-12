@@ -32,7 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BaseRenderer.h>
 #include <ClippingBox.h>
 #include <Color.h>
-#include <Names.h>
+#include <Tokens.h>
 
 namespace flvr
 {

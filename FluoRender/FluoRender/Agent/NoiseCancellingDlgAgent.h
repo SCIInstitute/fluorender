@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define NoiseCancellingDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class NoiseCancellingDlg;
 class NoiseCancellingDlgAgent : public Agent

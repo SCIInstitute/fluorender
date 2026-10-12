@@ -30,6 +30,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainSettings.h>
 #include <ShaderProgram.h>
+#include <Coordinator.h>
+#include <MainFrameAgent.h>
 #include <wxFadeButton.h>
 #include <wxMapDoubleSlider.h>
 #include <wxDoubleSlider.h>
@@ -1359,6 +1361,23 @@ void VolumePropPanel::ClearUndo()
 	m_colormap_sldr->Clear();
 }
 
+std::array<int, 2> VolumePropPanel::GetMinMax()
+{
+	long ival1 = 0, ival2 = 0;
+	wxString str = m_low_offset_text->GetValue();
+	str.ToLong(&ival1);
+	str = m_high_offset_text->GetValue();
+	str.ToLong(&ival2);
+	int low = ival1;
+	int hi = ival2;
+	return { low, hi };
+}
+
+bool VolumePropPanel::GetEnableMinMax()
+{
+	return m_minmax_chk->GetValue();
+}
+
 double VolumePropPanel::GetGamma()
 {
 	wxString str = m_gamma_text->GetValue();
@@ -1368,29 +1387,186 @@ double VolumePropPanel::GetGamma()
 	return 0.0;
 }
 
-//1
-void VolumePropPanel::OnGammaMF(wxCommandEvent& event)
+bool VolumePropPanel::GetEnableGamma()
 {
-	fluo::ValueCollection vc;
+	return m_gamma_chk->GetValue();
+}
+
+int VolumePropPanel::GetAlpha()
+{
+	wxString str = m_alpha_text->GetValue();
+	long ival = 0;
+	if (str.ToLong(&ival))
+		return static_cast<int>(ival);
+	return 0;
+}
+
+bool VolumePropPanel::GetEnableAlpha()
+{
+	return m_alpha_chk->GetValue();
+}
+
+int VolumePropPanel::GetLuminance()
+{
+	wxString str = m_luminance_text->GetValue();
+	long ival = 0;
+	if (str.ToLong(&ival))
+		return static_cast<int>(ival);
+	return 0;
+}
+
+bool VolumePropPanel::GetEnableLuminance()
+{
+	return m_luminance_chk->GetValue();
+}
+
+double VolumePropPanel::GetSampleRate()
+{
+	wxString str = m_sample_text->GetValue();
+	double val = 0.0;
+	if (str.ToDouble(&val))
+		return val;
+	return 2.0;
+}
+
+bool VolumePropPanel::GetEnableSampleRate()
+{
+	return m_sample_chk->GetValue();
+}
+
+std::array<int, 2> VolumePropPanel::GetThreshold()
+{
+	long ival1 = 0, ival2 = 0;
+	wxString str = m_left_thresh_text->GetValue();
+	str.ToLong(&ival1);
+	str = m_right_thresh_text->GetValue();
+	str.ToLong(&ival2);
+	int low = ival1;
+	int hi = ival2;
+	return { low, hi };
+}
+
+bool VolumePropPanel::GetEnableThreshold()
+{
+	return m_boundary_chk->GetValue();
+}
+
+std::array<double, 2> VolumePropPanel::GetBoundary()
+{
+	double val1 = 0.0, val2 = 0.0;
+	wxString str = m_boundary_low_text->GetValue();
+	str.ToDouble(&val1);
+	str = m_boundary_high_text->GetValue();
+	str.ToDouble(&val2);
+	return { val1, val2 };
+}
+
+void VolumePropPanel::TrySetBoundarySlider(int& low, int& high)
+{
+	m_boundary_sldr->ChangeValues(low, high);
+}
+
+bool VolumePropPanel::GetEnableBoundary()
+{
+	return m_thresh_chk->GetValue();
+}
+
+//1
+void VolumePropPanel::OnMinMaxMF(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncGamma(vd->GetGamma());
+		agent->UpdateUIToData({ gstSyncMinMax });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_gamma_sldr);
+		frame->SetFocusVRenderViews(m_minmax_sldr);
 		break;
 	case 2:
-		SetGamma(glbin_vol_def.m_gamma, true);
+		agent->UpdateUIToData({ gstSetDefaultMinMax });
 		break;
 	case 3:
-		SetGamma(vd->GetMlGamma(), true);
+		agent->UpdateUIToData({ gstSetMlMinMax });
+		break;
+	case 4:
+		m_minmax_sldr->Undo();
+		break;
+	case 5:
+		agent->UpdateUIToData({ gstToggleMinMax });
+		break;
+	}
+}
+
+void VolumePropPanel::OnMinMaxChange(wxScrollEvent& event)
+{
+	int ival1 = m_minmax_sldr->GetLowValue();
+	int ival2 = m_minmax_sldr->GetHighValue();
+	m_low_offset_text->ChangeValue(wxString::Format("%d", ival1));
+	m_high_offset_text->ChangeValue(wxString::Format("%d", ival2));
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMinMax });
+}
+
+void VolumePropPanel::OnMinMaxText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMinMax });
+}
+
+void VolumePropPanel::OnMinMaxLink(wxCommandEvent& event)
+{
+	bool val = m_minmax_sldr->GetLink();
+	val = !val;
+	m_minmax_sldr->SetLink(val);
+	m_minmax_link_tb->ToggleTool(0, val);
+	wxBitmapBundle bitmap;
+	if (val)
+		bitmap = wxGetBitmap(link);
+	else
+		bitmap = wxGetBitmap(unlink);
+	m_minmax_link_tb->SetToolNormalBitmap(0, bitmap);
+}
+
+void VolumePropPanel::OnMinMaxChk(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableMinMax });
+}
+
+void VolumePropPanel::OnGammaMF(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
+	switch (glbin_settings.m_mulfunc)
+	{
+	case 0:
+		agent->UpdateUIToData({ gstSyncGamma3d });
+		break;
+	case 1:
+		frame->SetFocusVRenderViews(m_gamma_sldr);
+		break;
+	case 2:
+		agent->UpdateUIToData({ gstSetDefaultGamma3d });
+		break;
+	case 3:
+		agent->UpdateUIToData({ gstSetMlGamma3d });
 		break;
 	case 4:
 		m_gamma_sldr->Undo();
 		break;
 	case 5:
-		EnableGamma(!vd->GetGammaEnable());
+		agent->UpdateUIToData({ gstToggleGamma3d });
 		break;
 	}
 }
@@ -1412,128 +1588,89 @@ void VolumePropPanel::OnGammaText(wxCommandEvent& event)
 
 void VolumePropPanel::OnGammaChk(wxCommandEvent& event)
 {
-	bool val = m_gamma_chk->GetValue();
-	EnableGamma(val);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableGamma3d });
 }
 
-void VolumePropPanel::OnMinMaxMF(wxCommandEvent& event)
+void VolumePropPanel::OnAlphaMF(wxCommandEvent& event)
 {
-	auto vd = m_vd.lock();
-	if (!vd)
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
 		return;
 
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncMinMax(vd->GetLowOffset(), vd->GetHighOffset());
+		agent->UpdateUIToData({ gstSyncAlpha });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_minmax_sldr);
+		frame->SetFocusVRenderViews(m_alpha_sldr);
 		break;
 	case 2:
-		SetMinMax(glbin_vol_def.m_lo_offset, glbin_vol_def.m_hi_offset, true);
+		agent->UpdateUIToData({ gstSetDefaultAlpha });
 		break;
 	case 3:
-		SetMinMax(vd->GetMlLowOffset(), vd->GetMlHighOffset(), true);
+		agent->UpdateUIToData({ gstSetMlAlpha });
 		break;
 	case 4:
-		m_minmax_sldr->Undo();
+		m_alpha_sldr->Undo();
 		break;
 	case 5:
-		EnableMinMax(!vd->GetMinMaxEnable());
+		agent->UpdateUIToData({ gstToggleAlpha });
 		break;
 	}
 }
 
-void VolumePropPanel::OnMinMaxChange(wxScrollEvent & event)
+void VolumePropPanel::OnAlphaCheck(wxCommandEvent& event)
 {
-	int ival1 = m_minmax_sldr->GetLowValue();
-	int ival2 = m_minmax_sldr->GetHighValue();
-	double val1 = ival1 / m_max_val;
-	double val2 = ival2 / m_max_val;
-	m_low_offset_text->ChangeValue(wxString::Format("%d", ival1));
-	m_high_offset_text->ChangeValue(wxString::Format("%d", ival2));
-
-	//set saturation value
-	if (m_sync_group)
-		SyncMinMax(val1, val2);
-	else
-		SetMinMax(val1, val2, false);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableAlpha });
 }
 
-void VolumePropPanel::OnMinMaxText(wxCommandEvent& event)
+void VolumePropPanel::OnAlphaChange(wxScrollEvent& event)
 {
-	wxObject* t = event.GetEventObject();
-	long ival1 = 0, ival2 = 0;
-	wxString str = m_low_offset_text->GetValue();
-	str.ToLong(&ival1);
-	str = m_high_offset_text->GetValue();
-	str.ToLong(&ival2);
-	int low = ival1;
-	int hi = ival2;
-	if (double(hi) > m_max_val)
-		UpdateMaxVal(hi);
-	m_minmax_sldr->ChangeValues(low, hi);
-	if (low != ival1 && t != m_low_offset_text)
-		m_low_offset_text->ChangeValue(std::to_string(low));
-	if (hi != ival2 && t != m_high_offset_text)
-		m_high_offset_text->ChangeValue(std::to_string(hi));
-	double val1 = double(low) / m_max_val;
-	double val2 = double(hi) / m_max_val;
-
-	//set minmax value
-	if (m_sync_group)
-		SyncMinMax(val1, val2);
-	else
-		SetMinMax(val1, val2, false);
-
+	int ival = m_alpha_sldr->GetValue();
+	wxString str = wxString::Format("%d", ival);
+	if (str != m_alpha_text->GetValue())
+		m_alpha_text->SetValue(str);
 }
 
-void VolumePropPanel::OnMinMaxLink(wxCommandEvent& event)
+void VolumePropPanel::OnAlphaText(wxCommandEvent& event)
 {
-	bool val = m_minmax_sldr->GetLink();
-	val = !val;
-	m_minmax_sldr->SetLink(val);
-	m_minmax_link_tb->ToggleTool(0, val);
-	wxBitmapBundle bitmap;
-	if (val)
-		bitmap = wxGetBitmap(link);
-	else
-		bitmap = wxGetBitmap(unlink);
-	m_minmax_link_tb->SetToolNormalBitmap(0, bitmap);
-}
-
-void VolumePropPanel::OnMinMaxChk(wxCommandEvent& event)
-{
-	bool val = m_minmax_chk->GetValue();
-	EnableMinMax(val);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAlpha });
 }
 
 void VolumePropPanel::OnLuminanceMF(wxCommandEvent& event)
 {
-	auto vd = m_vd.lock();
-	if (!vd)
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
 		return;
 
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncLuminance(vd->GetLuminance());
+		agent->UpdateUIToData({ gstSyncLuminance });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_luminance_sldr);
+		frame->SetFocusVRenderViews(m_luminance_sldr);
 		break;
 	case 2:
-		SetLuminance(glbin_vol_def.m_luminance, true);
+		agent->UpdateUIToData({ gstSetDefaultLuminance });
 		break;
 	case 3:
-		SetLuminance(vd->GetMlLuminance(), true);
+		agent->UpdateUIToData({ gstSetMlLuminance });
 		break;
 	case 4:
 		m_luminance_sldr->Undo();
 		break;
 	case 5:
-		EnableLuminance(!vd->GetLuminanceEnable());
+		agent->UpdateUIToData({ gstToggleLuminance });
 		break;
 	}
 }
@@ -1543,104 +1680,216 @@ void VolumePropPanel::OnLuminanceChange(wxScrollEvent& event)
 	int ival = m_luminance_sldr->GetValue();
 	wxString str = wxString::Format("%d", ival);
 	if (str != m_luminance_text->GetValue())
-		m_luminance_text->ChangeValue(str);
-	double val = ival / m_max_val;
-
-	//set saturation value
-	if (m_sync_group)
-		SyncLuminance(val);
-	else
-		SetLuminance(val, false);
+		m_luminance_text->SetValue(str);
 }
 
 void VolumePropPanel::OnLuminanceText(wxCommandEvent& event)
 {
-	wxString str = m_luminance_text->GetValue();
-	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
-		UpdateMaxVal(ival);
-	m_luminance_sldr->ChangeValue(ival);
-	double val = ival / m_max_val;
-
-	//set saturation value
-	if (m_sync_group)
-		SyncLuminance(val);
-	else
-		SetLuminance(val, false);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstLuminance });
 }
 
 void VolumePropPanel::OnLuminanceChk(wxCommandEvent& event)
 {
-	bool val = m_luminance_chk->GetValue();
-	EnableLuminance(val);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableLuminance });
 }
 
-void VolumePropPanel::OnAlphaMF(wxCommandEvent& event)
+void VolumePropPanel::OnSampleMF(wxCommandEvent& event)
 {
-	auto vd = m_vd.lock();
-	if (!vd)
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
 		return;
 
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncAlpha(vd->GetAlpha());
+		agent->UpdateUIToData({ gstSyncSampleRate });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_alpha_sldr);
+		frame->SetFocusVRenderViews(m_sample_sldr);
 		break;
 	case 2:
-		SetAlpha(glbin_vol_def.m_alpha, true);
+		agent->UpdateUIToData({ gstSetDefaultSampleRate });
 		break;
 	case 3:
-		SetAlpha(vd->GetMlAlpha(), true);
+		agent->UpdateUIToData({ gstSetMlSampleRate });
 		break;
 	case 4:
-		m_alpha_sldr->Undo();
+		m_sample_sldr->Undo();
 		break;
 	case 5:
-		EnableAlpha(!vd->GetAlphaEnable());
+		agent->UpdateUIToData({ gstToggleSampleRate });
 		break;
 	}
 }
 
-void VolumePropPanel::OnAlphaCheck(wxCommandEvent& event)
+void VolumePropPanel::OnSampleChange(wxScrollEvent& event)
 {
-	bool val = m_alpha_chk->GetValue();
-	EnableAlpha(val);
+	double val = m_sample_sldr->GetValue() / 10.0;
+	wxString str = wxString::Format("%.1f", val);
+	if (str != m_sample_text->GetValue())
+		m_sample_text->SetValue(str);
 }
 
-void VolumePropPanel::OnAlphaChange(wxScrollEvent& event)
+void VolumePropPanel::OnSampleText(wxCommandEvent& event)
 {
-	int ival = m_alpha_sldr->GetValue();
-	wxString str = wxString::Format("%d", ival);
-	if (str != m_alpha_text->GetValue())
-		m_alpha_text->ChangeValue(str);
-	double val = double(ival) / m_max_val;
-
-	//set alpha value
-	if (m_sync_group)
-		SyncAlpha(val);
-	else
-		SetAlpha(val, false);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSampleRate });
 }
 
-void VolumePropPanel::OnAlphaText(wxCommandEvent& event)
+void VolumePropPanel::OnSampleChk(wxCommandEvent& event)
 {
-	wxString str = m_alpha_text->GetValue();
-	long ival = 0;
-	str.ToLong(&ival);
-	if (double(ival) > m_max_val)
-		UpdateMaxVal(ival);
-	m_alpha_sldr->ChangeValue(ival);
-	double val = double(ival) / m_max_val;
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableSampleRate });
+}
 
-	//set alpha value
-	if (m_sync_group)
-		SyncAlpha(val);
+void VolumePropPanel::OnThreshMF(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
+	switch (glbin_settings.m_mulfunc)
+	{
+	case 0:
+		agent->UpdateUIToData({ gstSyncThreshold });
+		break;
+	case 1:
+		frame->SetFocusVRenderViews(m_thresh_sldr);
+		break;
+	case 2:
+		agent->UpdateUIToData({ gstSetDefaultThreshold });
+		break;
+	case 3:
+		agent->UpdateUIToData({ gstSetMlThreshold });
+		break;
+	case 4:
+		m_thresh_sldr->Undo();
+		break;
+	case 5:
+		agent->UpdateUIToData({ gstToggleThreshold });
+		break;
+	}
+}
+
+void VolumePropPanel::OnThreshChange(wxScrollEvent& event)
+{
+	int ival1 = m_thresh_sldr->GetLowValue();
+	int ival2 = m_thresh_sldr->GetHighValue();
+	m_left_thresh_text->ChangeValue(wxString::Format("%d", ival1));
+	m_right_thresh_text->ChangeValue(wxString::Format("%d", ival2));
+
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstThreshold });
+}
+
+void VolumePropPanel::OnThreshText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstThreshold });
+}
+
+void VolumePropPanel::OnThreshLink(wxCommandEvent& event)
+{
+	bool val = m_thresh_sldr->GetLink();
+	val = !val;
+	m_thresh_sldr->SetLink(val);
+	m_thresh_link_tb->ToggleTool(0, val);
+	wxBitmapBundle bitmap;
+	if (val)
+		bitmap = wxGetBitmap(link);
 	else
-		SetAlpha(val, false);
+		bitmap = wxGetBitmap(unlink);
+	m_thresh_link_tb->SetToolNormalBitmap(0, bitmap);
+}
+
+void VolumePropPanel::OnThreshChk(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableThreshold });
+}
+
+void VolumePropPanel::OnBoundaryMF(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
+		return;
+
+	switch (glbin_settings.m_mulfunc)
+	{
+	case 0:
+		agent->UpdateUIToData({ gstSyncBoundary });
+		break;
+	case 1:
+		frame->SetFocusVRenderViews(m_boundary_sldr);
+		break;
+	case 2:
+		agent->UpdateUIToData({ gstSetDefaultBoundary });
+		break;
+	case 3:
+		agent->UpdateUIToData({ gstSetMlBoundary });
+		break;
+	case 4:
+		m_boundary_sldr->Undo();
+		break;
+	case 5:
+		agent->UpdateUIToData({ gstToggleBoundary });
+		break;
+	}
+}
+
+void VolumePropPanel::OnBoundaryChange(wxScrollEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (!agent)
+		return;
+
+	double gmf = 1000 / agent->GetBoundaryMax();
+	double val1 = m_boundary_sldr->GetLowValue() / gmf;
+	double val2 = m_boundary_sldr->GetHighValue() / gmf;
+	m_boundary_low_text->ChangeValue(wxString::Format("%.4f", val1));
+	m_boundary_high_text->ChangeValue(wxString::Format("%.4f", val2));
+
+	agent->UpdateUIToData({ gstBoundary });
+}
+
+void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstBoundary });
+}
+
+void VolumePropPanel::OnBoundaryLink(wxCommandEvent& event)
+{
+	bool val = m_boundary_sldr->GetLink();
+	val = !val;
+	m_boundary_sldr->SetLink(val);
+	m_boundary_link_tb->ToggleTool(0, val);
+	wxBitmapBundle bitmap;
+	if (val)
+		bitmap = wxGetBitmap(link);
+	else
+		bitmap = wxGetBitmap(unlink);
+	m_boundary_link_tb->SetToolNormalBitmap(0, bitmap);
+}
+
+void VolumePropPanel::OnBoundaryChk(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableBoundary });
 }
 
 void VolumePropPanel::OnShadingMF(wxCommandEvent& event)
@@ -1739,201 +1988,6 @@ void VolumePropPanel::OnShadingChk(wxCommandEvent& event)
 	EnableShading(val);
 }
 
-void VolumePropPanel::OnBoundaryMF(wxCommandEvent& event)
-{
-	auto vd = m_vd.lock();
-	if (!vd)
-		return;
-
-	switch (glbin_settings.m_mulfunc)
-	{
-	case 0:
-		SyncBoundary(vd->GetBoundaryLow(), vd->GetBoundaryHigh());
-		break;
-	case 1:
-		m_frame->SetFocusVRenderViews(m_boundary_sldr);
-		break;
-	case 2:
-		SetBoundary(glbin_vol_def.m_boundary_low, glbin_vol_def.m_boundary_high, true);
-		break;
-	case 3:
-		SetBoundary(vd->GetMlBoundaryLow(), vd->GetMlBoundaryHigh(), true);
-		break;
-	case 4:
-		m_boundary_sldr->Undo();
-		break;
-	case 5:
-		EnableBoundary(!vd->GetBoundaryEnable());
-		break;
-	}
-}
-
-void VolumePropPanel::OnBoundaryChange(wxScrollEvent& event)
-{
-	auto vd = m_vd.lock();
-	if (!vd)
-		return;
-
-	double gmf = 1000 / vd->GetBoundaryMax();
-	double val1 = m_boundary_sldr->GetLowValue() / gmf;
-	double val2 = m_boundary_sldr->GetHighValue() / gmf;
-	m_boundary_low_text->ChangeValue(wxString::Format("%.4f", val1));
-	m_boundary_high_text->ChangeValue(wxString::Format("%.4f", val2));
-
-	//set boundary value
-	if (m_sync_group)
-		SyncBoundary(val1, val2);
-	else
-		SetBoundary(val1, val2, false);
-}
-
-void VolumePropPanel::OnBoundaryText(wxCommandEvent& event)
-{
-	auto vd = m_vd.lock();
-	if (!vd)
-		return;
-	double gmf = 1000 / vd->GetBoundaryMax();
-	wxObject* t = event.GetEventObject();
-	double val1 = 0.0, val2 = 0.0;
-	wxString str = m_boundary_low_text->GetValue();
-	str.ToDouble(&val1);
-	str = m_boundary_high_text->GetValue();
-	str.ToDouble(&val2);
-	int low = std::round(val1 * gmf);
-	int high = std::round(val2 * gmf);
-	int low_save = low;
-	int high_save = high;
-	m_boundary_sldr->ChangeValues(low, high);
-	if (low != low_save && t != m_boundary_low_text)
-	{
-		val1 = low / gmf;
-		m_boundary_low_text->ChangeValue(wxString::Format("%.4f", val1));
-	}
-	if (high != high_save && t != m_boundary_high_text)
-	{
-		val2 = high / gmf;
-		m_boundary_high_text->ChangeValue(wxString::Format("%.4f", val2));
-	}
-
-	//set boundary value
-	if (m_sync_group)
-		SyncBoundary(val1, val2);
-	else
-		SetBoundary(val1, val2, false);
-}
-
-void VolumePropPanel::OnBoundaryLink(wxCommandEvent& event)
-{
-	bool val = m_boundary_sldr->GetLink();
-	val = !val;
-	m_boundary_sldr->SetLink(val);
-	m_boundary_link_tb->ToggleTool(0, val);
-	wxBitmapBundle bitmap;
-	if (val)
-		bitmap = wxGetBitmap(link);
-	else
-		bitmap = wxGetBitmap(unlink);
-	m_boundary_link_tb->SetToolNormalBitmap(0, bitmap);
-}
-
-void VolumePropPanel::OnBoundaryChk(wxCommandEvent& event)
-{
-	bool val = m_boundary_chk->GetValue();
-	EnableBoundary(val);
-}
-
-void VolumePropPanel::OnThreshMF(wxCommandEvent& event)
-{
-	auto vd = m_vd.lock();
-	if (!vd)
-		return;
-
-	switch (glbin_settings.m_mulfunc)
-	{
-	case 0:
-		SyncThresh(vd->GetLeftThresh(), vd->GetRightThresh());
-		break;
-	case 1:
-		m_frame->SetFocusVRenderViews(m_thresh_sldr);
-		break;
-	case 2:
-		SetThresh(glbin_vol_def.m_lo_thresh, glbin_vol_def.m_hi_thresh, true);
-		break;
-	case 3:
-		SetThresh(vd->GetMlLeftThresh(), vd->GetMlRightThresh(), true);
-		break;
-	case 4:
-		m_thresh_sldr->Undo();
-		break;
-	case 5:
-		EnableThresh(!vd->GetThreshEnable());
-		break;
-	}
-}
-
-void VolumePropPanel::OnThreshChange(wxScrollEvent& event)
-{
-	int ival1 = m_thresh_sldr->GetLowValue();
-	int ival2 = m_thresh_sldr->GetHighValue();
-	double val1 = double(ival1) / m_max_val;
-	double val2 = double(ival2) / m_max_val;
-	m_left_thresh_text->ChangeValue(wxString::Format("%d", ival1));
-	m_right_thresh_text->ChangeValue(wxString::Format("%d", ival2));
-
-	//set left threshold value
-	if (m_sync_group)
-		SyncThresh(val1, val2);
-	else
-		SetThresh(val1, val2, false);
-}
-
-void VolumePropPanel::OnThreshText(wxCommandEvent& event)
-{
-	wxObject* t = event.GetEventObject();
-	long ival1 = 0, ival2 = 0;
-	wxString str = m_left_thresh_text->GetValue();
-	str.ToLong(&ival1);
-	str = m_right_thresh_text->GetValue();
-	str.ToLong(&ival2);
-	int low = ival1;
-	int hi = ival2;
-	if (double(hi) > m_max_val)
-		UpdateMaxVal(hi);
-	m_thresh_sldr->ChangeValues(low, hi);
-	if (low != ival1 && t != m_left_thresh_text)
-		m_left_thresh_text->ChangeValue(std::to_string(low));
-	if (hi != ival2 && t != m_right_thresh_text)
-		m_right_thresh_text->ChangeValue(std::to_string(hi));
-	double val1 = double(low) / m_max_val;
-	double val2 = double(hi) / m_max_val;
-
-	//set left threshold value
-	if (m_sync_group)
-		SyncThresh(val1, val2);
-	else
-		SetThresh(val1, val2, false);
-}
-
-void VolumePropPanel::OnThreshLink(wxCommandEvent& event)
-{
-	bool val = m_thresh_sldr->GetLink();
-	val = !val;
-	m_thresh_sldr->SetLink(val);
-	m_thresh_link_tb->ToggleTool(0, val);
-	wxBitmapBundle bitmap;
-	if (val)
-		bitmap = wxGetBitmap(link);
-	else
-		bitmap = wxGetBitmap(unlink);
-	m_thresh_link_tb->SetToolNormalBitmap(0, bitmap);
-}
-
-void VolumePropPanel::OnThreshChk(wxCommandEvent& event)
-{
-	bool val = m_thresh_chk->GetValue();
-	EnableThresh(val);
-}
-
 //shadow
 void VolumePropPanel::OnShadowMF(wxCommandEvent& event)
 {
@@ -2021,69 +2075,6 @@ void VolumePropPanel::OnShadowDirEdit(wxCommandEvent& event)
 	str.ToDouble(&deg);
 	m_shadow_dir_sldr->ChangeValue(std::round(deg));
 	SetShadowDir(deg, false);
-}
-
-void VolumePropPanel::OnSampleMF(wxCommandEvent& event)
-{
-	auto vd = m_vd.lock();
-	if (!vd)
-		return;
-
-	switch (glbin_settings.m_mulfunc)
-	{
-	case 0:
-		SyncSampleRate(vd->GetSampleRate());
-		break;
-	case 1:
-		m_frame->SetFocusVRenderViews(m_sample_sldr);
-		break;
-	case 2:
-		SetSampleRate(glbin_vol_def.m_sample_rate, true);
-		break;
-	case 3:
-		SetSampleRate(vd->GetMlSampleRate(), true);
-		break;
-	case 4:
-		m_sample_sldr->Undo();
-		break;
-	case 5:
-		EnableSample(!vd->GetSampleRateEnable());
-		break;
-	}
-}
-
-void VolumePropPanel::OnSampleChange(wxScrollEvent & event)
-{
-	double val = m_sample_sldr->GetValue() / 10.0;
-	wxString str = wxString::Format("%.1f", val);
-	if (str != m_sample_text->GetValue())
-		m_sample_text->ChangeValue(str);
-
-	//set sample rate value
-	if (m_sync_group)
-		SyncSampleRate(val);
-	else
-		SetSampleRate(val, false);
-}
-
-void VolumePropPanel::OnSampleText(wxCommandEvent& event)
-{
-	wxString str = m_sample_text->GetValue();
-	double val = 0.0;
-	str.ToDouble(&val);
-	m_sample_sldr->ChangeValue(std::round(val * 10));
-
-	//set sample rate value
-	if (m_sync_group)
-		SyncSampleRate(val);
-	else
-		SetSampleRate(val, false);
-}
-
-void VolumePropPanel::OnSampleChk(wxCommandEvent& event)
-{
-	bool val = m_sample_chk->GetValue();
-	EnableSample(val);
 }
 
 //colormap controls

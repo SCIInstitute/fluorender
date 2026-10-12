@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define ComponentDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <GridData.h>
 #include <AsyncTimer.hpp>
 #include <wx/wx.h>

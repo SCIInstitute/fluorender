@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _CAM_CENTER_RENDERER_H_
 
 #include <BaseRenderer.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class RenderView;
 namespace flvr

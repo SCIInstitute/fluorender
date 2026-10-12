@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <LookingGlassRenderer.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <Framebuffer.h>
 #include <ShaderProgram.h>

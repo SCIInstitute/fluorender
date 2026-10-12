@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define SettingDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class SettingDlg;
 class SettingDlgAgent : public Agent

@@ -46,7 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeRenderer.h>
 #include <LookingGlassRenderer.h>
 #include <image_capture_factory.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <iostream>
 #include <filesystem>
 

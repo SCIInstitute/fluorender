@@ -29,7 +29,7 @@
 #include <fl_gl.h>
 #include <VolumeRenderer.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <Plane.h>
 #include <BrickTexture.h>

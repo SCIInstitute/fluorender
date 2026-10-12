@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CalculationDlgAgent.h>
 #include <CalculationDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <VolumeCalculator.h>
 #include <VolumeData.h>
 #include <VolumeGroup.h>

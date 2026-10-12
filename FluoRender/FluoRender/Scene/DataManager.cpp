@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <DataManager.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <MainFrame.h>
 #include <Root.h>

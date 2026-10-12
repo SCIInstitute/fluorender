@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <OutputAdjPanelAgent.h>
 #include <OutputAdjPanel.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <CurrentObjects.h>
 #include <MainSettings.h>
 #include <VolumeGroup.h>

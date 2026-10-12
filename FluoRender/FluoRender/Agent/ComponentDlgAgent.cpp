@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDlgAgent.h>
 #include <ComponentDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <CompGenerator.h>
 #include <CompAnalyzer.h>
 #include <VolumeSelector.h>

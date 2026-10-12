@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MainFrameAgent.h>
 #include <MainFrame.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <Root.h>
 #include <DataManager.h>
 #include <RenderView.h>

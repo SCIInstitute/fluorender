@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ManipPropPanelAgent.h>
 #include <ManipPropPanel.h>
 #include <MeshData.h>
-#include <Names.h>
+#include <Tokens.h>
 
 ManipPropPanelAgent::ManipPropPanelAgent(
 	ManipPropPanel* panel,

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define OclDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <vector>
 #include <string>
 

@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <ComponentDefault.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <Global.h>
 #include <compatibility.h>
 #include <CompGenerator.h>

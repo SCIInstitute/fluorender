@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <OclDlgAgent.h>
 #include <OclDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <Directory.h>
 #include <KernelExecutor.h>
 #include <CurrentObjects.h>

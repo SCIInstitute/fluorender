@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ScriptBreakDlgAgent.h>
 #include <ScriptBreakDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <ScriptProc.h>
 #include <MovieMaker.h>
 #include <Coordinator.h>

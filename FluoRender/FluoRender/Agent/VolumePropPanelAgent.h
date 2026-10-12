@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define VolumePropPanelAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <memory>
 
 class VolumePropPanel;
@@ -54,6 +54,11 @@ public:
 	{
 		return m_vd.lock();
 	}
+
+	void SetGroup(const std::shared_ptr<VolumeGroup>& group);
+	void SetView(const std::shared_ptr<RenderView>& view);
+
+	double GetBoundaryMax();
 
 protected:
 	std::span < const std::string_view>
@@ -81,13 +86,58 @@ private:
 
 private:
 	void UpdateGradient();
+
+	void SetMinMax();
+	void SyncMinMax();
+	void SetDefaultMinMax();
+	void SetMlMinMax();
+	void EnableMinMax();
+	void ToggleMinMax();
+
 	void SetGamma();
+	void SyncGamma();
+	void SetDefaultGamma();
+	void SetMlGamma();
+	void EnableGamma();
+	void ToggleGamma();
+
+	void SetAlpha();
+	void SyncAlpha();
+	void SetDefaultAlpha();
+	void SetMlAlpha();
+	void EnableAlpha();
+	void ToggleAlpha();
+
+	void SetLuminance();
+	void SyncLuminance();
+	void SetDefaultLuminance();
+	void SetMlLuminance();
+	void EnableLuminance();
+	void ToggleLuminance();
+
+	void SetSampleRate();
+	void SyncSampleRate();
+	void SetDefaultSampleRate();
+	void SetMlSampleRate();
+	void EnableSampleRate();
+	void ToggleSampleRate();
+
+	void SetThreshold();
+	void SyncThreshold();
+	void SetDefaultThreshold();
+	void SetMlThreshold();
+	void EnableThreshold();
+	void ToggleThreshold();
+
+	void SetBoundary();
+	void SyncBoundary();
+	void SetDefaultBoundary();
+	void SetMlBoundary();
+	void EnableBoundary();
+	void ToggleBoundary();
 
 
 	void InitViews(unsigned int type);
-
-	void SetGroup(const std::shared_ptr<VolumeGroup>& group);
-	void SetView(const std::shared_ptr<RenderView>& view);
 
 	void ApplyMl();
 	void SaveMl();
@@ -103,9 +153,9 @@ private:
 	void EnableGamma(bool);
 	void EnableAlpha(bool);
 	void EnableLuminance(bool);
-	void EnableSample(bool);
+	void EnableSampleRate(bool);
 	//2
-	void EnableThresh(bool);
+	void EnableThreshold(bool);
 	void EnableBoundary(bool);
 	void EnableShading(bool);
 	void EnableShadow(bool);
@@ -116,18 +166,18 @@ private:
 	void EnableTransparent(bool);
 
 	//set values
-	void SetMinMax(double, double, bool);
+	void SetMinMax(double, double);
 	void SetGamma(double);
-	void SetAlpha(double, bool);
-	void SetLuminance(double, bool);
-	void SetSampleRate(double, bool);
-	void SetThresh(double, double, bool);
-	void SetBoundary(double, double, bool);
-	void SetShadingStrength(double, bool);
-	void SetShadingShine(double, bool);
-	void SetShadowInt(double, bool);
-	void SetShadowDir(double, bool);
-	void SetColormapVal(double, double, bool);
+	void SetAlpha(double);
+	void SetLuminance(double);
+	void SetSampleRate(double);
+	void SetThreshold(double, double);
+	void SetBoundary(double, double);
+	void SetShadingStrength(double);
+	void SetShadingShine(double);
+	void SetShadowInt(double);
+	void SetShadowDir(double);
+	void SetColormapVal(double, double);
 
 	//sync values
 	void SyncMinMax(double, double);
@@ -135,7 +185,7 @@ private:
 	void SyncAlpha(double);
 	void SyncLuminance(double);
 	void SyncSampleRate(double);
-	void SyncThresh(double, double);
+	void SyncThreshold(double, double);
 	void SyncBoundary(double, double);
 	void SyncShadingStrength(double);
 	void SyncShadingShine(double);

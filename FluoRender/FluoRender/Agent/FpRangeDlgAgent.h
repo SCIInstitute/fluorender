@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define FpRangeDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class FpRangeDlg;
 class FpRangeDlgAgent : public Agent

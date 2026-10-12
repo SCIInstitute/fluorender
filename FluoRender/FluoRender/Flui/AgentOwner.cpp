@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentOwner.h>
 #include <Agent.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainFrame.h>
 #include <RenderCanvas.h>
 #include <RenderViewPanel.h>

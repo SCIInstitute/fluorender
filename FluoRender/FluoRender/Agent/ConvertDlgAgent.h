@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define ConvertDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class ConvertDlg;
 class ConvertDlgAgent : public Agent

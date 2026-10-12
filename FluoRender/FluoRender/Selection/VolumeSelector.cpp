@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <VolumeSelector.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <VolumeDefault.h>
 #include <BrushDefault.h>
 #include <AutomateDefault.h>

@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <CompGenerator.h>
 #include <KernelProgram.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <CompKernelCode.h>
 #include <EntryHist.h>

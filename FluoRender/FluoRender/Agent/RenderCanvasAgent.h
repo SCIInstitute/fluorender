@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define RenderCanvasAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <memory>
 
 class RenderCanvas;

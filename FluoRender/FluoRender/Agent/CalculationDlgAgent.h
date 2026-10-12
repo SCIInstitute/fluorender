@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define CalculationDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class CalculationDlg;
 class CalculationDlgAgent : public Agent

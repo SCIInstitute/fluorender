@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Main.h>
 #include <MainFrame.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
 #include <Directory.h>

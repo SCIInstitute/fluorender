@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumePropPanel.h>
 #include <VolumeDefault.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <BrickTexture.h>
 #include <VolumeRenderer.h>
 #include <VolumeSelector.h>

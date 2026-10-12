@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FpRangeDlgAgent.h>
 #include <FpRangeDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 
 FpRangeDlgAgent::FpRangeDlgAgent(

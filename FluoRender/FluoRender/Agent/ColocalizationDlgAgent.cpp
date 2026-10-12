@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ColocalizationDlgAgent.h>
 #include <ColocalizationDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <ColocalDefault.h>
 #include <Colocalize.h>
 #include <GridBuilder.h>

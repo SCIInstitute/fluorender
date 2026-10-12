@@ -27,7 +27,7 @@ DEALINGS IN THE SOFTWARE.
 */
 #include <Global.h>
 #include <BrushDefault.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <VolumeSelector.h>
 #include <BaseTreeFile.h>
 #include <TreeFileFactory.h>

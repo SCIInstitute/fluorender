@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <SettingDlgAgent.h>
 #include <SettingDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MainSettings.h>
 #include <Directory.h>
 #include <ShaderProgram.h>

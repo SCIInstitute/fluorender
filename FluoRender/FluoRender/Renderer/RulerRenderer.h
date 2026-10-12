@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #define _RulerRenderer_H_
 
 #include <BaseRenderer.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <RulerList.h>
 #include <vector>
 #include <set>

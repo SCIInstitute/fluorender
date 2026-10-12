@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define ColocalizationDlgAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class ColocalizationDlg;
 class ColocalizationDlgAgent : public Agent

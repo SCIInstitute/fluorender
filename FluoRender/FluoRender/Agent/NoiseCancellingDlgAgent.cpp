@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <NoiseCancellingDlgAgent.h>
 #include <NoiseCancellingDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <CurrentObjects.h>
 #include <VolumeData.h>
 #include <ComponentDefault.h>

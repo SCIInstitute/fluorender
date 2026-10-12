@@ -28,7 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <TextRenderer.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <ShaderProgram.h>
 #include <Framebuffer.h>
 #include <FramebufferStateTracker.h>

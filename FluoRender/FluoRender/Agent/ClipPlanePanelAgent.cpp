@@ -30,7 +30,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ClipPlanePanel.h>
 #include <Global.h>
 #include <GlobalStates.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <CurrentObjects.h>
 #include <Coordinator.h>
 #include <TreeLayer.h>

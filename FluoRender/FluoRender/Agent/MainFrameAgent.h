@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define MainFrameAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 class MainFrame;
 class wxBasisSlider;

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define ListPanelAgent_h
 
 #include <Agent.h>
-#include <Names.h>
+#include <Tokens.h>
 
 enum class ListItemType : int
 {

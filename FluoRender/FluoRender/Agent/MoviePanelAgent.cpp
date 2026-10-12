@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanelAgent.h>
 #include <MoviePanel.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <MovieMaker.h>
 #include <Root.h>
 #include <RenderView.h>

@@ -29,7 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MeasureDlgAgent.h>
 #include <MeasureDlg.h>
 #include <Global.h>
-#include <Names.h>
+#include <Tokens.h>
 #include <CurrentObjects.h>
 #include <RenderView.h>
 #include <RulerHandler.h>
