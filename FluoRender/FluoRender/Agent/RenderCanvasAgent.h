@@ -86,6 +86,9 @@ private:
 	void SyncCamera(
 		RenderCanvasAgent* sender);
 
+	void InitViewAll();
+	void InitViewBoundsCenter();
+
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{

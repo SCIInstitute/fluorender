@@ -1412,6 +1412,30 @@ DEALINGS IN THE SOFTWARE.
 #define gstSetMlBoundary "set ml boundary"
 #define gstEnableBoundary "enable boundary"
 #define gstToggleBoundary "toggle boundary"
+#define gstSyncShading "sync shading"
+#define gstSetDefaultShading "set default shading"
+#define gstSetMlShading "set ml shading"
+#define gstEnableShading "enable shading"
+#define gstToggleShading "toggle shading"
+#define gstSyncShadowIntensity "sync shadow intensity"
+#define gstSetDefaultShadowIntensity "set default shadow intensity"
+#define gstSetMlShadowIntensity "set ml shadow intensity"
+#define gstEnableShadow "enable shadow"
+#define gstToggleShadow "toggle shadow"
+#define gstSyncColormap "sync colormap"
+#define gstSetDefaultColormap "set default colormap"
+#define gstSetMlColormap "set ml colormap"
+#define gstEnableColormap "enalbe colormap"
+#define gstToggleColormap "toggle colormap"
+#define gstColormapSlider "colormap slider"
+#define gstInvertColormap "invert colormap"
+#define gstMainColorMode "main color mode"
+#define gstMainColor "main color"
+#define gstAltColorMode "alt color mode"
+#define gstAltColor "alt color"
+#define gstSetMlVolumeProp "set ml volume prop"
+#define gstResetDefault "reset default"
+#define gstSaveDefault "save default"
 
 //main frame
 #define gstRenderViewPanel "render view panel"
@@ -1426,5 +1450,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstColocalizationDlg "colocalization dlg"
 #define gstConvertDlg "convert dlg"
 #define gstOclDlg "ocl dlg"
+
+//render canvas
+#define gstInitViewAll "init view all"
+#define gstInitViewBoundsCenter "init view bounds center"
 
 #endif//NAMES_HPP

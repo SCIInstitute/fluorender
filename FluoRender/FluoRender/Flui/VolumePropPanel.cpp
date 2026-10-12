@@ -1471,6 +1471,116 @@ bool VolumePropPanel::GetEnableBoundary()
 	return m_thresh_chk->GetValue();
 }
 
+double VolumePropPanel::GetShadingStrength()
+{
+	wxString str = m_shading_strength_text->GetValue();
+	double val = 0.0;
+	if (str.ToDouble(&val))
+		return val;
+	return 0.0;
+}
+
+double VolumePropPanel::GetShadingShine()
+{
+	wxString str = m_shading_shine_text->GetValue();
+	double val = 0.0;
+	if (str.ToDouble(&val))
+		return val;
+	return 0.0;
+}
+
+bool VolumePropPanel::GetShadingEnable()
+{
+	return m_shade_chk->GetValue();
+}
+
+double VolumePropPanel::GetShadowIntensity()
+{
+	wxString str = m_shadow_text->GetValue();
+	double val = 0.0;
+	if (str.ToDouble(&val))
+		return val;
+	return 0.0;
+}
+
+bool VolumePropPanel::GetShadowEnable()
+{
+	return m_shadow_chk->GetValue();
+}
+
+double VolumePropPanel::GetShadowDirection()
+{
+	wxString str = m_shadow_dir_text->GetValue();
+	double deg;
+	if (str.ToDouble(&deg))
+		return deg;
+	return 0.0;
+}
+
+bool VolumePropPanel::GetShadowDirEnable()
+{
+	return m_shadow_dir_chk->GetToolState(0);
+}
+
+std::array<double, 2> VolumePropPanel::GetColormap()
+{
+	wxString str = m_colormap_low_text->GetValue();
+	double dval1 = 0, dval2 = 0;
+	str.ToDouble(&dval1);
+	str = m_colormap_hi_text->GetValue();
+	str.ToDouble(&dval2);
+	return { dval1, dval2 };
+}
+
+std::array<int, 2> VolumePropPanel::GetColormapSlider()
+{
+	int ival1 = m_colormap_sldr->GetLowValue();
+	int ival2 = m_colormap_sldr->GetHighValue();
+	return { ival1, ival2 };
+}
+
+bool VolumePropPanel::GetColormapEnable()
+{
+	return m_colormap_chk->GetValue();
+}
+
+bool VolumePropPanel::GetColormapInv()
+{
+	return m_colormap_inv_btn->GetToolState(0);
+}
+
+int VolumePropPanel::GetColormapType()
+{
+	return m_colormap_combo->GetCurrentSelection();
+}
+
+int VolumePropPanel::GetColormapProj()
+{
+	return m_colormap_proj_combo->GetCurrentSelection() + 1;
+}
+
+fluo::Color VolumePropPanel::GetMainColor()
+{
+	wxString str = m_main_color_text->GetValue();
+	wxColor wxc;
+	if (GetColorString(str, wxc) == 3)
+	{
+		return fluo::Color(wxc.Red() / 255.0, wxc.Green() / 255.0, wxc.Blue() / 255.0);
+	}
+	return fluo::Color();
+}
+
+fluo::Color VolumePropPanel::GetAltColor()
+{
+	wxString str = m_alt_color_text->GetValue();
+	wxColor wxc;
+	if (GetColorString(str, wxc) == 3)
+	{
+		return fluo::Color(wxc.Red() / 255.0, wxc.Green() / 255.0, wxc.Blue() / 255.0);
+	}
+	return fluo::Color();
+}
+
 //1
 void VolumePropPanel::OnMinMaxMF(wxCommandEvent& event)
 {
@@ -1894,34 +2004,30 @@ void VolumePropPanel::OnBoundaryChk(wxCommandEvent& event)
 
 void VolumePropPanel::OnShadingMF(wxCommandEvent& event)
 {
-	auto vd = m_vd.lock();
-	if (!vd)
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
 		return;
 
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		{
-			SyncShadingStrength(vd->GetShadingStrength());
-			SyncShadingShine(vd->GetShadingShine());
-		}
+		agent->UpdateUIToData({ gstSyncShading });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_shading_strength_sldr);
+		frame->SetFocusVRenderViews(m_shading_strength_sldr);
 		break;
 	case 2:
-		SetShadingStrength(glbin_vol_def.m_shading_strength, true);
-		SetShadingShine(glbin_vol_def.m_shading_shine, true);
+		agent->UpdateUIToData({ gstSetDefaultShading });
 		break;
 	case 3:
-		SetShadingStrength(vd->GetMlShadingStrength(), true);
-		SetShadingShine(vd->GetMlShadingShine(), true);
+		agent->UpdateUIToData({ gstSetMlShading });
 		break;
 	case 4:
 		m_shading_strength_sldr->Undo();
 		break;
 	case 5:
-		EnableShading(!vd->GetShadingEnable());
+		agent->UpdateUIToData({ gstToggleShading });
 		break;
 	}
 }
@@ -1931,27 +2037,14 @@ void VolumePropPanel::OnShadingStrengthChange(wxScrollEvent& event)
 	double val = m_shading_strength_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_shading_strength_text->GetValue())
-		m_shading_strength_text->ChangeValue(str);
-
-	//set low shading value
-	if (m_sync_group)
-		SyncShadingStrength(val);
-	else
-		SetShadingStrength(val, false);
+		m_shading_strength_text->SetValue(str);
 }
 
 void VolumePropPanel::OnShadingStrengthText(wxCommandEvent& event)
 {
-	wxString str = m_shading_strength_text->GetValue();
-	double val = 0.0;
-	str.ToDouble(&val);
-	m_shading_strength_sldr->ChangeValue(std::round(val * 100));
-
-	//set low shading value
-	if (m_sync_group)
-		SyncShadingStrength(val);
-	else
-		SetShadingStrength(val, false);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstShadingStrength });
 }
 
 void VolumePropPanel::OnShadingShineChange(wxScrollEvent& event)
@@ -1959,69 +2052,59 @@ void VolumePropPanel::OnShadingShineChange(wxScrollEvent& event)
 	double val = m_shading_shine_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_shading_shine_text->GetValue())
-		m_shading_shine_text->ChangeValue(str);
-
-	//set high shading value
-	if (m_sync_group)
-		SyncShadingShine(val);
-	else
-		SetShadingShine(val, false);
+		m_shading_shine_text->SetValue(str);
 }
 
 void VolumePropPanel::OnShadingShineText(wxCommandEvent& event)
 {
-	wxString str = m_shading_shine_text->GetValue();
-	double val = 0.0;
-	str.ToDouble(&val);
-	m_shading_shine_sldr->ChangeValue(std::round(val * 100));
-
-	//set high shading value
-	if (m_sync_group)
-		SyncShadingShine(val);
-	else
-		SetShadingShine(val, false);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstShadingShine });
 }
 
 void VolumePropPanel::OnShadingChk(wxCommandEvent& event)
 {
-	bool val = m_shade_chk->GetValue();
-	EnableShading(val);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableShading });
 }
 
 //shadow
 void VolumePropPanel::OnShadowMF(wxCommandEvent& event)
 {
-	auto vd = m_vd.lock();
-	if (!vd)
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
 		return;
 
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		SyncShadowInt(vd->GetShadowIntensity());
+		agent->UpdateUIToData({ gstSyncShadowIntensity });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_shadow_sldr);
+		frame->SetFocusVRenderViews(m_shadow_sldr);
 		break;
 	case 2:
-		SetShadowInt(glbin_vol_def.m_shadow_intensity, true);
+		agent->UpdateUIToData({ gstSetDefaultShadowIntensity });
 		break;
 	case 3:
-		SetShadowInt(vd->GetMlShadowIntensity(), true);
+		agent->UpdateUIToData({ gstSetMlShadowIntensity });
 		break;
 	case 4:
 		m_shadow_sldr->Undo();
 		break;
 	case 5:
-		EnableShadow(!vd->GetShadowEnable());
+		agent->UpdateUIToData({ gstToggleShadow });
 		break;
 	}
 }
 
 void VolumePropPanel::OnShadowChk(wxCommandEvent& event)
 {
-	bool val = m_shadow_chk->GetValue();
-	EnableShadow(val);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableShadow });
 }
 
 void VolumePropPanel::OnShadowChange(wxScrollEvent& event)
@@ -2029,34 +2112,22 @@ void VolumePropPanel::OnShadowChange(wxScrollEvent& event)
 	double val = m_shadow_sldr->GetValue() / 100.0;
 	wxString str = wxString::Format("%.2f", val);
 	if (str != m_shadow_text->GetValue())
-		m_shadow_text->ChangeValue(str);
-
-	//set shadow darkness
-	if (m_sync_group)
-		SyncShadowInt(val);
-	else
-		SetShadowInt(val, false);
+		m_shadow_text->SetValue(str);
 }
 
 void VolumePropPanel::OnShadowText(wxCommandEvent& event)
 {
-	wxString str = m_shadow_text->GetValue();
-	double val = 0.0;
-	str.ToDouble(&val);
-	m_shadow_sldr->ChangeValue(std::round(val*100.0));
-
-	//set shadow darkness
-	if (m_sync_group)
-		SyncShadowInt(val);
-	else
-		SetShadowInt(val, false);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstShadow });
 }
 
 //shadow direction
 void VolumePropPanel::OnShadowDirCheck(wxCommandEvent& event)
 {
-	bool bval = m_shadow_dir_chk->GetToolState(0);
-	EnableShadowDir(bval);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableShadowDir });
 }
 
 void VolumePropPanel::OnShadowDirChange(wxScrollEvent& event)
@@ -2065,96 +2136,65 @@ void VolumePropPanel::OnShadowDirChange(wxScrollEvent& event)
 	wxString str = wxString::Format("%.0f", deg);
 	if (str != m_shadow_dir_text->GetValue())
 		m_shadow_dir_text->SetValue(str);
-	SetShadowDir(deg, false);
 }
 
 void VolumePropPanel::OnShadowDirEdit(wxCommandEvent& event)
 {
-	wxString str = m_shadow_dir_text->GetValue();
-	double deg;
-	str.ToDouble(&deg);
-	m_shadow_dir_sldr->ChangeValue(std::round(deg));
-	SetShadowDir(deg, false);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstShadowDir });
 }
 
 //colormap controls
 void VolumePropPanel::OnColormapMF(wxCommandEvent& event)
 {
-	auto vd = m_vd.lock();
-	if (!vd)
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!agent || !frame)
 		return;
 
 	switch (glbin_settings.m_mulfunc)
 	{
 	case 0:
-		{
-			double val1, val2;
-			vd->GetColormapValues(val1, val2);
-			SyncColormapVal(val1, val2);
-		}
+		agent->UpdateUIToData({ gstSyncColormap });
 		break;
 	case 1:
-		m_frame->SetFocusVRenderViews(m_colormap_sldr);
+		frame->SetFocusVRenderViews(m_colormap_sldr);
 		break;
 	case 2:
-		SetColormapVal(glbin_vol_def.m_colormap_low_value, glbin_vol_def.m_colormap_hi_value, true);
+		agent->UpdateUIToData({ gstSetDefaultColormap });
 		break;
 	case 3:
-		SetColormapVal(vd->GetMlColormapLow(), vd->GetMlColormapHigh(), true);
+		agent->UpdateUIToData({ gstSetMlColormap });
 		break;
 	case 4:
 		m_colormap_sldr->Undo();
 		break;
 	case 5:
-		EnableColormap(
-			vd->GetMainColorMode() == flvr::ColorMode::SingleColor);
+		agent->UpdateUIToData({ gstToggleColormap });
 		break;
 	}
 }
 
 void VolumePropPanel::OnColormapChk(wxCommandEvent& event)
 {
-	bool val = m_colormap_chk->GetValue();
-	EnableColormap(val);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstEnableColormap });
 }
 
 void VolumePropPanel::OnColormapChange(wxScrollEvent& event)
 {
-	int ival1 = m_colormap_sldr->GetLowValue();
-	int ival2 = m_colormap_sldr->GetHighValue();
-	double val1 = double(ival1) / m_max_val;
-	double val2 = double(ival2) / m_max_val;
-
-	//set left threshold value
-	if (m_sync_group)
-		SyncColormapVal(val1, val2);
-	else
-		SetColormapVal(val1, val2, true);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstColormapSlider });
 }
 
 void VolumePropPanel::OnColormapText(wxCommandEvent& event)
 {
-	wxObject* t = event.GetEventObject();
-	wxString str = m_colormap_low_text->GetValue();
-	double dval1 = 0, dval2 = 0;
-	str.ToDouble(&dval1);
-	str = m_colormap_hi_text->GetValue();
-	str.ToDouble(&dval2);
-
-	auto vd = m_vd.lock();
-	if (vd)
-	{
-		double minv, maxv;
-		vd->GetColormapRange(minv, maxv);
-		dval1 = (dval1 - minv) / (maxv - minv);
-		dval2 = (dval2 - minv) / (maxv - minv);
-	}
-
-	//set left threshold value
-	if (m_sync_group)
-		SyncColormapVal(dval1, dval2);
-	else
-		SetColormapVal(dval1, dval2, true);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstColormap });
 }
 
 void VolumePropPanel::OnColormapLink(wxCommandEvent& event)
@@ -2173,179 +2213,52 @@ void VolumePropPanel::OnColormapLink(wxCommandEvent& event)
 
 void VolumePropPanel::OnColormapInvBtn(wxCommandEvent& event)
 {
-	bool val = m_colormap_inv_btn->GetToolState(0);
-	if (val)
-		m_colormap_inv_btn->SetToolNormalBitmap(0,
-			wxGetBitmap(invert));
-	else
-		m_colormap_inv_btn->SetToolNormalBitmap(0,
-			wxGetBitmap(invert_off));
-
-	auto view = m_view.lock();
-	auto group = m_group.lock();
-	auto vd = m_vd.lock();
-	assert(view);
-	assert(group);
-	assert(vd);
-
-	bool mip_enable = vd && vd->GetRenderMode() == flvr::RenderMode::Mip;
-	bool sync_view_depth_mip = mip_enable && view && view->GetChannelMixMode() == ChannelMixMode::Depth;
-	bool sync_group_depth_mip = mip_enable && vd && vd->GetChannelMixMode() == ChannelMixMode::Depth;
-
-	if (sync_view_depth_mip)
-		view->SetColormapInv(val ? -1.0 : 1.0);
-	else if (m_sync_group || sync_group_depth_mip)
-		group->SetColormapInv(val ? -1.0 : 1.0);
-	else
-		vd->SetColormapInv(val ? -1.0 : 1.0);
-
-	EnableColormap(true);
-
-	FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId() });
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstInvertColormap });
 }
 
 void VolumePropPanel::OnColormapCombo(wxCommandEvent& event)
 {
-	int colormap = m_colormap_combo->GetCurrentSelection();
-	auto view = m_view.lock();
-	auto group = m_group.lock();
-	auto vd = m_vd.lock();
-	assert(view);
-	assert(group);
-	assert(vd);
-	bool mip_enable = vd->GetRenderMode() == flvr::RenderMode::Mip;
-	bool sync_view_depth_mip = mip_enable && view->GetChannelMixMode() == ChannelMixMode::Depth;
-	bool sync_group_depth_mip = mip_enable && vd->GetChannelMixMode() == ChannelMixMode::Depth;
-
-	if (sync_view_depth_mip)
-		view->SetColormap(colormap);
-	else if (m_sync_group || sync_group_depth_mip)
-		group->SetColormap(colormap);
-	else
-		vd->SetColormap(colormap);
-
-	EnableColormap(true);
-	if (colormap >= 5)
-	{
-		m_options_toolbar->ToggleTool(ID_TranspChk, true);
-		EnableTransparent(true);
-	}
-
-	FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId() });
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstColormapType });
 }
 
 void VolumePropPanel::OnColormapProjCombo(wxCommandEvent& event)
 {
-	int ival = m_colormap_proj_combo->GetCurrentSelection() + 1;
-	flvr::ColormapProj colormap_proj =
-		static_cast<flvr::ColormapProj>(ival);
-
-	auto group = m_group.lock();
-	auto vd = m_vd.lock();
-	if (m_sync_group && group)
-		group->SetColormapProj(colormap_proj);
-	else if (vd)
-		vd->SetColormapProj(colormap_proj);
-	EnableColormap(true);
-
-	FluoRefresh(0, { gstColormap }, { glbin_current.GetViewId() });
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstColormapProj });
 }
 
 //6
 void VolumePropPanel::OnMainColorMode(wxCommandEvent& event)
 {
-	auto group = m_group.lock();
-	auto vd = m_vd.lock();
-	if (!vd)
-		return;
-
-	if (m_sync_group && group)
-		group->IncMainMaskMode();
-	else
-		vd->IncMainMaskMode();
-
-	FluoRefresh(0, { gstMainMode, gstColormap }, { glbin_current.GetViewId() });
-}
-
-void VolumePropPanel::OnMainColorChange(wxColor c)
-{
-	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	auto vd = m_vd.lock();
-	if (vd)
-	{
-		vd->SetColor(color);
-
-		if (!vd->GetMaskColorSet())
-		{
-			color = vd->GetMaskColor();
-			wxColor wxc((unsigned char)(color.r()*255),
-				(unsigned char)(color.g()*255),
-				(unsigned char)(color.b()*255));
-			m_alt_color_text->ChangeValue(wxString::Format("%d , %d , %d",
-				wxc.Red(), wxc.Green(), wxc.Blue()));
-			m_alt_color_btn->SetValue(wxc);
-		}
-
-		FluoRefresh(0, { gstColor, gstSecColor, gstTreeColors, gstClipPlaneRangeColor, gstUpdateSync, gstColormap, gstUpdateHistogram }, { glbin_current.GetViewId() });
-	}
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMainColorMode });
 }
 
 void VolumePropPanel::OnAltColorMode(wxCommandEvent& event)
 {
-	auto vd = m_vd.lock();
-	if (!vd)
-		return;
-
-	auto group = m_group.lock();
-	if (m_sync_group && group)
-		group->IncMaskMode();
-	else
-		vd->IncMaskMode();
-
-	FluoRefresh(0, { gstMaskMode, gstColormap }, { glbin_current.GetViewId() });
-}
-
-void VolumePropPanel::OnAltColorChange(wxColor c)
-{
-	fluo::Color color(c.Red()/255.0, c.Green()/255.0, c.Blue()/255.0);
-	auto vd = m_vd.lock();
-	if (vd)
-	{
-		vd->SetMaskColor(color);
-		FluoRefresh(0, { gstSecColor, gstColormap }, { glbin_current.GetViewId() });
-	}
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAltColorMode });
 }
 
 void VolumePropPanel::OnMainColorTextChange(wxCommandEvent& event)
 {
-	wxString str = m_main_color_text->GetValue();
-	wxColor wxc;
-	if (GetColorString(str, wxc) == 3)
-	{
-		wxString new_str = wxString::Format("%d , %d , %d",
-			wxc.Red(), wxc.Green(), wxc.Blue());
-		if (str != new_str)
-			m_main_color_text->ChangeValue(new_str);
-		m_main_color_btn->SetValue(wxc);
-
-		OnMainColorChange(wxc);
-	}
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMainColor });
 }
 
 void VolumePropPanel::OnAltColorTextChange(wxCommandEvent& event)
 {
-	wxString str = m_alt_color_text->GetValue();
-	wxColor wxc;
-	if (GetColorString(str, wxc) == 3)
-	{
-		wxString new_str = wxString::Format("%d , %d , %d",
-			wxc.Red(), wxc.Green(), wxc.Blue());
-		if (str != new_str)
-			m_alt_color_text->ChangeValue(new_str);
-		m_alt_color_btn->SetValue(wxc);
-
-		OnAltColorChange(wxc);
-	}
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAltColor });
 }
 
 void VolumePropPanel::OnMainColorBtn(wxColourPickerEvent& event)
@@ -2355,7 +2268,9 @@ void VolumePropPanel::OnMainColorBtn(wxColourPickerEvent& event)
 	m_main_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 
-	OnMainColorChange(wxc);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMainColor });
 }
 
 void VolumePropPanel::OnAltColorBtn(wxColourPickerEvent& event)
@@ -2365,7 +2280,9 @@ void VolumePropPanel::OnAltColorBtn(wxColourPickerEvent& event)
 	m_alt_color_text->ChangeValue(wxString::Format("%d , %d , %d",
 		wxc.Red(), wxc.Green(), wxc.Blue()));
 
-	OnAltColorChange(wxc);
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstAltColor });
 }
 
 void VolumePropPanel::OnMainColorTextFocus(wxMouseEvent& event)
@@ -2380,55 +2297,57 @@ void VolumePropPanel::OnAltColorTextFocus(wxMouseEvent& event)
 
 void VolumePropPanel::OnOptions(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	fluo::ValueCollection vc;
 
+	int id = event.GetId();
 	switch (id)
 	{
 	case ID_UseMlChk:
-		SetMachineLearning();
+		vc.insert(gstSetMlVolumeProp);
 		break;
 	case ID_TranspChk:
-		SetTransparent();
+		vc.insert(gstTransparent);
 		break;
 	case ID_MipChk:
-		SetMIP();
+		vc.insert(gstRenderMode);
 		break;
 	case ID_InvChk:
-		SetInvert();
+		vc.insert(gstInvert);
 		break;
 	case ID_OutlineChk:
-		SetOutline();
+		vc.insert(gstOutline);
 		break;
 	case ID_InterpolateChk:
-		SetInterpolate();
+		vc.insert(gstInterpolate);
 		break;
 	case ID_NoiseReductChk:
-		SetNoiseReduction();
+		vc.insert(gstNoiseRedct);
 		break;
 	case ID_SyncGroupChk:
-		SetSyncGroup();
+		vc.insert(gstSyncGroup);
 		break;
 	case ID_ChannelMixDepthChk:
-		SetChannelMixDepth();
+		vc.insert(gstChannelMixMode);
 		break;
 	case ID_LegendChk:
-		SetLegend();
+		vc.insert(gstLegend);
 		break;
 	case ID_ResetDefault:
-		ResetDefault();
+		vc.insert(gstResetDefault);
 		break;
 	case ID_SaveDefault:
-		SaveDefault();
+		vc.insert(gstSaveDefault);
 		break;
 	}
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData(vc);
 }
 
 void VolumePropPanel::OnSpaceText(wxCommandEvent& event)
 {
-	if (SetSpacing())
-	{
-		InitViews(INIT_BOUNDS|INIT_CENTER);
-		FluoRefresh(3, { gstNull });
-	}
+	auto agent = m_agent->As<VolumePropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstSpacing });
 }
 

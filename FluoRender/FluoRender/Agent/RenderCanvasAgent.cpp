@@ -121,6 +121,11 @@ void RenderCanvasAgent::Update(
 		SyncCamera(sender);
 	}
 
+	if (request.HasValue(gstInitViewAll))
+		InitViewAll();
+	else if (request.HasValue(gstInitViewBoundsCenter))
+		InitViewBoundsCenter();
+
 	RequestDraw();
 }
 
@@ -167,4 +172,18 @@ void RenderCanvasAgent::PerformDraw()
 RenderCanvas* RenderCanvasAgent::GetCanvas() const
 {
 	return static_cast<RenderCanvas*>(GetOwner());
+}
+
+void RenderCanvasAgent::InitViewAll()
+{
+	auto view = m_view.lock();
+	if (view)
+		view->InitView(-1);
+}
+
+void RenderCanvasAgent::InitViewBoundsCenter()
+{
+	auto view = m_view.lock();
+	if (view)
+		view->InitView(INIT_BOUNDS | INIT_CENTER);
 }

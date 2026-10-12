@@ -145,6 +145,21 @@ public:
 	std::array<double, 2> GetBoundary();
 	void TrySetBoundarySlider(int& low, int& high);
 	bool GetEnableBoundary();
+	double GetShadingStrength();
+	double GetShadingShine();
+	bool GetShadingEnable();
+	double GetShadowIntensity();
+	bool GetShadowEnable();
+	double GetShadowDirection();
+	bool GetShadowDirEnable();
+	std::array<double, 2> GetColormap();
+	std::array<int, 2> GetColormapSlider();
+	bool GetColormapEnable();
+	bool GetColormapInv();
+	int GetColormapType();
+	int GetColormapProj();
+	fluo::Color GetMainColor();
+	fluo::Color GetAltColor();
 
 private:
 	//1
@@ -303,12 +318,10 @@ private:
 	void OnColormapProjCombo(wxCommandEvent& event);
 	//color and display modes
 	void OnMainColorMode(wxCommandEvent& event);
-	void OnMainColorChange(wxColor c);
 	void OnMainColorTextChange(wxCommandEvent& event);
 	void OnMainColorTextFocus(wxMouseEvent& event);
 	void OnMainColorBtn(wxColourPickerEvent& event);
 	void OnAltColorMode(wxCommandEvent& event);
-	void OnAltColorChange(wxColor c);
 	void OnAltColorTextChange(wxCommandEvent& event);
 	void OnAltColorTextFocus(wxMouseEvent& event);
 	void OnAltColorBtn(wxColourPickerEvent& event);

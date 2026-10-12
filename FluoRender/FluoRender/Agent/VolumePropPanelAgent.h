@@ -136,13 +136,44 @@ private:
 	void EnableBoundary();
 	void ToggleBoundary();
 
+	void SetShadingStrength();
+	void SetShadingShine();
+	void SyncShading();
+	void SetDefaultShading();
+	void SetMlShading();
+	void EnableShading();
+	void ToggleShading();
 
-	void InitViews(unsigned int type);
+	void SetShadowIntensity();
+	void SyncShadowIntensity();
+	void SetDefaultShadowIntensity();
+	void SetMlShadowIntensity();
+	void EnableShadowIntensity();
+	void ToggleShadowIntensity();
+	void SetShadowDirection();
+	void EnableShadowDirection();
+
+	void SetColormap();
+	void SetColormapSlider();
+	void SyncColormap();
+	void SetDefaultColormap();
+	void SetMlColormap();
+	void EnableColormap();
+	void ToggleColormap();
+
+	void InvertColormap();
+	void SetColormapType();
+	void SetColormapProj();
+
+	void SetMainColorMode();
+	void SetMainColor();
+	void SetAltColorMode();
+	void SetAltColor();
+
+	void SetSpacing();
 
 	void ApplyMl();
 	void SaveMl();
-
-	bool SetSpacing();
 
 	//update max value
 	void UpdateMaxVal(double value);
