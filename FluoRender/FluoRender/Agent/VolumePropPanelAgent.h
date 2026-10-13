@@ -172,9 +172,6 @@ private:
 
 	void SetSpacing();
 
-	void ApplyMl();
-	void SaveMl();
-
 	//update max value
 	void UpdateMaxVal(double value);
 
@@ -234,6 +231,7 @@ private:
 	void SetSyncGroup();
 	void SetChannelMixDepth();
 	void SetLegend();
+	void SaveMl();
 	void SaveDefault();
 	void ResetDefault();
 

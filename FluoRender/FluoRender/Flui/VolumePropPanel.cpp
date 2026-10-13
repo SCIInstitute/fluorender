@@ -1581,6 +1581,77 @@ fluo::Color VolumePropPanel::GetAltColor()
 	return fluo::Color();
 }
 
+bool VolumePropPanel::GetTransparent()
+{
+	return m_options_toolbar->GetToolState(ID_TranspChk);
+}
+
+int VolumePropPanel::GetMip()
+{
+	return m_options_toolbar->GetToolState(ID_MipChk) ? 1 : 0;
+}
+
+bool VolumePropPanel::GetInvert()
+{
+	return m_options_toolbar->GetToolState(ID_InvChk);
+}
+
+bool VolumePropPanel::GetOutline()
+{
+	return m_options_toolbar->GetToolState(ID_OutlineChk);
+}
+
+bool VolumePropPanel::GetInterpolate()
+{
+	return m_options_toolbar->GetToolState(ID_InterpolateChk);
+}
+
+bool VolumePropPanel::GetNoiseReduction()
+{
+	return m_options_toolbar->GetToolState(ID_NoiseReductChk);
+}
+
+bool VolumePropPanel::GetSyncGroup()
+{
+	return m_options_toolbar->GetToolState(ID_SyncGroupChk);
+}
+
+bool VolumePropPanel::GetChannelMixDepth()
+{
+	return m_options_toolbar->GetToolState(ID_ChannelMixDepthChk);
+}
+
+bool VolumePropPanel::GetLegend()
+{
+	return m_options_toolbar->GetToolState(ID_LegendChk);
+}
+
+void VolumePropPanel::ResetLinks()
+{
+	m_minmax_sldr->SetLink(false);
+	m_thresh_sldr->SetLink(false);
+	m_colormap_sldr->SetLink(false);
+}
+
+std::array<double, 3> VolumePropPanel::GetSpacing()
+{
+	wxString str;
+	double spcx = 1.0;
+	double spcy = 1.0;
+	double spcz = 1.0;
+
+	str = m_space_x_text->GetValue();
+	str.ToDouble(&spcx);
+
+	str = m_space_y_text->GetValue();
+	str.ToDouble(&spcy);
+
+	str = m_space_z_text->GetValue();
+	str.ToDouble(&spcz);
+
+	return { spcx, spcy, spcz };
+}
+
 //1
 void VolumePropPanel::OnMinMaxMF(wxCommandEvent& event)
 {

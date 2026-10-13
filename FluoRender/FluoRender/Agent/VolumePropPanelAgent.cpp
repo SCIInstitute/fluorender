@@ -37,6 +37,10 @@ DEALINGS IN THE SOFTWARE.
 #include <ShaderProgram.h>
 #include <Root.h>
 #include <DataManager.h>
+#include <Reshape.h>
+#include <RecordHistParams.h>
+#include <TableHistParams.h>
+#include <Histogram.h>
 
 VolumePropPanelAgent::VolumePropPanelAgent(
 	VolumePropPanel* panel,
@@ -1485,69 +1489,6 @@ void VolumePropPanelAgent::SetAltColor()
 	NotifyViewUpdate({ gstSecColor, gstColormap });
 }
 
-void VolumePropPanelAgent::ApplyMl()
-{
-	auto group = m_group.lock();
-	auto vd = m_vd.lock();
-	if (m_sync_group && group)
-		group->ApplyMlVolProp();
-	else if (vd)
-		vd->ApplyMlVolProp();
-	NotifyViewUpdate({ gstVolumeProps, gstConvVolMeshUpdateTransf });
-}
-
-void VolumePropPanelAgent::SaveMl()
-{
-	auto vd = m_vd.lock();
-	if (!vd)
-		return;
-
-	std::vector<float> val;
-	val.push_back(float(vd->GetBoundaryLow()));
-	val.push_back(float(vd->GetGamma()));
-	val.push_back(float(vd->GetLowOffset()));
-	val.push_back(float(vd->GetHighOffset()));
-	val.push_back(float(vd->GetLeftThresh()));
-	val.push_back(float(vd->GetRightThresh()));
-	val.push_back(float(vd->GetShadingStrength()));
-	val.push_back(float(vd->GetShadingShine()));
-	val.push_back(float(vd->GetAlpha()));
-	val.push_back(float(vd->GetSampleRate()));
-	val.push_back(float(vd->GetLuminance()));
-	val.push_back(float(vd->GetMainColorMode() == flvr::ColorMode::Colormap));
-	val.push_back(float(vd->GetColormapInv()));
-	val.push_back(float(vd->GetColormap()));
-	val.push_back(float(vd->GetColormapProj()));
-	val.push_back(float(vd->GetColormapLow()));
-	val.push_back(float(vd->GetColormapHigh()));
-	val.push_back(float(vd->GetAlphaEnable()));
-	val.push_back(float(vd->GetShadingEnable()));
-	val.push_back(float(vd->GetInterpolate()));
-	val.push_back(float(vd->GetInvert()));
-	val.push_back(float(vd->GetRenderMode() == flvr::RenderMode::Mip));
-	val.push_back(float(vd->GetTransparent()));
-	val.push_back(float(vd->GetNR()));
-	val.push_back(float(vd->GetShadowEnable()));
-	val.push_back(float(vd->GetShadowIntensity()));
-	auto ep = flrd::Reshape::get_entry_params("vol_prop", val);
-
-	//histogram
-	flrd::Histogram histogram(vd);
-	histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
-	histogram.SetUseMask(false);
-	auto eh = histogram.GetEntryHist();
-
-	if (eh)
-	{
-		//record
-		auto rec = std::make_shared<flrd::RecordHistParams>();
-		rec->setInput(eh);
-		rec->setOutput(ep);
-		//table
-		glbin.get_vp_table().addRecord(rec);
-	}
-}
-
 //enable/disable
 void VolumePropPanelAgent::EnableGamma(bool bval)
 {
@@ -1558,7 +1499,7 @@ void VolumePropPanelAgent::EnableGamma(bool bval)
 	else if (vd)
 		vd->SetGammaEnable(bval);
 
-	FluoRefresh(0, { gstGamma3d }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstGamma3d });
 }
 
 void VolumePropPanelAgent::EnableMinMax(bool bval)
@@ -1570,7 +1511,7 @@ void VolumePropPanelAgent::EnableMinMax(bool bval)
 	else if (vd)
 		vd->SetMinMaxEnable(bval);
 
-	FluoRefresh(0, { gstMinMax }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstMinMax });
 }
 
 void VolumePropPanelAgent::EnableLuminance(bool bval)
@@ -1582,7 +1523,7 @@ void VolumePropPanelAgent::EnableLuminance(bool bval)
 	else if (vd)
 		vd->SetLuminanceEnable(bval);
 
-	FluoRefresh(0, { gstColor }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstColor });
 }
 
 void VolumePropPanelAgent::EnableAlpha(bool bval)
@@ -1594,7 +1535,7 @@ void VolumePropPanelAgent::EnableAlpha(bool bval)
 	else if (vd)
 		vd->SetAlphaEnable(bval);
 
-	FluoRefresh(0, { gstAlpha }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstAlpha });
 }
 
 void VolumePropPanelAgent::EnableShading(bool bval)
@@ -1606,7 +1547,7 @@ void VolumePropPanelAgent::EnableShading(bool bval)
 	else if (vd)
 		vd->SetShadingEnable(bval);
 
-	FluoRefresh(0, { gstShading }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShading });
 }
 
 void VolumePropPanelAgent::EnableBoundary(bool bval)
@@ -1618,10 +1559,10 @@ void VolumePropPanelAgent::EnableBoundary(bool bval)
 	else if (vd)
 		vd->SetBoundaryEnable(bval);
 
-	FluoRefresh(0, { gstBoundary }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstBoundary });
 }
 
-void VolumePropPanelAgent::EnableThresh(bool bval)
+void VolumePropPanelAgent::EnableThreshold(bool bval)
 {
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
@@ -1630,7 +1571,7 @@ void VolumePropPanelAgent::EnableThresh(bool bval)
 	else if (vd)
 		vd->SetThreshEnable(bval);
 
-	FluoRefresh(0, { gstThreshold }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstThreshold });
 }
 
 void VolumePropPanelAgent::EnableShadow(bool bval)
@@ -1644,7 +1585,7 @@ void VolumePropPanelAgent::EnableShadow(bool bval)
 	else if (vd)
 		vd->SetShadowEnable(bval);
 
-	FluoRefresh(0, { gstShadow }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShadow });
 }
 
 void VolumePropPanelAgent::EnableShadowDir(bool bval)
@@ -1653,22 +1594,12 @@ void VolumePropPanelAgent::EnableShadowDir(bool bval)
 		return;
 
 	glbin_settings.m_shadow_dir = bval;
-	if (bval)
-	{
-		wxString str;
-		str = m_shadow_dir_text->GetValue();
-		double deg;
-		str.ToDouble(&deg);
-		deg -= 45.0;
-		glbin_settings.m_shadow_dir_x = cos(d2r(deg));
-		glbin_settings.m_shadow_dir_y = sin(d2r(deg));
-	}
-	else
+	if (!bval)
 	{
 		glbin_settings.m_shadow_dir_x = 0.0;
 		glbin_settings.m_shadow_dir_y = 0.0;
 	}
-	FluoRefresh(0, { gstShadowDir }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShadowDir });
 }
 
 void VolumePropPanelAgent::EnableSampleRate(bool bval)
@@ -1680,7 +1611,7 @@ void VolumePropPanelAgent::EnableSampleRate(bool bval)
 	else if (vd)
 		vd->SetSampleRateEnable(bval);
 
-	FluoRefresh(0, { gstSampleRate }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstSampleRate });
 }
 
 void VolumePropPanelAgent::EnableColormap(bool bval)
@@ -1707,7 +1638,7 @@ void VolumePropPanelAgent::EnableColormap(bool bval)
 		vd->SetColormapDisp(bval);
 	}
 
-	FluoRefresh(0, { gstColormap, gstMainMode, gstMaskMode, gstUpdateSync }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstColormap, gstMainMode, gstMaskMode, gstUpdateSync });
 }
 
 void VolumePropPanelAgent::EnableMip(bool bval)
@@ -1724,7 +1655,7 @@ void VolumePropPanelAgent::EnableMip(bool bval)
 	else
 		vd->SetRenderMode(bval ? flvr::RenderMode::Mip : flvr::RenderMode::Standard);
 
-	FluoRefresh(0, { gstRenderMode }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstRenderMode });
 }
 
 void VolumePropPanelAgent::EnableTransparent(bool bval)
@@ -1736,7 +1667,7 @@ void VolumePropPanelAgent::EnableTransparent(bool bval)
 	else if (vd)
 		vd->SetTransparent(bval);
 
-	FluoRefresh(0, { gstTransparent }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstTransparent });
 }
 
 //set values
@@ -1763,13 +1694,10 @@ void VolumePropPanelAgent::SetMinMax(double val1, double val2)
 
 	vd->SetLowOffset(val1);
 	vd->SetHighOffset(val2);
-	if (notify)
-		FluoRefresh(0, { gstMinMax, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstMinMax, gstConvVolMeshUpdateTransf });
 }
 
-void VolumePropPanelAgent::SetLuminance(double val, bool notify)
+void VolumePropPanelAgent::SetLuminance(double val)
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -1779,13 +1707,10 @@ void VolumePropPanelAgent::SetLuminance(double val, bool notify)
 
 	vd->SetLuminance(val);
 
-	if (notify)
-		FluoRefresh(0, { gstLuminance }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstLuminance });
 }
 
-void VolumePropPanelAgent::SetAlpha(double val, bool notify)
+void VolumePropPanelAgent::SetAlpha(double val)
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -1794,13 +1719,10 @@ void VolumePropPanelAgent::SetAlpha(double val, bool notify)
 		return;
 
 	vd->SetAlpha(val);
-	if (notify)
-		FluoRefresh(0, { gstAlpha }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstAlpha });
 }
 
-void VolumePropPanelAgent::SetShadingStrength(double val, bool notify)
+void VolumePropPanelAgent::SetShadingStrength(double val)
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -1809,13 +1731,10 @@ void VolumePropPanelAgent::SetShadingStrength(double val, bool notify)
 		return;
 
 	vd->SetShadingStrength(val);
-	if (notify)
-		FluoRefresh(0, { gstShading }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShading });
 }
 
-void VolumePropPanelAgent::SetShadingShine(double val, bool notify)
+void VolumePropPanelAgent::SetShadingShine(double val)
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -1824,13 +1743,10 @@ void VolumePropPanelAgent::SetShadingShine(double val, bool notify)
 		return;
 
 	vd->SetShadingShine(val);
-	if (notify)
-		FluoRefresh(0, { gstShading }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShading });
 }
 
-void VolumePropPanelAgent::SetBoundary(double val1, double val2, bool notify)
+void VolumePropPanelAgent::SetBoundary(double val1, double val2)
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -1841,13 +1757,10 @@ void VolumePropPanelAgent::SetBoundary(double val1, double val2, bool notify)
 
 	vd->SetBoundaryLow(val1);
 	vd->SetBoundaryHigh(val2);
-	if (notify)
-		FluoRefresh(0, { gstBoundary, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstBoundary, gstConvVolMeshUpdateTransf });
 }
 
-void VolumePropPanelAgent::SetThresh(double val1, double val2, bool notify)
+void VolumePropPanelAgent::SetThreshold(double val1, double val2)
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -1858,14 +1771,10 @@ void VolumePropPanelAgent::SetThresh(double val1, double val2, bool notify)
 
 	vd->SetLeftThresh(val1);
 	vd->SetRightThresh(val2);
-	fluo::ValueCollection vc = { gstBrushCountAutoUpdate, gstColocalAutoUpdate, gstConvVolMeshUpdateTransf };
-	if (notify)
-		vc.insert(gstThreshold);
-
-	FluoRefresh(0, vc, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate, gstConvVolMeshUpdateTransf });
 }
 
-void VolumePropPanelAgent::SetShadowInt(double val, bool notify)
+void VolumePropPanelAgent::SetShadowInt(double val)
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -1874,13 +1783,10 @@ void VolumePropPanelAgent::SetShadowInt(double val, bool notify)
 		return;
 
 	vd->SetShadowIntensity(val);
-	if (notify)
-		FluoRefresh(0, { gstShadow }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShadow });
 }
 
-void VolumePropPanelAgent::SetShadowDir(double dval, bool notify)
+void VolumePropPanelAgent::SetShadowDir(double dval)
 {
 	dval -= 45.0;
 	double dir_x = cos(d2r(dval));
@@ -1891,13 +1797,10 @@ void VolumePropPanelAgent::SetShadowDir(double dval, bool notify)
 
 	glbin_settings.m_shadow_dir_x = dir_x;
 	glbin_settings.m_shadow_dir_y = dir_y;
-	if (notify)
-		FluoRefresh(0, { gstShadowDir }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShadowDir });
 }
 
-void VolumePropPanelAgent::SetSampleRate(double val, bool notify)
+void VolumePropPanelAgent::SetSampleRate(double val)
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -1906,13 +1809,10 @@ void VolumePropPanelAgent::SetSampleRate(double val, bool notify)
 		return;
 
 	vd->SetSampleRate(val);
-	if (notify)
-		FluoRefresh(0, { gstSampleRate }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstSampleRate });
 }
 
-void VolumePropPanelAgent::SetColormapVal(double val1, double val2, bool notify)
+void VolumePropPanelAgent::SetColormapVal(double val1, double val2)
 {
 	auto vd = m_vd.lock();
 	if (!vd)
@@ -1922,10 +1822,7 @@ void VolumePropPanelAgent::SetColormapVal(double val1, double val2, bool notify)
 		return;
 
 	vd->SetColormapValues(val1, val2);
-	if (notify)
-		FluoRefresh(0, { gstColormap }, { glbin_current.GetViewId() });
-	else
-		FluoRefresh(0, { gstNull }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstColormap });
 }
 
 
@@ -1953,7 +1850,7 @@ void VolumePropPanelAgent::SyncMinMax(double val1, double val2)
 
 	group->SetLowOffset(val1);
 	group->SetHighOffset(val2);
-	FluoRefresh(1, { gstMinMax }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstMinMax });
 }
 
 void VolumePropPanelAgent::SyncLuminance(double val)
@@ -1965,7 +1862,7 @@ void VolumePropPanelAgent::SyncLuminance(double val)
 		return;
 
 	group->SetLuminance(val);
-	FluoRefresh(1, { gstColor, gstTreeColors, gstClipPlaneRangeColor }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstColor, gstTreeColors, gstClipPlaneRangeColor });
 }
 
 void VolumePropPanelAgent::SyncAlpha(double val)
@@ -1977,7 +1874,7 @@ void VolumePropPanelAgent::SyncAlpha(double val)
 		return;
 
 	group->SetAlpha(val);
-	FluoRefresh(1, { gstAlpha }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstAlpha });
 }
 
 void VolumePropPanelAgent::SyncShadingStrength(double val)
@@ -1989,7 +1886,7 @@ void VolumePropPanelAgent::SyncShadingStrength(double val)
 		return;
 
 	group->SetShadingStrength(val);
-	FluoRefresh(1, { gstShading }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShading });
 }
 
 void VolumePropPanelAgent::SyncShadingShine(double val)
@@ -2001,7 +1898,7 @@ void VolumePropPanelAgent::SyncShadingShine(double val)
 		return;
 
 	group->SetShadingShine(val);
-	FluoRefresh(1, { gstShading }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShading });
 }
 
 void VolumePropPanelAgent::SyncBoundary(double val1, double val2)
@@ -2015,10 +1912,10 @@ void VolumePropPanelAgent::SyncBoundary(double val1, double val2)
 
 	group->SetBoundaryLow(val1);
 	group->SetBoundaryHigh(val2);
-	FluoRefresh(1, { gstBoundary }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstBoundary });
 }
 
-void VolumePropPanelAgent::SyncThresh(double val1, double val2)
+void VolumePropPanelAgent::SyncThreshold(double val1, double val2)
 {
 	auto group = m_group.lock();
 	if (!group)
@@ -2029,7 +1926,7 @@ void VolumePropPanelAgent::SyncThresh(double val1, double val2)
 
 	group->SetLeftThresh(val1);
 	group->SetRightThresh(val2);
-	FluoRefresh(1, { gstThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstThreshold, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
 }
 
 void VolumePropPanelAgent::SyncShadowInt(double val)
@@ -2041,7 +1938,7 @@ void VolumePropPanelAgent::SyncShadowInt(double val)
 		return;
 
 	group->SetShadowIntensity(val);
-	FluoRefresh(1, { gstShadow }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstShadow });
 }
 
 void VolumePropPanelAgent::SyncSampleRate(double val)
@@ -2054,7 +1951,7 @@ void VolumePropPanelAgent::SyncSampleRate(double val)
 		view->SetSampleRate(val);
 	else
 		group->SetSampleRate(val);
-	FluoRefresh(1, { gstSampleRate }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstSampleRate });
 }
 
 void VolumePropPanelAgent::SyncColormapVal(double val1, double val2)
@@ -2067,89 +1964,101 @@ void VolumePropPanelAgent::SyncColormapVal(double val1, double val2)
 		return;
 
 	group->SetColormapValues(val1, val2);
-	FluoRefresh(1, { gstColormap }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstColormap });
 }
 
 //ml
 void VolumePropPanelAgent::SetMachineLearning()
 {
-	ApplyMl();
-	//settings not managed by ml
-	//component display
-	//int ival = glbin_vol_def.m_label_mode;
-	//m_options_toolbar->ToggleTool(ID_CompChk, ival ? true : false);
-	//if (m_sync_group && m_group)
-	//	m_group->SetLabelMode(ival);
-	//else
-	//	m_vd->SetLabelMode(ival);
+	auto group = m_group.lock();
+	auto vd = m_vd.lock();
+	if (m_sync_group && group)
+		group->ApplyMlVolProp();
+	else if (vd)
+		vd->ApplyMlVolProp();
+	NotifyViewUpdate({ gstVolumeProps, gstConvVolMeshUpdateTransf });
 }
 
 void VolumePropPanelAgent::SetTransparent()
 {
-	bool bval = m_options_toolbar->GetToolState(ID_TranspChk);
-	EnableTransparent(bval);
+	auto panel = GetPanel();
+	if (panel)
+		EnableTransparent(panel->GetTransparent());
 }
 
 void VolumePropPanelAgent::SetMIP()
 {
-	int val = m_options_toolbar->GetToolState(ID_MipChk) ? 1 : 0;
-	EnableMip(val);
+	auto panel = GetPanel();
+	if (panel)
+		EnableMip(panel->GetMip());
 }
 
 void VolumePropPanelAgent::SetInvert()
 {
-	bool inv = m_options_toolbar->GetToolState(ID_InvChk);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
 
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
+	bool val = panel->GetInvert();
 	if (m_sync_group && group)
-		group->SetInvert(inv);
+		group->SetInvert(val);
 	else if (vd)
-		vd->SetInvert(inv);
+		vd->SetInvert(val);
 
-	FluoRefresh(0, { gstInvert, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstInvert, gstConvVolMeshUpdateTransf });
 }
 
 void VolumePropPanelAgent::SetOutline()
 {
-	bool bval = m_options_toolbar->GetToolState(ID_OutlineChk);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
 
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
+	bool val = panel->GetOutline();
 	if (m_sync_group && group)
-		group->SetOutline(bval);
+		group->SetOutline(val);
 	else if (vd)
-		vd->SetOutline(bval);
+		vd->SetOutline(val);
 
-	FluoRefresh(0, { gstOutline }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstOutline });
 }
 
 //interpolation
 void VolumePropPanelAgent::SetInterpolate()
 {
-	bool inv = m_options_toolbar->GetToolState(ID_InterpolateChk);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
 
 	auto view = m_view.lock();
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
+	bool val = panel->GetInterpolate();
 	if (m_sync_group && group)
-		group->SetInterpolate(inv);
+		group->SetInterpolate(val);
 	else if (vd)
-		vd->SetInterpolate(inv);
+		vd->SetInterpolate(val);
 	if (view)
-		view->SetIntp(inv);
+		view->SetIntp(val);
 
-	FluoRefresh(0, { gstInterpolate }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstInterpolate });
 }
 
 //noise reduction
 void VolumePropPanelAgent::SetNoiseReduction()
 {
-	bool val = m_options_toolbar->GetToolState(ID_NoiseReductChk);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
 
 	auto view = m_view.lock();
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
+	bool val = panel->GetNoiseReduction();
 	bool depth_view = view && view->GetChannelMixMode() == ChannelMixMode::Depth;
 	bool depth_group = vd && vd->GetChannelMixMode() == ChannelMixMode::Depth;
 	if (depth_view)
@@ -2159,13 +2068,17 @@ void VolumePropPanelAgent::SetNoiseReduction()
 	else
 		vd->SetNR(val);
 
-	FluoRefresh(0, { gstNoiseRedct }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstNoiseRedct });
 }
 
 //sync within group
 void VolumePropPanelAgent::SetSyncGroup()
 {
-	m_sync_group = m_options_toolbar->GetToolState(ID_SyncGroupChk);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	m_sync_group = panel->GetSyncGroup();
 	auto view = m_view.lock();
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
@@ -2229,17 +2142,19 @@ void VolumePropPanelAgent::SetSyncGroup()
 		group->SetMaskMode(vd->GetMaskColorMode());
 	}
 
-	FluoRefresh(1, { gstVolumeProps }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstVolumeProps });
 }
 
 //depth mode
 void VolumePropPanelAgent::SetChannelMixDepth()
 {
-	bool val = m_options_toolbar->GetToolState(ID_ChannelMixDepthChk);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
 
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
-	if (val)
+	if (panel->GetChannelMixDepth())
 	{
 		if (group)
 		{
@@ -2259,19 +2174,73 @@ void VolumePropPanelAgent::SetChannelMixDepth()
 			group->SetChannelMixMode(ChannelMixMode::CompositeAdd);
 	}
 
-	FluoRefresh(0, { gstChannelMixMode }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstChannelMixMode });
 }
 
 //legend
 void VolumePropPanelAgent::SetLegend()
 {
-	bool leg = m_options_toolbar->GetToolState(ID_LegendChk);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
 
 	auto vd = m_vd.lock();
 	if (vd)
-		vd->SetLegend(leg);
+		vd->SetLegend(panel->GetLegend());
 
-	FluoRefresh(1, { gstLegend }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstLegend });
+}
+
+void VolumePropPanelAgent::SaveMl()
+{
+	auto vd = m_vd.lock();
+	if (!vd)
+		return;
+
+	std::vector<float> val;
+	val.push_back(float(vd->GetBoundaryLow()));
+	val.push_back(float(vd->GetGamma()));
+	val.push_back(float(vd->GetLowOffset()));
+	val.push_back(float(vd->GetHighOffset()));
+	val.push_back(float(vd->GetLeftThresh()));
+	val.push_back(float(vd->GetRightThresh()));
+	val.push_back(float(vd->GetShadingStrength()));
+	val.push_back(float(vd->GetShadingShine()));
+	val.push_back(float(vd->GetAlpha()));
+	val.push_back(float(vd->GetSampleRate()));
+	val.push_back(float(vd->GetLuminance()));
+	val.push_back(float(vd->GetMainColorMode() == flvr::ColorMode::Colormap));
+	val.push_back(float(vd->GetColormapInv()));
+	val.push_back(float(vd->GetColormap()));
+	val.push_back(float(vd->GetColormapProj()));
+	val.push_back(float(vd->GetColormapLow()));
+	val.push_back(float(vd->GetColormapHigh()));
+	val.push_back(float(vd->GetAlphaEnable()));
+	val.push_back(float(vd->GetShadingEnable()));
+	val.push_back(float(vd->GetInterpolate()));
+	val.push_back(float(vd->GetInvert()));
+	val.push_back(float(vd->GetRenderMode() == flvr::RenderMode::Mip));
+	val.push_back(float(vd->GetTransparent()));
+	val.push_back(float(vd->GetNR()));
+	val.push_back(float(vd->GetShadowEnable()));
+	val.push_back(float(vd->GetShadowIntensity()));
+	auto ep = flrd::Reshape::get_entry_params("vol_prop", val);
+
+	//histogram
+	flrd::Histogram histogram(vd);
+	histogram.SetProgressFunc(glbin_data_manager.GetProgressFunc());
+	histogram.SetUseMask(false);
+	auto eh = histogram.GetEntryHist();
+
+	if (eh)
+	{
+		//record
+		auto rec = std::make_shared<flrd::RecordHistParams>();
+		rec->setInput(eh);
+		rec->setOutput(ep);
+		//table
+		glbin.get_vp_table().addRecord(rec);
+	}
 }
 
 void VolumePropPanelAgent::SaveDefault()
@@ -2286,47 +2255,30 @@ void VolumePropPanelAgent::SaveDefault()
 
 void VolumePropPanelAgent::ResetDefault()
 {
+	auto panel = GetPanel();
+	if (!panel)
+		return;
 	auto vd = m_vd.lock();
 	if (!vd)
 		return;
 
-	m_thresh_sldr->SetLink(false);
-	m_colormap_sldr->SetLink(false);
-
+	panel->ResetLinks();
 	auto group = m_group.lock();
 	if (m_sync_group && group)
 		glbin_vol_def.Apply(*group);
 	else
 		glbin_vol_def.Apply(*vd);
 
-	FluoRefresh(0, { gstVolumeProps, gstConvVolMeshUpdateTransf }, { glbin_current.GetViewId() });
+	NotifyViewUpdate({ gstVolumeProps, gstConvVolMeshUpdateTransf });
 }
 
 void VolumePropPanelAgent::SetSpacing()
 {
-	if (!m_space_x_text || !m_space_y_text || !m_space_z_text)
-		return false;
-
-	wxString str, str_new;
-	double spcx = 0.0;
-	double spcy = 0.0;
-	double spcz = 0.0;
-
-	str = m_space_x_text->GetValue();
-	str.ToDouble(&spcx);
-	if (spcx <= 0.0)
-		return false;
-
-	str = m_space_y_text->GetValue();
-	str.ToDouble(&spcy);
-	if (spcy <= 0.0)
-		return false;
-
-	str = m_space_z_text->GetValue();
-	str.ToDouble(&spcz);
-	if (spcz <= 0.0)
+	auto panel = GetPanel();
+	if (!panel)
 		return;
 
+	auto [spcx, spcy, spcz] = panel->GetSpacing();
 	fluo::Vector spc(spcx, spcy, spcz);
 	auto group = m_group.lock();
 	auto vd = m_vd.lock();
@@ -2372,11 +2324,5 @@ void VolumePropPanelAgent::UpdateMaxVal(double value)
 	m_max_val = value;
 	vd->SetMinMaxValue(vd->GetMinValue(), m_max_val);
 	vd->SetScalarScale(65535.0 / m_max_val);
-
-	m_minmax_sldr->SetRange(0, std::round(m_max_val));
-	m_thresh_sldr->SetRange(0, std::round(m_max_val));
-	m_luminance_sldr->SetRange(0, std::round(m_max_val));
-	m_alpha_sldr->SetRange(0, std::round(m_max_val));
-	m_colormap_sldr->SetRange(0, std::round(m_max_val));
 }
 

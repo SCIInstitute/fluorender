@@ -160,6 +160,17 @@ public:
 	int GetColormapProj();
 	fluo::Color GetMainColor();
 	fluo::Color GetAltColor();
+	bool GetTransparent();
+	int GetMip();
+	bool GetInvert();
+	bool GetOutline();
+	bool GetInterpolate();
+	bool GetNoiseReduction();
+	bool GetSyncGroup();
+	bool GetChannelMixDepth();
+	bool GetLegend();
+	void ResetLinks();
+	std::array<double, 3> GetSpacing();
 
 private:
 	//1
