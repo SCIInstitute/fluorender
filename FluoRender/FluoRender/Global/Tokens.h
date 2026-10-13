@@ -1450,6 +1450,10 @@ DEALINGS IN THE SOFTWARE.
 #define gstColocalizationDlg "colocalization dlg"
 #define gstConvertDlg "convert dlg"
 #define gstOclDlg "ocl dlg"
+#define gstTesterDlg "tester dlg"
+#define gstScriptBreakDlg "script break dlg"
+#define gstLoadRenderViewSettings "load render view settings"
+#define gstMainFrameInitialize "main frame initialize"
 
 //render canvas
 #define gstInitViewAll "init view all"

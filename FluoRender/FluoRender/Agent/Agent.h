@@ -149,7 +149,7 @@ struct UpdateRequest
 	}
 };
 
-bool HasAnyValue(
+inline bool HasAnyValue(
 	const UpdateRequest& request,
 	std::span<const std::string_view> values)
 {

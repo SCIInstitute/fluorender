@@ -30,8 +30,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Agent.h>
 #include <Tokens.h>
+#include <set>
 
 class MainFrame;
+class RenderViewPanelAgent;
 class wxBasisSlider;
 class MainFrameAgent : public Agent
 {
@@ -45,7 +47,8 @@ public:
 
 	void SetFocusVRenderViews(wxBasisSlider* slider);
 
-	void ShowScriptBreakDlg(bool bval);
+	void AddRenderView(RenderViewPanelAgent* agent);
+	void RemoveRenderView(RenderViewPanelAgent* agent);
 
 protected:
 	std::span < const std::string_view>
@@ -64,8 +67,13 @@ private:
 		gstCurrentSelect,
 	};
 
+	std::set<RenderViewPanelAgent*> renderview_agent_list_;
+
 private:
+	void Initialize();
 	void SyncRenderViewPanels();
+	void LoadRenderViewSettings();
+	void ToggleScriptBreakDlg();
 	void ShowMachineLearningDlg();
 	void ShowManipPropPanel();
 

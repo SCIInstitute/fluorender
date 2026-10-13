@@ -66,6 +66,7 @@ public:
 	int GetViewId();
 	//reset counter
 	static void ResetID();
+	void LoadSettings();
 
 protected:
 	std::span < const std::string_view>
@@ -187,8 +188,6 @@ private:
 	void SetRotLock();
 	void SetZeroRotations();
 	void ResetRotations();
-
-	void LoadSettings();
 
 };
 

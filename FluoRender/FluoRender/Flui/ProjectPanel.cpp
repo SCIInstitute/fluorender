@@ -26,17 +26,17 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <ProjectPanel.h>
-#include <MainFrame.h>
+#include <ProjectPanelAgent.h>
 //resources
 #include <png_resource.h>
 #include <icons.h>
 
-ProjectPanel::ProjectPanel(MainFrame* frame,
+ProjectPanel::ProjectPanel(wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	TabbedPanel(frame, pos, size, style, name)
+	TabbedPanel(parent, pos, size, style, name)
 {
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
@@ -111,39 +111,40 @@ ProjectPanel::ProjectPanel(MainFrame* frame,
 
 void ProjectPanel::OnToolbar(wxCommandEvent& event)
 {
+	fluo::ValueCollection vc;
 	int id = event.GetId();
 
 	switch (id)
 	{
 	case ID_Brush:
-		m_frame->ShowBrushDlg();
+		vc.insert(gstBrushToolDlg);
 		break;
 	case ID_Measurement:
-		m_frame->ShowMeasureDlg();
+		vc.insert(gstMeasureDlg);
 		break;
 	case ID_Component:
-		m_frame->ShowComponentDlg();
+		vc.insert(gstComponentDlg);
 		break;
 	case ID_Track:
-		m_frame->ShowTrackDlg();
+		vc.insert(gstTrackDlg);
 		break;
 	case ID_Calculation:
-		m_frame->ShowCalculationDlg();
+		vc.insert(gstCalculationDlg);
 		break;
 	case ID_NoiseReduct:
-		m_frame->ShowNoiseCancellingDlg();
+		vc.insert(gstNoiseCancellingDlg);
 		break;
 	case ID_VolumeSize:
-		m_frame->ShowCountingDlg();
+		vc.insert(gstCountingDlg);
 		break;
 	case ID_Colocalization:
-		m_frame->ShowColocalizationDlg();
+		vc.insert(gstColocalizationDlg);
 		break;
 	case ID_Convert:
-		m_frame->ShowConvertDlg();
+		vc.insert(gstConvertDlg);
 		break;
 	case ID_Ocl:
-		m_frame->ShowOclDlg();
+		vc.insert(gstOclDlg);
 		break;
 	}
 }

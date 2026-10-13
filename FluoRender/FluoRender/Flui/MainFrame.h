@@ -246,6 +246,9 @@ public:
 	void LoadPerspective(const wxString& str);
 	wxString SavePerspective();
 
+	int GetReset() { return m_reset; }
+	bool GetBenchmark() { return m_benchmark; }
+
 	//volume
 	void OpenVolume();
 	void ImportVolume();
@@ -334,6 +337,7 @@ public:
 	void DeleteRenderViewPanel(const std::wstring& name);
 
 	//hide/show tools
+	void ToggleScriptBreakDlg();
 	void ToggleAllPanels(bool cur_state);
 	void ToggleLastOpen();
 	void ToggleLastTool();
@@ -377,6 +381,10 @@ public:
 	void SetProgress(int val, const std::string& str);
 
 private:
+	//cmd settings
+	int m_reset;
+	bool m_benchmark;
+
 	//aui manager
 	wxAuiManager m_aui_mgr;
 	//main toolbar

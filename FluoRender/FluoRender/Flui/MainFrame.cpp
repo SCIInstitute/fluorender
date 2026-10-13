@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #include <KernelProgram.h>
 #include <Main.h>
 #include <MainFrame.h>
+#include <MainFrameAgent.h>
 #include <Global.h>
 #include <Tokens.h>
 #include <GlobalStates.h>
@@ -63,7 +64,7 @@ DEALINGS IN THE SOFTWARE.
 #include <MachineLearningDlg.h>
 #include <ScriptBreakDlg.h>
 #include <FpRangeDlg.h>
-#include <Tester.h>
+#include <TesterDlg.h>
 #include <TextureRenderer.h>
 #include <msk_writer.h>
 #include <msk_reader.h>
@@ -123,6 +124,8 @@ MainFrame::MainFrame(
 	bool windowed,
 	bool hidepanels)
 	: wxFrame(0, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
+	m_reset(reset),
+	m_benchmark(benchmark),
 	m_title(title),
 	m_movie_panel(0),
 	m_tree_panel(0),
@@ -153,31 +156,10 @@ MainFrame::MainFrame(
 #elifdef __linux__
 	SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
-	//create this first to read the settings
-	if (reset == 0)
-		glbin_settings.Read();
-	else if (reset == 2)
-		glbin_settings.Read("fluorender_default");
-	glbin.apply_processor_settings();
-	glbin_comp_def.Apply(glbin_clusterizer);
-	glbin_comp_def.Apply(glbin_comp_analyzer);
-	glbin_comp_def.Apply(glbin_comp_generator);
-	glbin_comp_def.Apply(glbin_comp_selector);
-	glbin_brush_def.Apply(glbin_vol_selector);
-	glbin_mesh_def.Apply(glbin_conv_vol_mesh);
-	glbin_mov_def.Apply(glbin_moviemaker);
-	glbin_data_manager.UpdateStreamMode(-1.0);
 
-	//set frame
-	glbin_script_proc.SetFrame(this);
-	glbin_data_manager.SetFrame(this);
-	glbin_current.mainframe = this;
-	//progress
-	//these global objects are constructed before mainframe. therefore need to set progress functions again
-	glbin.InitProgress(std::bind(&MainFrame::SetProgress, this,
-			std::placeholders::_1, std::placeholders::_2));
-
-	glbin_states.m_benchmark = benchmark;
+	auto agent = m_agent->As<MainFrameAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMainFrameInitialize });
 
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
@@ -456,97 +438,83 @@ MainFrame::MainFrame(
 		"Information about FluoRender");
 	m->SetBitmap(wxGetBitmap(icon_about_mini));
 
-	//create render view
-	RenderViewPanel *vrv = new RenderViewPanel(this);
-	Root* root = glbin_data_manager.GetRoot();
-	std::shared_ptr<RenderView> view;
-	if (root)
-	{
-		view = root->GetLastView();
-		if (view)
-		{
-			view->InitView();
-		}
-	}
+	//create primary render view
+	RenderViewPanel *vrv = glbin_flui_builder.BuildRenderViewPanel(this, nullptr);
 	m_renderview_panels.push_back(vrv);
 
-	wxSize panel_size(FromDIP(wxSize(350, 450)));
 	//use the project panel for both tree and list
-	m_proj_panel = new ProjectPanel(this);
-	//m_proj_panel->SetName("ProjectPanel");
+	m_proj_panel = glbin_flui_builder.BuildProjectPanel(this);
 	//create list view
-	m_list_panel = new ListPanel(this, m_proj_panel);
+	m_list_panel = glbin_flui_builder.BuildListPanel(m_proj_panel);
 	//create tree view
-	m_tree_panel = new TreePanel(this, m_proj_panel);
+	m_tree_panel = glbin_flui_builder.BuildTreePanel(m_proj_panel);
 	m_proj_panel->AddPage(m_list_panel, UITEXT_DATAVIEW, false);
 	m_proj_panel->AddPage(m_tree_panel, UITEXT_TREEVIEW, true);
 
 	//create movie view (sets the m_recorder_dlg)
-	m_movie_panel = new MoviePanel(this,
-		wxDefaultPosition, panel_size);
+	m_movie_panel = glbin_flui_builder.BuildMoviePanel(this);
+	m_movie_panel->SetSize(FromDIP(wxSize(350, 450)));
 
 	//create prop panel
-	m_prop_panel = new PropertyPanel(this);
-	//m_prop_panel->SetName("AgentPanel");
+	m_prop_panel = glbin_flui_builder.BuildPropertyPanel(this);
 
 	//clipping view
-	m_clip_plane_panel = new ClipPlanePanel(this,
-		wxDefaultPosition, FromDIP(wxSize(140,700)));
+	m_clip_plane_panel = glbin_flui_builder.BuildClipPlanePanel(this);
+	m_clip_plane_panel->SetSize(FromDIP(wxSize(140,700)));
 
 	//adjust view
-	m_output_adj_panel = new OutputAdjPanel(this,
-		wxDefaultPosition, FromDIP(wxSize(140, 700)));
+	m_output_adj_panel = glbin_flui_builder.BuildOutputAdjPanel(this);
+	m_output_adj_panel->SetSize(FromDIP(wxSize(140, 700)));
 
 	//settings dialog
-	m_setting_dlg = new SettingDlg(this);
+	m_setting_dlg = glbin_flui_builder.BuildSettingDlg(this);
 
 	//brush tool dialog
-	m_brush_tool_dlg = new BrushToolDlg(this);
+	m_brush_tool_dlg = glbin_flui_builder.BuildBrushToolDlg(this);
 
 	//noise cancelling dialog
-	m_noise_cancelling_dlg = new NoiseCancellingDlg(this);
+	m_noise_cancelling_dlg = glbin_flui_builder.BuildNoiseCancellingDlg(this);
 
 	//counting dialog
-	m_counting_dlg = new CountingDlg(this);
+	m_counting_dlg = glbin_flui_builder.BuildCountingDlg(this);
 
 	//convert dialog
-	m_convert_dlg = new ConvertDlg(this);
+	m_convert_dlg = glbin_flui_builder.BuildConvertDlg(this);
 
 	//colocalization dialog
-	m_colocalization_dlg = new ColocalizationDlg(this);
+	m_colocalization_dlg = glbin_flui_builder.BuildColocalizationDlg(this);
 
 	//measure dialog
-	m_measure_dlg = new MeasureDlg(this);
+	m_measure_dlg = glbin_flui_builder.BuildMeasureDlg(this);
 
 	//trace dialog
-	m_track_dlg = new TrackDlg(this);
+	m_track_dlg = glbin_flui_builder.BuildTrackDlg(this);
 
 	//ocl dialog
-	m_ocl_dlg = new OclDlg(this);
+	m_ocl_dlg = glbin_flui_builder.BuildOclDlg(this);
 
 	//component dialog
-	m_component_dlg = new ComponentDlg(this);
+	m_component_dlg = glbin_flui_builder.BuildComponentDlg(this);
 
 	//calculation dialog
-	m_calculation_dlg = new CalculationDlg(this);
+	m_calculation_dlg = glbin_flui_builder.BuildCalculationDlg(this);
 
 	//machine learing dialog
-	m_machine_learning_dlg = new MachineLearningDlg(this);
+	m_machine_learning_dlg = glbin_flui_builder.BuildMachineLearningDlg(this);
 
 	//script break dialog
-	m_script_break_dlg = new ScriptBreakDlg(this);
+	m_script_break_dlg = glbin_flui_builder.BuildScriptBreakDlg(this);
 
 	//floating point volume range
-	m_fp_range_dlg = new FpRangeDlg(this);
+	m_fp_range_dlg = glbin_flui_builder.BuildFpRangeDlg(this);
 	m_fp_range_dlg->Hide();
 
 	//help dialog
-	m_help_dlg = new HelpDlg(this);
-	//m_help_dlg->LoadPage("C:\\!wanyong!\\TEMP\\wxHtmlWindow.htm");
+	m_help_dlg = glbin_flui_builder.BuildHelpDlg(this);
 
 	//tester
 	//shown for testing parameters
-	m_teser_dlg = new TesterDlg(this);
+	m_teser_dlg = glbin_flui_builder.BuildTesterDlg(this);
 
 	//Add to the manager
 	m_aui_mgr.AddPane(m_main_tb, wxAuiPaneInfo().
@@ -691,8 +659,8 @@ MainFrame::MainFrame(
 	else
 		m_aui_mgr.GetPane(m_teser_dlg).Hide();
 
-	for (auto it : m_renderview_panels)
-		it->LoadSettings();
+	if (agent)
+		agent->UpdateDataToUI({ gstLoadRenderViewSettings });
 
 	SetMinSize(FromDIP(wxSize(800,600)));
 
@@ -700,7 +668,7 @@ MainFrame::MainFrame(
 		StartupMaximize();
 
 	//drop target
-	SetDropTarget(new DnDFile(this));
+	SetDropTarget(glbin_flui_builder.BuildDragDrop());
 
 	m_statusbar = new wxGaugeStatusbar(this, wxID_ANY);
 	SetStatusBar(m_statusbar);
@@ -1009,7 +977,7 @@ wxString MainFrame::CreateRenderViewPanel(int row)
 	if (!vrv)
 		return "NO_NAME";
 
-	RenderView* this_view = vrv->GetRenderView();;
+	RenderView* this_view = vrv->GetRenderView();
 	m_renderview_panels.push_back(vrv);
 	if (m_movie_panel)
 		m_movie_panel->FluoUpdate({ gstMovViewList });
@@ -1719,6 +1687,12 @@ void MainFrame::DeleteRenderViewPanel(const std::wstring &name)
 }
 
 //hide/show tools
+void MainFrame::ToggleScriptBreakDlg()
+{
+	bool shown = m_script_break_dlg->IsShown();
+	m_script_break_dlg->Show(!shown);
+}
+
 void MainFrame::ToggleAllPanels(bool cur_state)
 {
 	bool bval = true;

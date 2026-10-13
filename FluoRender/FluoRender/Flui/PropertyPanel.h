@@ -33,7 +33,7 @@ DEALINGS IN THE SOFTWARE.
 class PropertyPanel : public TabbedPanel
 {
 public:
-	PropertyPanel(MainFrame* frame,
+	PropertyPanel(wxWindow* frame,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,

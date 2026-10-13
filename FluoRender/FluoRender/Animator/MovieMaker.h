@@ -28,14 +28,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef _MOVIEMAKER_H_
 #define _MOVIEMAKER_H_
 
+#include <StopWatch.hpp>
 #include <vector>
 #include <string>
 #include <memory>
 
-namespace fluo
-{
-	class StopWatch;
-}
 class MainFrame;
 class RenderView;
 class MovieMaker
@@ -197,7 +194,7 @@ public:
 	void MakeKeysLookingGlass(int val);
 
 private:
-	MainFrame* m_frame;
+	fluo::StopWatch m_stop_watch;
 	std::weak_ptr<RenderView> m_view;
 	bool m_running;
 	int m_last_frame;//last frame nunmber to save
@@ -249,9 +246,6 @@ private:
 	//cam lock
 	bool m_cam_lock;
 	int m_cam_lock_type;//0-not used;1-image center;2-click view;3-ruler;4-selection
-
-private:
-	fluo::StopWatch* get_stopwatch();
 };
 
 #endif//_MOVIEMAKER_H_

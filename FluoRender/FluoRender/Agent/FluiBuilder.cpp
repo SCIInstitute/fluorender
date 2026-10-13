@@ -44,8 +44,12 @@ DEALINGS IN THE SOFTWARE.
 #include <ConvertDlgAgent.h>
 #include <CountingDlg.h>
 #include <CountingDlgAgent.h>
+#include <DragDrop.h>
+#include <DragDropFileAgent.h>
 #include <FpRangeDlg.h>
 #include <FpRangeDlgAgent.h>
+#include <HelpDlg.h>
+#include <HelpDlgAgent.h>
 #include <ListPanel.h>
 #include <ListPanelAgent.h>
 #include <MachineLearningDlg.h>
@@ -60,10 +64,16 @@ DEALINGS IN THE SOFTWARE.
 #include <MeshPropPanelAgent.h>
 #include <MoviePanel.h>
 #include <MoviePanelAgent.h>
+#include <NoiseCancellingDlg.h>
+#include <NoiseCancellingDlgAgent.h>
 #include <OclDlg.h>
 #include <OclDlgAgent.h>
 #include <OutputAdjPanel.h>
 #include <OutputAdjPanelAgent.h>
+#include <ProjectPanel.h>
+#include <ProjectPanelAgent.h>
+#include <PropertyPanel.h>
+#include <PropertyPanelAgent.h>
 #include <RenderCanvas.h>
 #include <RenderCanvasAgent.h>
 #include <RenderViewPanel.h>
@@ -72,6 +82,8 @@ DEALINGS IN THE SOFTWARE.
 #include <ScriptBreakDlgAgent.h>
 #include <SettingDlg.h>
 #include <SettingDlgAgent.h>
+#include <TesterDlg.h>
+#include <TesterDlgAgent.h>
 #include <TrackDlg.h>
 #include <TrackDlgAgent.h>
 #include <TreePanel.h>
@@ -84,7 +96,6 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderView.h>
 #include <Root.h>
 #include <Coordinator.h>
-
 
 #include <wx/glcanvas.h>
 
@@ -146,11 +157,31 @@ CountingDlg* FluiBuilder::BuildCountingDlg(
 		CountingDlgAgent>(parent);
 }
 
+DnDFile* FluiBuilder::BuildDragDrop()
+{
+	auto dndfile = new DnDFile();
+
+	auto agent = std::make_unique<DragDropFileAgent>(dndfile);
+
+	glbin_coordinator.Register(agent.get());
+
+	dndfile->SetAgent(std::move(agent));
+
+	return dndfile;
+}
+
 FpRangeDlg* FluiBuilder::BuildFpRangeDlg(
 	wxWindow* parent)
 {
 	return BuildUi<FpRangeDlg,
 		FpRangeDlgAgent>(parent);
+}
+
+HelpDlg* FluiBuilder::BuildHelpDlg(
+	wxWindow* parent)
+{
+	return BuildUi<HelpDlg,
+		HelpDlgAgent>(parent);
 }
 
 ListPanel* FluiBuilder::BuildListPanel(
@@ -226,6 +257,13 @@ MoviePanel* FluiBuilder::BuildMoviePanel(
 		MoviePanelAgent>(parent);
 }
 
+NoiseCancellingDlg* FluiBuilder::BuildNoiseCancellingDlg(
+	wxWindow* parent)
+{
+	return BuildUi<NoiseCancellingDlg,
+		NoiseCancellingDlgAgent>(parent);
+}
+
 OclDlg* FluiBuilder::BuildOclDlg(
 	wxWindow* parent)
 {
@@ -240,6 +278,20 @@ OutputAdjPanel* FluiBuilder::BuildOutputAdjPanel(
 		OutputAdjPanelAgent>(parent);
 }
 
+ProjectPanel* FluiBuilder::BuildProjectPanel(
+	wxWindow* parent)
+{
+	return BuildUi<ProjectPanel,
+		ProjectPanelAgent>(parent);
+}
+
+PropertyPanel* FluiBuilder::BuildPropertyPanel(
+	wxWindow* parent)
+{
+	return BuildUi<PropertyPanel,
+		PropertyPanelAgent>(parent);
+}
+
 RenderCanvas*
 FluiBuilder::BuildRenderCanvas(
 	wxWindow* parent,
@@ -251,10 +303,10 @@ FluiBuilder::BuildRenderCanvas(
 
 	auto agent = std::make_unique<RenderCanvasAgent>(canvas, view);
 
-	canvas->SetAgent(std::move(agent));
-	
 	glbin_coordinator.Register(agent.get());
 
+	canvas->SetAgent(std::move(agent));
+	
 	return canvas;
 }
 
@@ -268,8 +320,11 @@ FluiBuilder::BuildRenderViewPanel(
 	auto view = std::make_shared<RenderView>();
 
 	auto agent = std::make_unique<RenderViewPanelAgent>(panel, view);
-	panel->SetAgent(std::move(agent));
 	glbin_coordinator.Register(agent.get());
+	auto mainframe_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (mainframe_agent)
+		mainframe_agent->AddRenderView(agent.get());
+	panel->SetAgent(std::move(agent));
 
 	auto canvas = BuildRenderCanvas(panel, sharedContext, view);
 	canvas->SetCanFocus(false);
@@ -281,6 +336,7 @@ FluiBuilder::BuildRenderViewPanel(
 	Root* root = glbin_data_manager.GetRoot();
 	root->AddView(view);
 	glbin_current.render_view_drawing = view;
+	view->InitView();
 
 	return panel;
 
@@ -298,6 +354,13 @@ SettingDlg* FluiBuilder::BuildSettingDlg(
 {
 	return BuildUi<SettingDlg,
 		SettingDlgAgent>(parent);
+}
+
+TesterDlg* FluiBuilder::BuildTesterDlg(
+	wxWindow* parent)
+{
+	return BuildUi<TesterDlg,
+		TesterDlgAgent>(parent);
 }
 
 TrackDlg* FluiBuilder::BuildTrackDlg(

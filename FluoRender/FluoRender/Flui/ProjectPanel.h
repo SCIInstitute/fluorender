@@ -47,7 +47,7 @@ public:
 		ID_Ocl
 	};
 
-	ProjectPanel(MainFrame* frame,
+	ProjectPanel(wxWindow* parent,
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,

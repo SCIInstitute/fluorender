@@ -87,7 +87,7 @@ void ScriptBreakDlgAgent::Hold()
 	UpdateDataToUI({});
 	auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
 	if (frame_agent)
-		frame_agent->ShowScriptBreakDlg(true);
+		frame_agent->UpdateDataToUI({gstScriptBreakDlg});
 }
 
 void ScriptBreakDlgAgent::SetScriptBreak()
@@ -103,7 +103,7 @@ void ScriptBreakDlgAgent::MovieStop()
 	glbin_moviemaker.Rewind();
 	auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
 	if (frame_agent)
-		frame_agent->ShowScriptBreakDlg(false);
+		frame_agent->UpdateDataToUI({ gstScriptBreakDlg });
 }
 
 void ScriptBreakDlgAgent::MovieContinue()
@@ -111,5 +111,5 @@ void ScriptBreakDlgAgent::MovieContinue()
 	glbin_moviemaker.Resume();
 	auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
 	if (frame_agent)
-		frame_agent->ShowScriptBreakDlg(false);
+		frame_agent->UpdateDataToUI({ gstScriptBreakDlg });
 }

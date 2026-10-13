@@ -29,8 +29,10 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <RenderViewPanelAgent.h>
 #include <RenderCanvas.h>
+#include <MainFrameAgent.h>
 #include <Global.h>
 #include <Tokens.h>
+#include <Coordinator.h>
 #include <MainSettings.h>
 #include <RenderView.h>
 #include <RenderCanvasAgent.h>
@@ -222,6 +224,12 @@ RenderViewPanel::~RenderViewPanel()
 	glbin.del_undo_control(m_x_rot_sldr);
 	glbin.del_undo_control(m_y_rot_sldr);
 	glbin.del_undo_control(m_z_rot_sldr);
+
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	glbin_coordinator.Unregister(agent);
+	auto mainframe_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (mainframe_agent)
+		mainframe_agent->RemoveRenderView(agent);
 }
 
 void RenderViewPanel::CreateBar()

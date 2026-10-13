@@ -51,7 +51,11 @@ class ConvertDlg;
 
 class CountingDlg;
 
+class DnDFile;
+
 class FpRangeDlg;
+
+class HelpDlg;
 
 class ListPanel;
 
@@ -74,6 +78,10 @@ class OclDlg;
 
 class OutputAdjPanel;
 
+class ProjectPanel;
+
+class PropertyPanel;
+
 class RenderCanvas;
 class wxGLContext;
 class RenderView;
@@ -83,6 +91,8 @@ class RenderViewPanel;
 class ScriptBreakDlg;
 
 class SettingDlg;
+
+class TesterDlg;
 
 class TrackDlg;
 
@@ -120,7 +130,12 @@ public:
 	static CountingDlg* BuildCountingDlg(
 		wxWindow* parent);
 
+	static DnDFile* BuildDragDrop();
+
 	static FpRangeDlg* BuildFpRangeDlg(
+		wxWindow* parent);
+
+	static HelpDlg* BuildHelpDlg(
 		wxWindow* parent);
 
 	static ListPanel* BuildListPanel(
@@ -162,6 +177,12 @@ public:
 	static OutputAdjPanel* BuildOutputAdjPanel(
 		wxWindow* parent);
 
+	static ProjectPanel* BuildProjectPanel(
+		wxWindow* parent);
+
+	static PropertyPanel* BuildPropertyPanel(
+		wxWindow* parent);
+
 	static RenderCanvas* BuildRenderCanvas(
 		wxWindow* parent,
 		wxGLContext* sharedContext,
@@ -176,6 +197,9 @@ public:
 		wxWindow* parent);
 
 	static SettingDlg* BuildSettingDlg(
+		wxWindow* parent);
+
+	static TesterDlg* BuildTesterDlg(
 		wxWindow* parent);
 
 	static TrackDlg* BuildTrackDlg(

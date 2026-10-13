@@ -26,14 +26,14 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 #include <PropertyPanel.h>
-#include <MainFrame.h>
+#include <PropertyPanelAgent.h>
 
-PropertyPanel::PropertyPanel(MainFrame* frame,
+PropertyPanel::PropertyPanel(wxWindow* parent,
 	const wxPoint& pos,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	TabbedPanel(frame, pos, size, style, name)
+	TabbedPanel(parent, pos, size, style, name)
 {
 	wxEventBlocker blocker(this);
 	Freeze();

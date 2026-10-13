@@ -43,6 +43,8 @@ namespace fluo
 			return "StopWatch";
 		}
 
+		~StopWatch();
+
 		void start();
 		void stop();
 		void sample();
@@ -68,9 +70,6 @@ namespace fluo
 		unsigned long long sys_time();
 
 		unsigned long long get_ticks();
-
-	protected:
-		virtual ~StopWatch();
 
 	private:
 		using Clock = std::chrono::steady_clock; // CHANGE

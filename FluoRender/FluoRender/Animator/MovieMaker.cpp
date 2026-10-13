@@ -37,7 +37,6 @@ DEALINGS IN THE SOFTWARE.
 #include <MoviePanel.h>
 #include <RenderViewPanel.h>
 #include <StopWatch.hpp>
-#include <StopWatchFactory.hpp>
 #include <VideoEncoder.h>
 #include <MainSettings.h>
 #include <Project.h>
@@ -51,7 +50,6 @@ DEALINGS IN THE SOFTWARE.
 #include <filesystem>
 
 MovieMaker::MovieMaker() :
-	m_frame(0),
 	m_last_frame(-1),
 	m_starting_rot(0),
 	m_running(false),
@@ -125,14 +123,14 @@ void MovieMaker::Start()
 	flvr::TextureRenderer::maximize_uptime_ = true;
 	m_last_frame = 0;
 
-	get_stopwatch()->interval(1000.0 / m_fps);
-	get_stopwatch()->start();
+	m_stop_watch.interval(1000.0 / m_fps);
+	m_stop_watch.start();
 	m_running = true;
 }
 
 void MovieMaker::Stop()
 {
-	get_stopwatch()->stop();
+	m_stop_watch.stop();
 	glbin_video_encoder.close();
 	m_record = false;
 	glbin_states.m_capture = false;
@@ -145,8 +143,8 @@ void MovieMaker::Resume()
 {
 	if (m_timer_hold)
 	{
-		get_stopwatch()->interval(1000.0 / m_fps);
-		get_stopwatch()->start();
+		m_stop_watch.interval(1000.0 / m_fps);
+		m_stop_watch.start();
 		m_timer_hold = false;
 		m_running = true;
 	}
@@ -156,7 +154,7 @@ void MovieMaker::Hold()
 {
 	if (!m_timer_hold && m_running)
 	{
-		get_stopwatch()->stop();
+		m_stop_watch.stop();
 		m_timer_hold = true;
 		m_running = false;
 	}
@@ -197,7 +195,7 @@ void MovieMaker::Reset()
 void MovieMaker::PlaySave()
 {
 	auto view = m_view.lock();
-	if (!m_frame || !view)
+	if (!view)
 		return;
 
 	Rewind();
@@ -970,7 +968,7 @@ bool MovieMaker::Action()
 {
 	if (!m_running)
 		return false;
-	if (!get_stopwatch()->check())
+	if (!m_stop_watch.check())
 		return false;
 
 	//get all of the progress info
@@ -1026,18 +1024,6 @@ bool MovieMaker::Action()
 	}
 
 	return true;
-}
-
-fluo::StopWatch* MovieMaker::get_stopwatch()
-{
-	fluo::StopWatch* result = glbin_swhf.findFirst(gstMovStopWatch);
-	if (!result)
-	{
-		result = glbin_swhf.build();
-		result->setName(gstMovStopWatch);
-		result->interval(1000.0 / m_fps);
-	}
-	return result;
 }
 
 void MovieMaker::MakeKeys(int type)
