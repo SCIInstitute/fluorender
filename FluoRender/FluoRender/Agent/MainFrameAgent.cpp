@@ -41,6 +41,10 @@ DEALINGS IN THE SOFTWARE.
 #include <ScriptProc.h>
 #include <CurrentObjects.h>
 #include <GlobalStates.h>
+#include <PyBase.h>
+#include <Directory.h>
+#include <TextRenderer.h>
+#include <MovieMaker.h>
 
 MainFrameAgent::MainFrameAgent(
 	MainFrame* frame) :
@@ -59,8 +63,6 @@ void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 		ShowMachineLearningDlg();
 	if (request.HasValue(gstManipPropPanel))
 		ShowManipPropPanel();
-	if (request.HasValue(gstLoadRenderViewSettings))
-		LoadRenderViewSettings();
 }
 
 void MainFrameAgent::UpdateData(const UpdateRequest& request)
@@ -137,6 +139,28 @@ void MainFrameAgent::Initialize()
 
 	glbin_states.m_benchmark = mainframe->GetBenchmark();
 
+	//python
+	flrd::PyBase::SetHighVer(glbin_settings.m_python_ver);
+	//font
+	std::wstring font_file = glbin_settings.m_font_file;
+	std::filesystem::path p = GetDataRoot();
+	p /= "Fonts";
+	if (font_file != L"")
+		p /= font_file;
+	else
+		p /= "FreeSans.ttf";
+	font_file = p.wstring();
+	glbin_text_tex_manager.load_face(font_file);
+	glbin_text_tex_manager.set_size(glbin_settings.m_text_size);
+
+	glbin_states.m_status_str = std::string(fluo::AppTitle) + " started normally.";
+
+	//if (!renderview_agent_list_.empty())
+	//{
+	//	auto view = renderview_agent_list_.begin();
+	//	glbin_moviemaker.SetView(*view);
+	//}
+	glbin_mov_def.Apply(glbin_moviemaker);
 }
 
 void MainFrameAgent::SyncRenderViewPanels()

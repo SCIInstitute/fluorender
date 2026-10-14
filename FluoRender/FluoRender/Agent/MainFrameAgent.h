@@ -50,6 +50,9 @@ public:
 	void AddRenderView(RenderViewPanelAgent* agent);
 	void RemoveRenderView(RenderViewPanelAgent* agent);
 
+	void Initialize();
+	void LoadRenderViewSettings();
+
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -70,9 +73,7 @@ private:
 	std::set<RenderViewPanelAgent*> renderview_agent_list_;
 
 private:
-	void Initialize();
 	void SyncRenderViewPanels();
-	void LoadRenderViewSettings();
 	void ToggleScriptBreakDlg();
 	void ShowMachineLearningDlg();
 	void ShowManipPropPanel();

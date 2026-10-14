@@ -224,6 +224,9 @@ MainFrame* FluiBuilder::BuildMainFrame(
 
 	frame->SetAgent(std::move(agent));
 
+	agent->Initialize();
+	agent->LoadRenderViewSettings();
+
 	return frame;
 }
 

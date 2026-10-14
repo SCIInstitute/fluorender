@@ -157,10 +157,6 @@ MainFrame::MainFrame(
 	SetWindowVariant(wxWINDOW_VARIANT_MINI);
 #endif
 
-	auto agent = m_agent->As<MainFrameAgent>();
-	if (agent)
-		agent->UpdateUIToData({ gstMainFrameInitialize });
-
 	// tell wxAuiManager to manage this frame
 	m_aui_mgr.SetManagedWindow(this);
 
@@ -659,9 +655,6 @@ MainFrame::MainFrame(
 	else
 		m_aui_mgr.GetPane(m_teser_dlg).Hide();
 
-	if (agent)
-		agent->UpdateDataToUI({ gstLoadRenderViewSettings });
-
 	SetMinSize(FromDIP(wxSize(800,600)));
 
 	if (!windowed)
@@ -835,20 +828,6 @@ MainFrame::MainFrame(
 	if (mainmem_buf_size > flvr::TextureRenderer::get_mainmem_buf_size())
 		flvr::TextureRenderer::set_mainmem_buf_size(mainmem_buf_size);
 
-	//python
-	flrd::PyBase::SetHighVer(glbin_settings.m_python_ver);
-	//font
-	std::wstring font_file = glbin_settings.m_font_file;
-	std::filesystem::path p = GetDataRoot();
-	p /= "Fonts";
-	if (font_file != L"")
-		p /= font_file;
-	else
-		p /= "FreeSans.ttf";
-	font_file = p.wstring();
-	glbin_text_tex_manager.load_face(font_file);
-	glbin_text_tex_manager.set_size(glbin_settings.m_text_size);
-
 	//keyboard shortcuts
 	wxAcceleratorEntry entries[5];
 	entries[0].Set(wxACCEL_CTRL, (int)'N', ID_NewProjMenu);
@@ -881,14 +860,11 @@ MainFrame::MainFrame(
 	m_track_dlg->LoadPerspective(glbin_settings.m_layout_track);
 	m_convert_dlg->LoadPerspective(glbin_settings.m_layout_convert);
 	glbin_moviemaker.SetMainFrame(this);
-	glbin_moviemaker.SetView(view);
-	glbin_mov_def.Apply(glbin_moviemaker);
 
 	m_waker.Start(100);
 
 	m_aui_mgr.Update();
 
-	glbin_states.m_status_str = std::string(fluo::AppTitle) + " started normally.";
 }
 
 MainFrame::~MainFrame()
