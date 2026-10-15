@@ -29,11 +29,11 @@ DEALINGS IN THE SOFTWARE.
 #ifndef Coordinator_h
 #define Coordinator_h
 
+#include <AgentState.h>
 #include <set>
 #include <memory>
 
 class Agent;
-class RenderCanvasAgent;
 class RenderView;
 struct UpdateRequest;
 
@@ -42,6 +42,8 @@ class Coordinator
 public:
 	void Register(Agent* agent);
 	void Unregister(Agent* agent);
+
+	void AdvanceToState(AgentState state);
 
 	void Dispatch(const UpdateRequest& request);
 
@@ -58,5 +60,9 @@ public:
 
 private:
 	std::set<Agent*> agents_;
+	AgentState current_state_{ AgentState::Uninitialized };
+
+private:
+	void BringToState(Agent* agent, AgentState state);
 };
 #endif//Coordinator_h

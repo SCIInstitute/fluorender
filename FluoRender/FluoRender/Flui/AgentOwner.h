@@ -45,6 +45,9 @@ public:
 
 	void SetAgent(std::unique_ptr<Agent> agent);
 
+	virtual void CreateUI() {}
+	virtual void DestroyUI() {}
+
 protected:
 	std::unique_ptr<Agent> m_agent;
 

@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Coordinator.h>
 #include <Agent.h>
+#include <AgentOwner.h>
 #include <RenderCanvasAgent.h>
 #include <RenderView.h>
 
@@ -36,7 +37,13 @@ void Coordinator::Register(Agent* agent)
 	if (!agent)
 		return;
 
-	agents_.insert(agent);
+	auto [it, inserted] =
+		agents_.insert(agent);
+
+	if (!inserted)
+		return;
+
+	BringToState(agent, current_state_);
 }
 
 void Coordinator::Unregister(Agent* agent)
@@ -45,6 +52,20 @@ void Coordinator::Unregister(Agent* agent)
 		return;
 
 	agents_.erase(agent);
+}
+
+void Coordinator::AdvanceToState(
+	AgentState state)
+{
+	if (state <= current_state_)
+		return;
+
+	current_state_ = state;
+
+	for (auto* agent : agents_)
+	{
+		BringToState(agent, state);
+	}
 }
 
 void Coordinator::Dispatch(
@@ -110,4 +131,68 @@ Agent* Coordinator::FindRenderCanvasAgent(const std::shared_ptr<RenderView>& vie
 		}
 	}
 	return nullptr;
+}
+
+void Coordinator::BringToState(
+	Agent* agent,
+	AgentState target_state)
+{
+	if (!agent)
+		return;
+
+	auto state = agent->GetState();
+
+	if (state < AgentState::SettingsLoaded &&
+		target_state >= AgentState::SettingsLoaded)
+	{
+		agent->LoadSettings();
+		agent->SetState(
+			AgentState::SettingsLoaded);
+	}
+
+	if (state < AgentState::UICreated &&
+		target_state >= AgentState::UICreated)
+	{
+		if (auto* owner = agent->GetOwner())
+			owner->CreateUI();
+
+		agent->SetState(
+			AgentState::UICreated);
+	}
+
+	if (state < AgentState::SettingsApplied &&
+		target_state >= AgentState::SettingsApplied)
+	{
+		agent->ApplySettings();
+		agent->SetState(
+			AgentState::SettingsApplied);
+	}
+
+	if (state < AgentState::Running &&
+		target_state >= AgentState::Running)
+	{
+		agent->PostInitialize();
+		agent->SetState(
+			AgentState::Running);
+	}
+
+	if (state < AgentState::PreShutdown &&
+		target_state >= AgentState::PreShutdown)
+	{
+		agent->PreShutdown();
+		agent->SetState(
+			AgentState::PreShutdown);
+	}
+
+	if (state < AgentState::Shutdown &&
+		target_state >= AgentState::Shutdown)
+	{
+		if (auto* owner = agent->GetOwner())
+			owner->DestroyUI();
+
+		agent->Shutdown();
+
+		agent->SetState(
+			AgentState::Shutdown);
+	}
 }

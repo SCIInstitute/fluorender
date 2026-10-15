@@ -28,6 +28,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef Agent_h
 #define Agent_h
 
+#include <AgentState.h>
 #include <Value.hpp>
 #include <Tokens.h>
 #include <set>
@@ -193,6 +194,15 @@ public:
 
 	virtual void Update(const UpdateRequest& request);
 
+	//lifecycle support
+	void SetState(AgentState state) { state_ = state; }
+	AgentState GetState() const { return state_; }
+	virtual void LoadSettings() {}
+	virtual void ApplySettings() {}
+	virtual void PostInitialize() {}
+	virtual void PreShutdown() {}
+	virtual void Shutdown() {}
+
 	template<class T>
 	T* As()
 	{
@@ -265,6 +275,7 @@ protected:
 
 private:
 	AgentOwner* owner_ = nullptr;
+	AgentState state_{ AgentState::Uninitialized };
 };
 
 #endif//Agent_h
