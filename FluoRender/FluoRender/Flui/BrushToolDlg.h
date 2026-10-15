@@ -88,7 +88,8 @@ public:
 	};
 
 	BrushToolDlg(wxWindow* parent);
-	~BrushToolDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void EnableUndo(bool bval1, bool bval2);

@@ -37,15 +37,14 @@ DEALINGS IN THE SOFTWARE.
 class DnDFile : public wxFileDropTarget, public AgentOwner
 {
 public:
-	DnDFile();
-	~DnDFile();
+	DnDFile() = default;
 
 	virtual wxDragResult OnDragOver(wxCoord x, wxCoord y, wxDragResult def);
 	virtual bool OnDropFiles(wxCoord x, wxCoord y,
 		const wxArrayString& filenames);
 
 	//get
-	std::vector<std::wstring> GetFilenames() { return filenames_; }
+	std::vector<std::wstring> GetFilenames() const { return filenames_; }
 
 private:
 	std::vector<std::wstring> filenames_;

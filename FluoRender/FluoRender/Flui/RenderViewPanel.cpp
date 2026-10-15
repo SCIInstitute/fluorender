@@ -171,6 +171,35 @@ RenderViewPanel::RenderViewPanel(wxWindow* parent,
 	AgentPanel(parent, pos, size, style, name),
 	m_channel_mix_mode(ChannelMixMode::CompositeAdd)
 {
+}
+
+RenderViewPanel::~RenderViewPanel()
+{
+	if (m_full_frame)
+		m_full_frame->Destroy();
+
+	//delete controls
+	glbin.del_undo_control(m_mix_mode_tb);
+	glbin.del_undo_control(m_hud_tb);
+	glbin.del_undo_control(m_bg_color_picker);
+	glbin.del_undo_control(m_aov_sldr);
+	glbin.del_undo_control(m_cam_op_tb);
+	glbin.del_undo_control(m_depth_atten_btn);
+	glbin.del_undo_control(m_depth_atten_factor_sldr);
+	glbin.del_undo_control(m_scale_factor_sldr);
+	glbin.del_undo_control(m_slider_mode_btn);
+	glbin.del_undo_control(m_x_rot_sldr);
+	glbin.del_undo_control(m_y_rot_sldr);
+	glbin.del_undo_control(m_z_rot_sldr);
+
+	auto agent = m_agent->As<RenderViewPanelAgent>();
+	auto mainframe_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (mainframe_agent)
+		mainframe_agent->RemoveRenderView(agent);
+}
+
+void RenderViewPanel::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -204,32 +233,6 @@ RenderViewPanel::RenderViewPanel(wxWindow* parent,
 	glbin.add_undo_control(m_z_rot_sldr);
 
 	Thaw();
-}
-
-RenderViewPanel::~RenderViewPanel()
-{
-	if (m_full_frame)
-		m_full_frame->Destroy();
-
-	//delete controls
-	glbin.del_undo_control(m_mix_mode_tb);
-	glbin.del_undo_control(m_hud_tb);
-	glbin.del_undo_control(m_bg_color_picker);
-	glbin.del_undo_control(m_aov_sldr);
-	glbin.del_undo_control(m_cam_op_tb);
-	glbin.del_undo_control(m_depth_atten_btn);
-	glbin.del_undo_control(m_depth_atten_factor_sldr);
-	glbin.del_undo_control(m_scale_factor_sldr);
-	glbin.del_undo_control(m_slider_mode_btn);
-	glbin.del_undo_control(m_x_rot_sldr);
-	glbin.del_undo_control(m_y_rot_sldr);
-	glbin.del_undo_control(m_z_rot_sldr);
-
-	auto agent = m_agent->As<RenderViewPanelAgent>();
-	glbin_coordinator.Unregister(agent);
-	auto mainframe_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
-	if (mainframe_agent)
-		mainframe_agent->RemoveRenderView(agent);
 }
 
 void RenderViewPanel::CreateBar()

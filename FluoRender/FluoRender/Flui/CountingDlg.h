@@ -36,7 +36,8 @@ class CountingDlg : public TabbedPanel
 {
 public:
 	CountingDlg(wxWindow* parent);
-	~CountingDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateUseSelection(bool bval);

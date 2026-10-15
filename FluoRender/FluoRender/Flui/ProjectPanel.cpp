@@ -36,7 +36,12 @@ ProjectPanel::ProjectPanel(wxWindow* parent,
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	TabbedPanel(parent, pos, size, style, name)
+	TabbedPanel(parent, pos, size, style, name),
+	m_size(size)
+{
+}
+
+void ProjectPanel::CreateUI()
 {
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
@@ -45,7 +50,7 @@ ProjectPanel::ProjectPanel(wxWindow* parent,
 	wxBitmapBundle bitmap;
 	//toolbar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxTB_FLAT|wxTB_LEFT|wxTB_NODIVIDER);
+		wxTB_FLAT | wxTB_LEFT | wxTB_NODIVIDER);
 	bitmap = wxGetBitmap(filter_small);
 	m_toolbar->AddTool(ID_Ocl, "Volume Filter", bitmap,
 		"Show Volume Filter Dialog");
@@ -93,12 +98,12 @@ ProjectPanel::ProjectPanel(wxWindow* parent,
 	m_toolbar->Realize();
 
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
-		wxDefaultPosition, size,
+		wxDefaultPosition, m_size,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE |
 		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
 
-	wxBoxSizer *sizerv = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizerv = new wxBoxSizer(wxHORIZONTAL);
 	sizerv->Add(m_toolbar, 0, wxEXPAND | wxTOP, 20);
 	sizerv->Add(m_notebook, 1, wxEXPAND);
 

@@ -38,7 +38,8 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "PropertyPanel");
-	~PropertyPanel() {}
+
+	virtual void CreateUI() override;
 
 private:
 	//prop pages

@@ -232,7 +232,8 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "MoviePanel");
-	~MoviePanel();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateMovFps(double dval);

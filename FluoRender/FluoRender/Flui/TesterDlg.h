@@ -36,7 +36,8 @@ class TesterDlg : public AgentPanel
 {
 public:
 	TesterDlg(wxWindow* parent);
-	~TesterDlg();
+
+	virtual void CreateUI() override;
 
 	//values
 	double m_p1;

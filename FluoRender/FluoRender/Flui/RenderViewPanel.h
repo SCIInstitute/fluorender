@@ -151,6 +151,8 @@ public:
 		const wxString& name = "RenderView");
 	~RenderViewPanel();
 
+	virtual void CreateUI() override;
+
 	void SetRenderCanvas(RenderCanvas* canvas) { m_canvas = canvas; }
 	RenderCanvas* GetRenderCanvas() { return m_canvas; }
 	void SetFullFrame(wxFrame* frame) { m_full_frame = frame; }

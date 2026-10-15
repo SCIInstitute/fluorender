@@ -956,6 +956,10 @@ MoviePanel::MoviePanel(wxWindow* parent,
 	const wxString& name) :
 	TabbedPanel(parent, pos, size, style, name)
 {
+}
+
+void MoviePanel::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -1202,10 +1206,6 @@ MoviePanel::MoviePanel(wxWindow* parent,
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 	Thaw();
-}
-
-MoviePanel::~MoviePanel()
-{
 }
 
 void MoviePanel::UpdateMovFps(double dval)

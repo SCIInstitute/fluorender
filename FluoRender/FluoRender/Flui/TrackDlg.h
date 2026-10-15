@@ -91,7 +91,8 @@ public:
 	};
 
 	TrackDlg(wxWindow* parent);
-	~TrackDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateTrackFile(const std::wstring& str);

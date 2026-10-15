@@ -97,7 +97,8 @@ class SettingDlg : public TabbedPanel
 {
 public:
 	SettingDlg(wxWindow* parent);
-	~SettingDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateSaveProjectEnable(const SaveProjectInfo& info);

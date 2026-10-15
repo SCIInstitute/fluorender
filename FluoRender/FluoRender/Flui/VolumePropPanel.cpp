@@ -59,6 +59,51 @@ VolumePropPanel::VolumePropPanel(
 	const wxString& name) :
 	AgentPanel(parent, pos, size, style, name)
 {
+}
+
+VolumePropPanel::~VolumePropPanel()
+{
+	//delete sliders for undo and redo
+	glbin.del_undo_control(m_minmax_sldr);
+	glbin.del_undo_control(m_gamma_sldr);
+	glbin.del_undo_control(m_alpha_sldr);
+	glbin.del_undo_control(m_luminance_sldr);
+	glbin.del_undo_control(m_sample_sldr);
+	glbin.del_undo_control(m_thresh_sldr);
+	glbin.del_undo_control(m_boundary_sldr);
+	glbin.del_undo_control(m_shading_shine_sldr);
+	glbin.del_undo_control(m_shading_strength_sldr);
+	glbin.del_undo_control(m_shadow_sldr);
+	glbin.del_undo_control(m_shadow_dir_sldr);
+	glbin.del_undo_control(m_colormap_sldr);
+	//delete checkboxes
+	glbin.del_undo_control(m_minmax_chk);
+	glbin.del_undo_control(m_gamma_chk);
+	glbin.del_undo_control(m_alpha_chk);
+	glbin.del_undo_control(m_luminance_chk);
+	glbin.del_undo_control(m_sample_chk);
+	glbin.del_undo_control(m_thresh_chk);
+	glbin.del_undo_control(m_boundary_chk);
+	glbin.del_undo_control(m_shade_chk);
+	glbin.del_undo_control(m_shadow_chk);
+	glbin.del_undo_control(m_shadow_dir_chk);
+	glbin.del_undo_control(m_colormap_chk);
+	//delete others
+	glbin.del_undo_control(m_main_color_btn);
+	glbin.del_undo_control(m_alt_color_btn);
+	glbin.del_undo_control(m_space_x_text);
+	glbin.del_undo_control(m_space_y_text);
+	glbin.del_undo_control(m_space_z_text);
+	glbin.del_undo_control(m_colormap_inv_btn);
+	glbin.del_undo_control(m_colormap_combo);
+	glbin.del_undo_control(m_colormap_proj_combo);
+	glbin.del_undo_control(m_options_toolbar);
+
+	//m_frame->SetFocusVRenderViews(0);
+}
+
+void VolumePropPanel::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -422,7 +467,7 @@ VolumePropPanel::VolumePropPanel(
 	m_colormap_link_tb->Realize();
 
 	//right ///////////////////////////////////////////////////
-	m_options_toolbar = new wxUndoableToolbar(this,wxID_ANY,
+	m_options_toolbar = new wxUndoableToolbar(this, wxID_ANY,
 		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
 	//ml
 	bitmap = wxGetBitmap(starknot);
@@ -484,10 +529,10 @@ VolumePropPanel::VolumePropPanel(
 		"Sync current channel with other channels in the group");
 	//buttons
 	bitmap = wxGetBitmap(reset);
-	m_options_toolbar->AddToolWithHelp(ID_ResetDefault,"Reset",
+	m_options_toolbar->AddToolWithHelp(ID_ResetDefault, "Reset",
 		bitmap, "Reset all properties");
 	bitmap = wxGetBitmap(save_settings);
-	m_options_toolbar->AddToolWithHelp(ID_SaveDefault,"Save",
+	m_options_toolbar->AddToolWithHelp(ID_SaveDefault, "Save",
 		bitmap, "Set current settings as default");
 	m_options_toolbar->Bind(wxEVT_TOOL, &VolumePropPanel::OnOptions, this);
 	sizer_r1->AddStretchSpacer();
@@ -586,10 +631,10 @@ VolumePropPanel::VolumePropPanel(
 	m_colormap_proj_combo = new wxUndoableComboBox(this, wxID_ANY, "",
 		wxDefaultPosition, FromDIP(wxSize(85, 25)), 0, NULL, wxCB_READONLY);
 	std::vector<wxString> colormap_list2 =
-		{ "Intensity", "Z Value", "Y Value", "X Value", "T Value (4D)",
-		"Radial", "Linear", "Gradient", "Normals",
-		"Intensity Delta (4D)", "Speed (4D)",
-		};
+	{ "Intensity", "Z Value", "Y Value", "X Value", "T Value (4D)",
+	"Radial", "Linear", "Gradient", "Normals",
+	"Intensity Delta (4D)", "Speed (4D)",
+	};
 	m_colormap_proj_combo->Append(colormap_list2);
 	m_colormap_proj_combo->Bind(wxEVT_COMBOBOX, &VolumePropPanel::OnColormapProjCombo, this);
 	sizer_r5->Add(st, 0, wxALIGN_LEFT, 0);
@@ -669,47 +714,6 @@ VolumePropPanel::VolumePropPanel(
 	glbin.add_undo_control(m_options_toolbar);
 
 	Thaw();
-}
-
-VolumePropPanel::~VolumePropPanel()
-{
-	//delete sliders for undo and redo
-	glbin.del_undo_control(m_minmax_sldr);
-	glbin.del_undo_control(m_gamma_sldr);
-	glbin.del_undo_control(m_alpha_sldr);
-	glbin.del_undo_control(m_luminance_sldr);
-	glbin.del_undo_control(m_sample_sldr);
-	glbin.del_undo_control(m_thresh_sldr);
-	glbin.del_undo_control(m_boundary_sldr);
-	glbin.del_undo_control(m_shading_shine_sldr);
-	glbin.del_undo_control(m_shading_strength_sldr);
-	glbin.del_undo_control(m_shadow_sldr);
-	glbin.del_undo_control(m_shadow_dir_sldr);
-	glbin.del_undo_control(m_colormap_sldr);
-	//delete checkboxes
-	glbin.del_undo_control(m_minmax_chk);
-	glbin.del_undo_control(m_gamma_chk);
-	glbin.del_undo_control(m_alpha_chk);
-	glbin.del_undo_control(m_luminance_chk);
-	glbin.del_undo_control(m_sample_chk);
-	glbin.del_undo_control(m_thresh_chk);
-	glbin.del_undo_control(m_boundary_chk);
-	glbin.del_undo_control(m_shade_chk);
-	glbin.del_undo_control(m_shadow_chk);
-	glbin.del_undo_control(m_shadow_dir_chk);
-	glbin.del_undo_control(m_colormap_chk);
-	//delete others
-	glbin.del_undo_control(m_main_color_btn);
-	glbin.del_undo_control(m_alt_color_btn);
-	glbin.del_undo_control(m_space_x_text);
-	glbin.del_undo_control(m_space_y_text);
-	glbin.del_undo_control(m_space_z_text);
-	glbin.del_undo_control(m_colormap_inv_btn);
-	glbin.del_undo_control(m_colormap_combo);
-	glbin.del_undo_control(m_colormap_proj_combo);
-	glbin.del_undo_control(m_options_toolbar);
-
-	//m_frame->SetFocusVRenderViews(0);
 }
 
 void VolumePropPanel::UpdateMultiFuncTips(int ival)

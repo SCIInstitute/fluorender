@@ -34,7 +34,8 @@ class FpRangeDlg : public AgentDialog
 {
 public:
 	FpRangeDlg(wxWindow* parent);
-	~FpRangeDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateFpRangeMin(double dval);

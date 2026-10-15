@@ -36,6 +36,10 @@ AnnotatPropPanel::AnnotatPropPanel(
 	const wxString& name) :
 	AgentPanel(parent, pos, size, style, name)
 {
+}
+
+void AnnotatPropPanel::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
@@ -69,10 +73,6 @@ AnnotatPropPanel::AnnotatPropPanel(
 	Layout();
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
-}
-
-AnnotatPropPanel::~AnnotatPropPanel()
-{
 }
 
 // ui update methods

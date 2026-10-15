@@ -397,6 +397,10 @@ MeasureDlg::MeasureDlg(wxWindow* parent) :
 		parent->FromDIP(wxSize(500, 620)),
 		0, "MeasureDlg")
 {
+}
+
+void MeasureDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -428,10 +432,6 @@ MeasureDlg::MeasureDlg(wxWindow* parent) :
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 	Thaw();
-}
-
-MeasureDlg::~MeasureDlg()
-{
 }
 
 wxWindow* MeasureDlg::CreateToolPage(wxWindow* parent)

@@ -45,7 +45,31 @@ OutputAdjPanel::OutputAdjPanel(wxWindow* parent,
 					   const wxSize& size,
 					   long style,
 					   const wxString& name) :
-	TabbedPanel(parent, pos, size, style, name)
+	TabbedPanel(parent, pos, size, style, name),
+	m_size(size)
+{
+}
+
+OutputAdjPanel::~OutputAdjPanel()
+{
+	//delete sliders for undo and redo
+	glbin.del_undo_control(m_sync_r_chk);
+	glbin.del_undo_control(m_r_gamma_sldr);
+	glbin.del_undo_control(m_r_brightness_sldr);
+	glbin.del_undo_control(m_r_hdr_sldr);
+	glbin.del_undo_control(m_sync_g_chk);
+	glbin.del_undo_control(m_g_gamma_sldr);
+	glbin.del_undo_control(m_g_brightness_sldr);
+	glbin.del_undo_control(m_g_hdr_sldr);
+	glbin.del_undo_control(m_sync_b_chk);
+	glbin.del_undo_control(m_b_gamma_sldr);
+	glbin.del_undo_control(m_b_brightness_sldr);
+	glbin.del_undo_control(m_b_hdr_sldr);
+
+	//m_frame->SetFocusVRenderViews(0);
+}
+
+void OutputAdjPanel::CreateUI()
 {
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
@@ -57,7 +81,7 @@ OutputAdjPanel::OutputAdjPanel(wxWindow* parent,
 		wxDefaultPosition, wxDefaultSize,
 		wxAUI_NB_TOP | wxAUI_NB_TAB_SPLIT | wxAUI_NB_TAB_MOVE |
 		wxAUI_NB_SCROLL_BUTTONS | wxAUI_NB_TAB_EXTERNAL_MOVE | wxNO_BORDER);
-	wxSize s = wxSize(size.x, size.y / 3);
+	wxSize s = wxSize(m_size.x, m_size.y / 3);
 	m_notebook->AddPage(CreateRedPage(m_notebook, s), "Red", true);
 	m_notebook->AddPage(CreateGreenPage(m_notebook, s), "Green");
 	m_notebook->AddPage(CreateBluePage(m_notebook, s), "Blue");
@@ -65,7 +89,7 @@ OutputAdjPanel::OutputAdjPanel(wxWindow* parent,
 	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 
 	m_dft_btn = new wxButton(this, wxID_ANY, "Set Default",
-							 wxDefaultPosition, FromDIP(wxSize(95, 22)));
+		wxDefaultPosition, FromDIP(wxSize(95, 22)));
 	m_dft_btn->SetBitmap(wxGetBitmap(save_settings));
 	m_dft_btn->Bind(wxEVT_BUTTON, &OutputAdjPanel::OnSaveDefault, this);
 
@@ -93,25 +117,6 @@ OutputAdjPanel::OutputAdjPanel(wxWindow* parent,
 	glbin.add_undo_control(m_b_hdr_sldr);
 
 	Thaw();
-}
-
-OutputAdjPanel::~OutputAdjPanel()
-{
-	//delete sliders for undo and redo
-	glbin.del_undo_control(m_sync_r_chk);
-	glbin.del_undo_control(m_r_gamma_sldr);
-	glbin.del_undo_control(m_r_brightness_sldr);
-	glbin.del_undo_control(m_r_hdr_sldr);
-	glbin.del_undo_control(m_sync_g_chk);
-	glbin.del_undo_control(m_g_gamma_sldr);
-	glbin.del_undo_control(m_g_brightness_sldr);
-	glbin.del_undo_control(m_g_hdr_sldr);
-	glbin.del_undo_control(m_sync_b_chk);
-	glbin.del_undo_control(m_b_gamma_sldr);
-	glbin.del_undo_control(m_b_brightness_sldr);
-	glbin.del_undo_control(m_b_hdr_sldr);
-
-	//m_frame->SetFocusVRenderViews(0);
 }
 
 wxWindow* OutputAdjPanel::CreateRedPage(wxWindow* parent, wxSize& size)

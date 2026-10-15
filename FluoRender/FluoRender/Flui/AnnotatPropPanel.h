@@ -40,7 +40,8 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "AnnotatPropPanel");
-	~AnnotatPropPanel();
+
+	virtual void CreateUI() override;
 
 	// ui update methods
 	void SetMemoText(const std::wstring& text);

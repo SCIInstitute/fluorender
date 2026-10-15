@@ -37,6 +37,10 @@ CountingDlg::CountingDlg(wxWindow *parent) :
 		parent->FromDIP(wxSize(400, 150)),
 		0, "CountingDlg")
 {
+}
+
+void CountingDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -61,10 +65,6 @@ CountingDlg::CountingDlg(wxWindow *parent) :
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 	Thaw();
-}
-
-CountingDlg::~CountingDlg()
-{
 }
 
 wxWindow* CountingDlg::CreateSettingPage(wxWindow* parent)

@@ -72,7 +72,8 @@ public:
 	};
 
 	ComponentDlg(wxWindow* parent);
-	~ComponentDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateUseSelection(bool bval1, bool bval2);

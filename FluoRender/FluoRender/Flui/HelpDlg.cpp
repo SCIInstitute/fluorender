@@ -35,18 +35,17 @@ HelpDlg::HelpDlg(wxWindow* parent) :
 		0, "HelpDlg"),
 m_html(0)
 {
+}
+
+void HelpDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
 	m_name = "";
-	wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
 	m_html = new wxHtmlWindow(this);
 	sizer->Add(m_html, 1, wxEXPAND);
 	SetSizer(sizer);
 	Layout();
 }
-
-HelpDlg::~HelpDlg()
-{
-}
-

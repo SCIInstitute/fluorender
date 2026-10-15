@@ -38,15 +38,19 @@ class Agent;
 class AgentOwner
 {
 public:
-	AgentOwner() {};
-	~AgentOwner() {};
-
-	Agent* GetAgent() const { return m_agent.get(); }
+	virtual ~AgentOwner() = default;
 
 	void SetAgent(std::unique_ptr<Agent> agent);
 
-	virtual void CreateUI() {}
-	virtual void DestroyUI() {}
+	Agent* GetAgent() const { return m_agent.get(); }
+
+	template<class T>
+	T* GetAgentAs() const
+	{
+		return dynamic_cast<T*>(m_agent.get());
+	}
+
+	virtual void CreateUI() {};
 
 protected:
 	std::unique_ptr<Agent> m_agent;
@@ -62,7 +66,6 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "AgentPanel");
-	~AgentPanel() {};
 
 protected:
 };
@@ -75,7 +78,6 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "AgentPanel");
-	~AgentDialog() {};
 
 protected:
 };
@@ -89,7 +91,7 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "TabbedPanel");
-	~TabbedPanel() {};
+
 	virtual void LoadPerspective(const std::string& str);
 	virtual std::string SavePerspective();
 

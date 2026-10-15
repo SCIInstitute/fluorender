@@ -37,11 +37,15 @@ FpRangeDlg::FpRangeDlg(wxWindow *parent)
 	wxMAXIMIZE_BOX | wxMINIMIZE_BOX | wxSTAY_ON_TOP,
 	wxString("Data Conversion"))
 {
+}
+
+void FpRangeDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
 
-	wxStaticText *st;
+	wxStaticText* st;
 	//validator: floating point 1
 	wxFloatingPointValidator<double> vald_fp(10);
 
@@ -51,11 +55,11 @@ FpRangeDlg::FpRangeDlg(wxWindow *parent)
 	sizer1->Add(st, 0, wxALIGN_CENTER);
 
 	//text controls
-	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Minimum:",
 		wxDefaultPosition, wxDefaultSize);
 	m_min_text = new wxTextCtrl(this, wxID_ANY, "0.0",
-		wxDefaultPosition, wxDefaultSize , wxTE_RIGHT, vald_fp);
+		wxDefaultPosition, wxDefaultSize, wxTE_RIGHT, vald_fp);
 	m_min_text->Bind(wxEVT_TEXT, &FpRangeDlg::OnMinText, this);
 	sizer2->Add(10, 10);
 	sizer2->Add(st, 0, wxALIGN_CENTER);
@@ -86,7 +90,7 @@ FpRangeDlg::FpRangeDlg(wxWindow *parent)
 	sizer3->AddStretchSpacer(1);
 
 	//all
-	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(10, 10);
 	sizer_v->Add(sizer1, 0, wxEXPAND);
 	sizer_v->Add(10, 10);
@@ -99,10 +103,6 @@ FpRangeDlg::FpRangeDlg(wxWindow *parent)
 	Layout();
 
 	Bind(wxEVT_SHOW, &FpRangeDlg::OnShow, this);
-}
-
-FpRangeDlg::~FpRangeDlg()
-{
 }
 
 void FpRangeDlg::UpdateFpRangeMin(double dval)

@@ -37,6 +37,10 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
 		parent->FromDIP(wxSize(450, 200)),
 		0, "NoiseCancellingDlg")
 {
+}
+
+void NoiseCancellingDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
@@ -46,10 +50,10 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 
-	wxStaticText *st = 0;
+	wxStaticText* st = 0;
 
 	//group1
-	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Threshold:",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)));
 	m_threshold_sldr = new wxSingleSlider(this, wxID_ANY, 0, 0, 2550,
@@ -68,7 +72,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
 	sizer1->Add(m_preview_btn, 0, wxALIGN_CENTER);
 
 	//group2
-	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Voxel Size:",
 		wxDefaultPosition, FromDIP(wxSize(75, 23)));
 	m_voxel_sldr = new wxSingleSlider(this, wxID_ANY, 1, 1, 500,
@@ -87,21 +91,21 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
 	sizer2->Add(m_erase_btn, 0, wxALIGN_CENTER);
 
 	//group3
-	wxBoxSizer *sizer3 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer3 = new wxBoxSizer(wxHORIZONTAL);
 	m_ca_select_only_chk = new wxCheckBox(this, wxID_ANY, "Selct. Only",
 		wxDefaultPosition, FromDIP(wxSize(95, 20)));
 	m_ca_select_only_chk->Bind(wxEVT_CHECKBOX, &NoiseCancellingDlg::OnSelOnlyChk, this);
 	sizer3->Add(m_ca_select_only_chk, 0, wxALIGN_CENTER);
 
 	//group4
-	wxBoxSizer *sizer4 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer4 = new wxBoxSizer(wxHORIZONTAL);
 	m_enhance_sel_chk = new wxCheckBox(this, wxID_ANY, "Enhance selection",
 		wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT);
 	m_enhance_sel_chk->Bind(wxEVT_CHECKBOX, &NoiseCancellingDlg::OnEnhanceSelChk, this);
 	sizer4->Add(m_enhance_sel_chk, 0, wxALIGN_CENTER);
 
 	//group5
-	wxBoxSizer *sizer5 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer5 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0,
 		"Check this option if selections are too dim. It is equivalent to\n"\
 		"adjusting the Equalization values in the Output Adjustment\n panel.",
@@ -109,7 +113,7 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
 	sizer5->Add(st, 0, wxALIGN_CENTER);
 
 	//all controls
-	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
@@ -123,10 +127,6 @@ NoiseCancellingDlg::NoiseCancellingDlg(wxWindow *parent) :
 
 	SetSizer(sizerV);
 	Layout();
-}
-
-NoiseCancellingDlg::~NoiseCancellingDlg()
-{
 }
 
 void NoiseCancellingDlg::UpdateNrThresh(double dval, double max_val)

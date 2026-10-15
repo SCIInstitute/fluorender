@@ -34,7 +34,8 @@ class ScriptBreakDlg : public AgentPanel
 {
 public:
 	ScriptBreakDlg(wxWindow* parent);
-	~ScriptBreakDlg();
+	
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateScriptBreakInfo(const std::string& str);

@@ -66,7 +66,8 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "ManipPropPanel");
-	~ManipPropPanel();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateMeshTranslation(const fluo::Vector& vval);

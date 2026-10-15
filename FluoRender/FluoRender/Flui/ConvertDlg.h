@@ -58,7 +58,8 @@ public:
 	};
 
 	ConvertDlg(wxWindow* parent);
-	~ConvertDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateVolMeshThresh(double dval);

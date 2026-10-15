@@ -52,10 +52,12 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "ProjectPanel");
-	~ProjectPanel() {}
+
+	virtual void CreateUI() override;
 
 private:
 	wxToolBar* m_toolbar;
+	wxSize m_size;
 
 	void OnToolbar(wxCommandEvent& event);
 };

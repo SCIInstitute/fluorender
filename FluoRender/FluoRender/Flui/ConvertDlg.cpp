@@ -42,6 +42,10 @@ ConvertDlg::ConvertDlg(wxWindow *parent) :
 		parent->FromDIP(wxSize(500, 620)),
 		0, "ConvertDlg")
 {
+}
+
+void ConvertDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -66,10 +70,6 @@ ConvertDlg::ConvertDlg(wxWindow *parent) :
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 	Thaw();
-}
-
-ConvertDlg::~ConvertDlg()
-{
 }
 
 wxWindow* ConvertDlg::CreateSettingPage(wxWindow* parent)

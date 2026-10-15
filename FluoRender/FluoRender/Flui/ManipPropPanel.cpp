@@ -36,6 +36,10 @@ ManipPropPanel::ManipPropPanel(
 	const wxString& name) :
 	AgentPanel(parent, pos, size, style, name)
 {
+}
+
+void ManipPropPanel::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
@@ -166,10 +170,6 @@ ManipPropPanel::ManipPropPanel(
 	SetSizer(sizer_v);
 	Layout();
 	SetScrollRate(10, 10);
-}
-
-ManipPropPanel::~ManipPropPanel()
-{
 }
 
 void ManipPropPanel::UpdateMeshTranslation(const fluo::Vector& vval)

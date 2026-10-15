@@ -38,7 +38,8 @@ class ColocalizationDlg : public AgentPanel
 {
 public:
 	ColocalizationDlg(wxWindow* parent);
-	~ColocalizationDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateColocalMethod(int ival);

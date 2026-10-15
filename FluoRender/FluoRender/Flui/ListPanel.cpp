@@ -312,6 +312,10 @@ ListPanel::ListPanel(
 	const wxString& name) :
 	AgentPanel(parent, pos, size, style, name)
 {
+}
+
+void ListPanel::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
@@ -380,10 +384,6 @@ ListPanel::ListPanel(
 	Bind(wxEVT_SCROLLWIN_THUMBTRACK, &ListPanel::OnScrollWin, this);
 	Bind(wxEVT_LEFT_DOWN, &ListPanel::OnMouse, this);
 	Bind(wxEVT_MOUSEWHEEL, &ListPanel::OnScroll, this);
-}
-
-ListPanel::~ListPanel()
-{
 }
 
 void ListPanel::DeleteAllListItems()

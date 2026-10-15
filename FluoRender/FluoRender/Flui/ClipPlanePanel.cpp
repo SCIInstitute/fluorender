@@ -52,6 +52,24 @@ ClipPlanePanel::ClipPlanePanel(
 	TabbedPanel(parent, pos, size, style, name),
 m_enable_all(true)
 {
+}
+
+ClipPlanePanel::~ClipPlanePanel()
+{
+	//delete controls
+	glbin.del_undo_control(m_clipx_sldr);
+	glbin.del_undo_control(m_clipy_sldr);
+	glbin.del_undo_control(m_clipz_sldr);
+	glbin.del_undo_control(m_x_rot_sldr);
+	glbin.del_undo_control(m_y_rot_sldr);
+	glbin.del_undo_control(m_z_rot_sldr);
+	glbin.del_undo_control(m_toolbar);
+
+	//m_frame->SetFocusVRenderViews(0);
+}
+
+void ClipPlanePanel::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -111,20 +129,6 @@ m_enable_all(true)
 	glbin.add_undo_control(m_toolbar);
 
 	Thaw();
-}
-
-ClipPlanePanel::~ClipPlanePanel()
-{
-	//delete controls
-	glbin.del_undo_control(m_clipx_sldr);
-	glbin.del_undo_control(m_clipy_sldr);
-	glbin.del_undo_control(m_clipz_sldr);
-	glbin.del_undo_control(m_x_rot_sldr);
-	glbin.del_undo_control(m_y_rot_sldr);
-	glbin.del_undo_control(m_z_rot_sldr);
-	glbin.del_undo_control(m_toolbar);
-
-	//m_frame->SetFocusVRenderViews(0);
 }
 
 wxWindow* ClipPlanePanel::CreateTranslatePage(wxWindow* parent)

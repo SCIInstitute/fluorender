@@ -149,6 +149,10 @@ TrackDlg::TrackDlg(wxWindow* parent)
 		parent->FromDIP(wxSize(500, 620)),
 		0, "TrackDlg")
 {
+}
+
+void TrackDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -178,10 +182,6 @@ TrackDlg::TrackDlg(wxWindow* parent)
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 	Thaw();
-}
-
-TrackDlg::~TrackDlg()
-{
 }
 
 wxWindow* TrackDlg::CreateMapPage(wxWindow *parent)

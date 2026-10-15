@@ -250,7 +250,8 @@ public:
 	};
 
 	MeasureDlg(wxWindow* parent);
-	~MeasureDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateFreehandToolState(InteractiveMode int_mode, flrd::RulerMode rul_mode, bool redist_length);

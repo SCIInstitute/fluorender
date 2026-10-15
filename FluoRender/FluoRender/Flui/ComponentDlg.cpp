@@ -46,6 +46,10 @@ ComponentDlg::ComponentDlg(wxWindow *parent)
 		0, "ComponentDlg"),
 	m_hold_history(false)
 {
+}
+
+void ComponentDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -71,10 +75,6 @@ ComponentDlg::ComponentDlg(wxWindow *parent)
 	SetScrollRate(10, 10);
 
 	Thaw();
-}
-
-ComponentDlg::~ComponentDlg()
-{
 }
 
 wxWindow* ComponentDlg::CreateCompGenPage(wxWindow *parent)

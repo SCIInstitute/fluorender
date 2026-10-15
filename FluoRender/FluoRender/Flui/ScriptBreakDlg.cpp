@@ -34,12 +34,16 @@ ScriptBreakDlg::ScriptBreakDlg(wxWindow* parent) :
 		parent->FromDIP(wxSize(400, 300)),
 		0, "ScriptBreakDlg")
 {
+}
+
+void ScriptBreakDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 
 	wxBoxSizer* sizer1 = new wxBoxSizer(wxVERTICAL);
 	m_info_text = new wxTextCtrl(this, wxID_ANY, "",
-		wxDefaultPosition, wxDefaultSize, wxTE_READONLY|wxTE_MULTILINE);
+		wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_MULTILINE);
 	sizer1->Add(m_info_text, 1, wxEXPAND);
 	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_shown_chk = new wxCheckBox(this, wxID_ANY, "Do not show again",
@@ -69,10 +73,6 @@ ScriptBreakDlg::ScriptBreakDlg(wxWindow* parent) :
 
 	SetSizer(sizerv);
 	Layout();
-}
-
-ScriptBreakDlg::~ScriptBreakDlg()
-{
 }
 
 void ScriptBreakDlg::UpdateScriptBreakInfo(const std::string& str)

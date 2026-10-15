@@ -45,6 +45,10 @@ MeshPropPanel::MeshPropPanel(
 	const wxString& name) :
 	AgentPanel(parent, pos, size,style, name)
 {
+}
+
+void MeshPropPanel::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
@@ -80,7 +84,7 @@ MeshPropPanel::MeshPropPanel(
 		"Show outlines");
 	//sync group
 	bitmap = wxGetBitmap(sync_chan);
-	m_options_toolbar->AddCheckTool(ID_SyncGroupChk,"Group Sync",
+	m_options_toolbar->AddCheckTool(ID_SyncGroupChk, "Group Sync",
 		bitmap, wxNullBitmap,
 		"Sync current channel with other channels in the group",
 		"Sync current channel with other channels in the group");
@@ -92,11 +96,11 @@ MeshPropPanel::MeshPropPanel(
 		"Enable name legend display for current channel");
 	//reset default
 	bitmap = wxGetBitmap(reset);
-	m_options_toolbar->AddToolWithHelp(ID_ResetDefault,"Reset",
+	m_options_toolbar->AddToolWithHelp(ID_ResetDefault, "Reset",
 		bitmap, "Reset all properties");
 	//save default
 	bitmap = wxGetBitmap(save_settings);
-	m_options_toolbar->AddToolWithHelp(ID_SaveDefault,"Save",
+	m_options_toolbar->AddToolWithHelp(ID_SaveDefault, "Save",
 		bitmap, "Set current settings as default");
 	m_options_toolbar->Bind(wxEVT_TOOL, &MeshPropPanel::OnOptions, this);
 	m_options_toolbar->Realize();
@@ -112,7 +116,7 @@ MeshPropPanel::MeshPropPanel(
 		wxDefaultPosition, bts, wxALIGN_CENTER);
 	m_alpha_chk = new wxCheckBox(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
-	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 127, 0, 255, 
+	m_alpha_sldr = new wxSingleSlider(this, wxID_ANY, 127, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_alpha_text = new wxNumTextCtrl(this, wxID_ANY, "0.50",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
@@ -130,7 +134,7 @@ MeshPropPanel::MeshPropPanel(
 		wxDefaultPosition, bts, wxALIGN_CENTER);
 	m_shading_chk = new wxCheckBox(this, wxID_ANY, "",
 		wxDefaultPosition, wxDefaultSize);
-	m_shading_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255, 
+	m_shading_sldr = new wxSingleSlider(this, wxID_ANY, 255, 0, 255,
 		wxDefaultPosition, wxDefaultSize, wxSL_HORIZONTAL);
 	m_shading_text = new wxNumTextCtrl(this, wxID_ANY, "1.00",
 		wxDefaultPosition, tts1, wxTE_RIGHT, vald_fp2);
@@ -222,10 +226,6 @@ MeshPropPanel::MeshPropPanel(
 	Layout();
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
-}
-
-MeshPropPanel::~MeshPropPanel()
-{
 }
 
 void MeshPropPanel::UpdateOutline(bool bval)

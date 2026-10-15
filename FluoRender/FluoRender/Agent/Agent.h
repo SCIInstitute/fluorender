@@ -177,7 +177,7 @@ public:
 	{
 	}
 
-	virtual ~Agent() = default;
+	virtual ~Agent();
 
 	AgentOwner* GetOwner() const
 	{

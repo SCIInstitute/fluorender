@@ -41,6 +41,10 @@ SettingDlg::SettingDlg(wxWindow *parent) :
 		parent->FromDIP(wxSize(500, 620)),
 		0, "SettingDlg")
 {
+}
+
+void SettingDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -61,7 +65,7 @@ SettingDlg::SettingDlg(wxWindow *parent) :
 	m_notebook->AddPage(CreateJavaPage(m_notebook), "ImageJ Link");
 
 	//interface
-	wxBoxSizer *sizer_v = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
 	sizer_v->Add(m_notebook, 1, wxEXPAND | wxALL);
 
 	SetSizer(sizer_v);
@@ -70,10 +74,6 @@ SettingDlg::SettingDlg(wxWindow *parent) :
 	SetScrollRate(10, 10);
 
 	Thaw();
-}
-
-SettingDlg::~SettingDlg()
-{
 }
 
 wxWindow* SettingDlg::CreateProjectPage(wxWindow *parent)

@@ -243,6 +243,8 @@ public:
 		bool hidepanels);
 	~MainFrame();
 
+	virtual void CreateUI() override;
+
 	void LoadPerspective(const wxString& str);
 	wxString SavePerspective();
 
@@ -382,8 +384,11 @@ public:
 
 private:
 	//cmd settings
-	int m_reset;
-	bool m_benchmark;
+	int m_reset{ false };
+	bool m_benchmark{ false };
+	bool m_fullscreen{ false };
+	bool m_windowed{ true };
+	bool m_hidepanels{ false };
 
 	//aui manager
 	wxAuiManager m_aui_mgr;

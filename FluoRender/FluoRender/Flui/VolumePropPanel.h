@@ -75,6 +75,8 @@ public:
 		const wxString& name = "VolumePropPanel");
 	~VolumePropPanel();
 
+	virtual void CreateUI() override;
+
 	//update
 	void UpdateMultiFuncTips(int ival);
 	void UpdateHistogram(

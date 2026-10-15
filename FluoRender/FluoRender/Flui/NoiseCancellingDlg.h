@@ -36,7 +36,8 @@ class NoiseCancellingDlg : public AgentPanel
 {
 public:
 	NoiseCancellingDlg(wxWindow* parent);
-	~NoiseCancellingDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateNrThresh(double dval, double max_val);

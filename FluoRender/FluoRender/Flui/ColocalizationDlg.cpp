@@ -36,6 +36,10 @@ ColocalizationDlg::ColocalizationDlg(wxWindow* parent) :
 		0, "ColocalizationDlg"),
 	m_hold_history(false)
 {
+}
+
+void ColocalizationDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
@@ -109,9 +113,9 @@ ColocalizationDlg::ColocalizationDlg(wxWindow* parent) :
 	sizer1->Add(10, 10);
 
 	//output
-	wxStaticBoxSizer *sizer2 = new wxStaticBoxSizer(
+	wxStaticBoxSizer* sizer2 = new wxStaticBoxSizer(
 		wxVERTICAL, this, "Output");
-	wxBoxSizer *sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer2_1 = new wxBoxSizer(wxHORIZONTAL);
 	m_history_chk = new wxCheckBox(this, wxID_ANY,
 		"Hold History", wxDefaultPosition, FromDIP(wxSize(85, 20)), wxALIGN_LEFT);
 	m_clear_hist_btn = new wxButton(this, wxID_ANY,
@@ -146,10 +150,6 @@ ColocalizationDlg::ColocalizationDlg(wxWindow* parent) :
 
 	Bind(wxEVT_KEY_DOWN, &ColocalizationDlg::OnKeyDown, this);
 	Bind(wxEVT_SIZE, &ColocalizationDlg::OnSize, this);
-}
-
-ColocalizationDlg::~ColocalizationDlg()
-{
 }
 
 void ColocalizationDlg::UpdateColocalMethod(int ival)

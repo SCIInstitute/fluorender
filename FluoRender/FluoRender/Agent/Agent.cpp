@@ -31,6 +31,11 @@ DEALINGS IN THE SOFTWARE.
 #include <Coordinator.h>
 #include <Global.h>
 
+Agent::~Agent()
+{
+	glbin_coordinator.Unregister(this);
+}
+
 void Agent::Update(
 	const UpdateRequest& request)
 {

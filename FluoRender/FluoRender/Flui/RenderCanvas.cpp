@@ -113,6 +113,70 @@ RenderCanvas::RenderCanvas(
 	m_full_screen(false),
 	m_focused_slider(0)
 {
+}
+
+RenderCanvas::~RenderCanvas()
+{
+	if (glbin_states.m_benchmark)
+	{
+		unsigned long long msec =
+			(unsigned long long)(glbin.getStopWatch(gstStopWatch)->total_time() * 1000.0);
+		unsigned long long count =
+			glbin.getStopWatch(gstStopWatch)->count();
+		double fps = glbin.getStopWatch(gstStopWatch)->total_fps();
+		wxString string = wxString("FluoRender has finished benchmarking.\n") +
+			wxString("Results:\n") +
+			wxString("Render size: ") + wxString::Format("%d X %d\n", GetSize().x, GetSize().y) +
+			wxString("Time: ") + wxString::Format("%llu msec\n", msec) +
+			wxString("Frames: ") + wxString::Format("%llu\n", count) +
+			wxString("FPS: ") + wxString::Format("%.2f", fps);
+		wxMessageDialog* diag = new wxMessageDialog(this, string, "Benchmark Results",
+			wxOK | wxICON_INFORMATION);
+		diag->ShowModal();
+	}
+
+	if (auto view = GetRenderView())
+	{
+		view->SetRenderViewPanel(0);
+		Root* root = glbin_data_manager.GetRoot();
+		if (root)
+			root->DeleteView(view.get());
+	}
+
+
+#ifdef _WIN32
+	//tablet
+	if (m_hTab)
+	{
+		gpWTClose(m_hTab);
+		m_hTab = 0;
+		UnloadWintab();
+	}
+
+#endif
+
+	std::string str = GetName().ToStdString() + ":";
+
+	if (m_full_screen)
+	{
+		m_full_screen = false;
+		m_renderview_panel->SetFullFrame(0);
+		if (auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>())
+		{
+			if (auto frame = frame_agent->GetMainFrame())
+			{
+				//m_frame->EraseAllCanvases();
+				frame->Close();
+			}
+		}
+	}
+
+	if (!m_sharedRC)
+		delete m_glRC;
+}
+
+void RenderCanvas::CreateUI()
+{
 	m_sharedRC = (sharedContext != nullptr);
 
 	if (m_sharedRC)
@@ -216,66 +280,8 @@ RenderCanvas::RenderCanvas(
 	Bind(wxEVT_TIMER, &RenderCanvas::OnQuitFscreen, this);
 }
 
-RenderCanvas::~RenderCanvas()
+void RenderCanvas::DestroyUI()
 {
-	if (glbin_states.m_benchmark)
-	{
-		unsigned long long msec =
-			(unsigned long long)(glbin.getStopWatch(gstStopWatch)->total_time() * 1000.0);
-		unsigned long long count =
-			glbin.getStopWatch(gstStopWatch)->count();
-		double fps = glbin.getStopWatch(gstStopWatch)->total_fps();
-		wxString string = wxString("FluoRender has finished benchmarking.\n") +
-			wxString("Results:\n") +
-			wxString("Render size: ") + wxString::Format("%d X %d\n", GetSize().x, GetSize().y) +
-			wxString("Time: ") + wxString::Format("%llu msec\n", msec) +
-			wxString("Frames: ") + wxString::Format("%llu\n", count) +
-			wxString("FPS: ") + wxString::Format("%.2f", fps);
-		wxMessageDialog* diag = new wxMessageDialog(this, string, "Benchmark Results",
-			wxOK | wxICON_INFORMATION);
-		diag->ShowModal();
-	}
-
-	if (auto view = GetRenderView())
-	{
-		view->SetRenderViewPanel(0);
-		Root* root = glbin_data_manager.GetRoot();
-		if (root)
-			root->DeleteView(view.get());
-	}
-
-
-#ifdef _WIN32
-	//tablet
-	if (m_hTab)
-	{
-		gpWTClose(m_hTab);
-		m_hTab = 0;
-		UnloadWintab();
-	}
-
-#endif
-
-	std::string str = GetName().ToStdString() + ":";
-
-	if (m_full_screen)
-	{
-		m_full_screen = false;
-		m_renderview_panel->SetFullFrame(0);
-		if (auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>())
-		{
-			if (auto frame = frame_agent->GetMainFrame())
-			{
-				//m_frame->EraseAllCanvases();
-				frame->Close();
-			}
-		}
-	}
-
-	if (!m_sharedRC)
-		delete m_glRC;
-
-	glbin_coordinator.Unregister(m_agent.get());
 }
 
 #ifdef _WIN32

@@ -58,12 +58,7 @@ enum class AgentState : int
 	// Save settings, disconnect observers,
 	// unregister callbacks, etc.
 	// UI still exists.
-	PreShutdown,
-
-	// Agent has been shut down.
-	// Associated UI has been destroyed or detached.
-	// No further communication should occur.
-	Shutdown
+	PreShutdown
 };
 
 #endif//AgentState_h

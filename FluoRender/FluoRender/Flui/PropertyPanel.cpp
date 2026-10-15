@@ -35,6 +35,10 @@ PropertyPanel::PropertyPanel(wxWindow* parent,
 	const wxString& name) :
 	TabbedPanel(parent, pos, size, style, name)
 {
+}
+
+void PropertyPanel::CreateUI()
+{
 	wxEventBlocker blocker(this);
 	Freeze();
 	m_notebook = new wxAuiNotebook(this, wxID_ANY,
@@ -42,7 +46,7 @@ PropertyPanel::PropertyPanel(wxWindow* parent,
 		wxAUI_NB_DEFAULT_STYLE | wxAUI_NB_TAB_EXTERNAL_MOVE |
 		wxAUI_NB_WINDOWLIST_BUTTON | wxNO_BORDER);
 	m_notebook->Bind(wxEVT_AUINOTEBOOK_PAGE_CLOSE, &PropertyPanel::OnPropPageClose, this);
-	wxBoxSizer *sizerv = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* sizerv = new wxBoxSizer(wxVERTICAL);
 	sizerv->Add(m_notebook, 1, wxEXPAND);
 	SetSizer(sizerv);
 	Layout();

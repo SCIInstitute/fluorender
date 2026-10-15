@@ -39,7 +39,8 @@ class OclDlg : public AgentPanel
 {
 public:
 	OclDlg(wxWindow* parent);
-	~OclDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateKernelList(const std::vector<std::wstring>& list);

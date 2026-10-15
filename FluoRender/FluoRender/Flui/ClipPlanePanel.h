@@ -70,7 +70,9 @@ public:
 		const wxSize& size=wxDefaultSize,
 		long style=0,
 		const wxString& name="ClipPlanePanel");
-	~ClipPlanePanel();
+	~ClipPlanePanel() override;
+
+	virtual void CreateUI() override;
 
 	//update
 	void EnableAll(bool val);

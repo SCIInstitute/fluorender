@@ -41,6 +41,10 @@ OclDlg::OclDlg(wxWindow* parent) :
 		parent->FromDIP(wxSize(550, 600)),
 		0, "OclDlg")
 {
+}
+
+void OclDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	//SetDoubleBuffered(true);
@@ -48,7 +52,7 @@ OclDlg::OclDlg(wxWindow* parent) :
 	//validator: integer
 	wxIntegerValidator<unsigned int> vald_int;
 
-	wxStaticText *st = 0;
+	wxStaticText* st = 0;
 	//
 	wxBoxSizer* sizer_1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Filter file:",
@@ -164,7 +168,7 @@ OclDlg::OclDlg(wxWindow* parent) :
 
 	//output
 	m_output_txt = new wxTextCtrl(mainSplitter, wxID_ANY, "",
-		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_READONLY|wxTE_MULTILINE);
+		wxDefaultPosition, FromDIP(wxSize(-1, 100)), wxTE_READONLY | wxTE_MULTILINE);
 
 	//top: list and code
 	topSplitter->SplitVertically(m_kernel_list, m_kernel_edit_stc);
@@ -174,7 +178,7 @@ OclDlg::OclDlg(wxWindow* parent) :
 	mainSplitter->SetSashGravity(0.9); // Optional: top gets more space
 
 	//all controls
-	wxBoxSizer *sizerV = new wxBoxSizer(wxVERTICAL);
+	wxBoxSizer* sizerV = new wxBoxSizer(wxVERTICAL);
 	sizerV->Add(10, 10);
 	sizerV->Add(sizer_1, 0, wxEXPAND);
 	sizerV->Add(10, 10);
@@ -184,10 +188,6 @@ OclDlg::OclDlg(wxWindow* parent) :
 
 	SetSizer(sizerV);
 	Layout();
-}
-
-OclDlg::~OclDlg()
-{
 }
 
 void OclDlg::UpdateKernelList(const std::vector<std::wstring>& list)

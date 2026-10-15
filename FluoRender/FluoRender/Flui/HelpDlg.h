@@ -35,7 +35,8 @@ class HelpDlg : public AgentPanel
 {
 public:
 	HelpDlg(wxWindow* parent);
-	~HelpDlg();
+
+	virtual void CreateUI() override;
 
 private:
 	wxHtmlWindow *m_html;

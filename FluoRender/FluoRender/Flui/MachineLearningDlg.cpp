@@ -35,6 +35,10 @@ MachineLearningDlg::MachineLearningDlg(wxWindow* parent) :
 		parent->FromDIP(wxSize(500, 620)),
 		0, "MachineLearningDlg")
 {
+}
+
+void MachineLearningDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -63,10 +67,6 @@ MachineLearningDlg::MachineLearningDlg(wxWindow* parent) :
 	Thaw();
 }
 
-MachineLearningDlg::~MachineLearningDlg()
-{
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MachineLearningPanel::MachineLearningPanel(wxWindow* parent) :
 	AgentPanel(parent,
@@ -76,11 +76,7 @@ MachineLearningPanel::MachineLearningPanel(wxWindow* parent) :
 {
 }
 
-MachineLearningPanel::~MachineLearningPanel()
-{
-}
-
-void MachineLearningPanel::Create()
+void MachineLearningPanel::CreateUI()
 {
 	auto agent = m_agent->As<MachineLearningPanelAgent>();
 	if (!agent)
@@ -326,11 +322,6 @@ void MachineLearningPanel::OnBotGridCellChanged(wxGridEvent& event)
 MLCompGenPanel::MLCompGenPanel(wxWindow* parent) :
 	MachineLearningPanel(parent)
 {
-	Create();
-}
-
-MLCompGenPanel::~MLCompGenPanel()
-{
 }
 
 void MLCompGenPanel::UpdateAutoStart(bool bval)
@@ -443,7 +434,11 @@ void MLCompGenPanel::OnTopGridCellChanged(wxGridEvent& event)
 MLVolPropPanel::MLVolPropPanel(wxWindow* parent) :
 	MachineLearningPanel(parent)
 {
-	Create();
+}
+
+void MLVolPropPanel::CreateUI()
+{
+	MachineLearningPanel::CreateUI();
 
 	//add more options
 	m_auto_apply_chk = new wxCheckBox(m_panel_bot, wxID_ANY, "Auto Apply",
@@ -452,10 +447,6 @@ MLVolPropPanel::MLVolPropPanel(wxWindow* parent) :
 	m_sizer2->Add(m_auto_apply_chk, 0);
 	m_sizer2->Add(5, 5);
 	m_panel_bot->Layout();
-}
-
-MLVolPropPanel::~MLVolPropPanel()
-{
 }
 
 void MLVolPropPanel::UpdateAutoStart(bool bval)

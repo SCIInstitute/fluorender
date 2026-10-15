@@ -34,14 +34,18 @@ CalculationDlg::CalculationDlg(wxWindow* parent)
 		parent->FromDIP(wxSize(500, 350)),
 		0, "CalculationDlg")
 {
+}
+
+void CalculationDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
 
-	wxStaticText *st = 0;
+	wxStaticText* st = 0;
 
 	//operand A
-	wxBoxSizer *sizer1 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Operand A:",
 		wxDefaultPosition, FromDIP(wxSize(75, 20)));
 	m_calc_load_a_btn = new wxButton(this, wxID_ANY, "Load",
@@ -53,7 +57,7 @@ CalculationDlg::CalculationDlg(wxWindow* parent)
 	sizer1->Add(m_calc_load_a_btn, 0, wxALIGN_CENTER);
 	sizer1->Add(m_calc_a_text, 1, wxEXPAND);
 	//operand B
-	wxBoxSizer *sizer2 = new wxBoxSizer(wxHORIZONTAL);
+	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
 	st = new wxStaticText(this, 0, "Operand B:",
 		wxDefaultPosition, FromDIP(wxSize(75, 20)));
 	m_calc_load_b_btn = new wxButton(this, wxID_ANY, "Load",
@@ -65,7 +69,7 @@ CalculationDlg::CalculationDlg(wxWindow* parent)
 	sizer2->Add(m_calc_load_b_btn, 0, wxALIGN_CENTER);
 	sizer2->Add(m_calc_b_text, 1, wxEXPAND);
 	//single operators
-	wxStaticBoxSizer *sizer3 = new wxStaticBoxSizer(
+	wxStaticBoxSizer* sizer3 = new wxStaticBoxSizer(
 		wxHORIZONTAL, this, "Single-valued Operators (Require only A)");
 	//sizer3
 	m_calc_fill_btn = new wxButton(this, wxID_ANY, "Consolidate Voxels",
@@ -77,7 +81,7 @@ CalculationDlg::CalculationDlg(wxWindow* parent)
 	sizer3->Add(m_calc_fill_btn, 1, wxEXPAND);
 	sizer3->Add(m_calc_combine_btn, 1, wxEXPAND);
 	//two operators
-	wxStaticBoxSizer *sizer4 = new wxStaticBoxSizer(
+	wxStaticBoxSizer* sizer4 = new wxStaticBoxSizer(
 		wxHORIZONTAL, this, "Two-valued Operators (Require both A and B)");
 	m_calc_sub_btn = new wxButton(this, wxID_ANY, "Subtract",
 		wxDefaultPosition, FromDIP(wxSize(50, 25)));
@@ -112,11 +116,6 @@ CalculationDlg::CalculationDlg(wxWindow* parent)
 	Layout();
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
-}
-
-CalculationDlg::~CalculationDlg()
-{
-
 }
 
 //update

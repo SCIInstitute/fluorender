@@ -34,7 +34,8 @@ class CalculationDlg : public AgentPanel
 {
 public:
 	CalculationDlg(wxWindow* parent);
-	~CalculationDlg();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateVolumeA(const std::wstring& str);

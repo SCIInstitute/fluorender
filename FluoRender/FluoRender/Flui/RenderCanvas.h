@@ -57,6 +57,8 @@ public:
 		long style = 0);
 	~RenderCanvas();
 
+	virtual void CreateUI() override;
+
 	//for degugging, this allows inspection of the pixel format actually given.
 #ifdef _WIN32
 	int GetPixelFormat(PIXELFORMATDESCRIPTOR *pfd);

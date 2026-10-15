@@ -291,6 +291,10 @@ TreePanel::TreePanel(
 	AgentPanel(parent, pos, size, style, name),
 	m_scroll_pos(-1)
 {
+}
+
+void TreePanel::CreateUI()
+{
 	wxEventBlocker blocker(this);
 	SetDoubleBuffered(true);
 	//create data tree
@@ -298,7 +302,7 @@ TreePanel::TreePanel(
 
 	//create tool bar
 	m_toolbar = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
+		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
 	wxBitmapBundle bitmap = wxGetBitmap(toggle_disp);
 	m_toolbar->AddTool(ID_ToggleDisp, "Toggle View", bitmap,
 		"Toggle the visibility of current selection");
@@ -353,7 +357,7 @@ TreePanel::TreePanel(
 
 	//create toolbar2
 	m_toolbar2 = new wxToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-		wxTB_FLAT|wxTB_TOP|wxTB_NODIVIDER);
+		wxTB_FLAT | wxTB_TOP | wxTB_NODIVIDER);
 	bitmap = wxGetBitmap(grow);
 	m_toolbar2->AddCheckTool(ID_BrushGrow, "Grow",
 		bitmap, wxNullBitmap,
@@ -425,10 +429,6 @@ TreePanel::TreePanel(
 	Bind(wxEVT_TREE_BEGIN_DRAG, &TreePanel::OnBeginDrag, this);
 	Bind(wxEVT_TREE_END_DRAG, &TreePanel::OnEndDrag, this);
 	Bind(wxEVT_KEY_DOWN, &TreePanel::OnKeyDown, this);
-}
-
-TreePanel::~TreePanel()
-{
 }
 
 void TreePanel::UpdateFreehandToolState(InteractiveMode int_mode,

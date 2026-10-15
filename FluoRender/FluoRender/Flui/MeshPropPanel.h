@@ -54,7 +54,8 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "MeshPropPanel");
-	~MeshPropPanel();
+
+	virtual void CreateUI() override;
 
 	//update
 	void UpdateOutline(bool bval);

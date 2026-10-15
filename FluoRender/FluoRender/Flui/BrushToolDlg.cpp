@@ -47,6 +47,10 @@ BrushToolDlg::BrushToolDlg(
 	m_hold_history(false),
 	m_auto_update_timer(this)
 {
+}
+
+void BrushToolDlg::CreateUI()
+{
 	// temporarily block events during constructor:
 	wxEventBlocker blocker(this);
 	Freeze();
@@ -73,10 +77,6 @@ BrushToolDlg::BrushToolDlg(
 	SetAutoLayout(true);
 	SetScrollRate(10, 10);
 	Thaw();
-}
-
-BrushToolDlg::~BrushToolDlg()
-{
 }
 
 wxWindow* BrushToolDlg::CreateToolPage(wxWindow* parent)

@@ -42,7 +42,8 @@ class MachineLearningDlg : public TabbedPanel
 {
 public:
 	MachineLearningDlg(wxWindow* parent);
-	~MachineLearningDlg();
+
+	virtual void CreateUI() override;
 
 private:
 	std::vector<MachineLearningPanel*> m_panels;
@@ -53,7 +54,8 @@ class MachineLearningPanel : public AgentPanel
 {
 public:
 	MachineLearningPanel(wxWindow* parent);
-	~MachineLearningPanel();
+
+	virtual void CreateUI() override;
 
 	virtual void PopTopList(const GridData& data);
 	virtual void UpdateTopListRow(const GridRowData& data);
@@ -84,8 +86,6 @@ protected:
 	wxButton* m_apply_rec_btn;
 
 protected:
-	virtual void Create();
-
 	virtual void EvenSizeBotGrid();
 	//
 	virtual void OnNewTable(wxCommandEvent& event) = 0;
@@ -112,7 +112,6 @@ class MLCompGenPanel : public MachineLearningPanel
 {
 public:
 	MLCompGenPanel(wxWindow* parent);
-	~MLCompGenPanel();
 
 	void UpdateAutoStart(bool bval);
 
@@ -140,7 +139,8 @@ class MLVolPropPanel : public MachineLearningPanel
 {
 public:
 	MLVolPropPanel(wxWindow* parent);
-	~MLVolPropPanel();
+
+	virtual void CreateUI() override;
 
 	void UpdateAutoStart(bool bval);
 	void UpdateAutoApply(bool bval);

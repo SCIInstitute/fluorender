@@ -126,6 +126,9 @@ MainFrame::MainFrame(
 	: wxFrame(0, wxID_ANY, title, wxPoint(x, y), wxSize(w, h),wxDEFAULT_FRAME_STYLE),
 	m_reset(reset),
 	m_benchmark(benchmark),
+	m_fullscreen(fullscreen),
+	m_windowed(windowed),
+	m_hidepanels(hidepanels),
 	m_title(title),
 	m_movie_panel(0),
 	m_tree_panel(0),
@@ -150,6 +153,51 @@ MainFrame::MainFrame(
 	//m_vd_copy(0),
 	//m_copy_data(false),
 	m_waker(this)
+{
+
+}
+
+MainFrame::~MainFrame()
+{
+	//release
+	glbin_text_tex_manager.clear();
+	flvr::KernelProgram::release_context();
+
+	glbin_brush_def.Set(glbin_vol_selector);
+	glbin_comp_def.Set(glbin_comp_generator);
+	glbin_comp_def.Set(glbin_clusterizer);
+	glbin_comp_def.Set(glbin_comp_selector);
+	glbin_comp_def.Set(glbin_comp_analyzer);
+	glbin_mov_def.Set(glbin_moviemaker);
+	glbin_mesh_def.Set(glbin_conv_vol_mesh);
+	//ui settings
+	//mainframe layout
+	SavePlacement();
+	//dpi scale factor
+	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
+	//frame layout
+	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
+	//panels
+	glbin_settings.m_layout_clip = m_clip_plane_panel->SavePerspective();
+	glbin_settings.m_layout_movie = m_movie_panel->SavePerspective();
+	glbin_settings.m_layout_outadj = m_output_adj_panel->SavePerspective();
+	glbin_settings.m_layout_project = m_proj_panel->SavePerspective();
+	//dialogs
+	glbin_settings.m_layout_brush = m_brush_tool_dlg->SavePerspective();
+	glbin_settings.m_layout_component = m_component_dlg->SavePerspective();
+	glbin_settings.m_layout_machine_learning = m_machine_learning_dlg->SavePerspective();
+	glbin_settings.m_layout_measure = m_measure_dlg->SavePerspective();
+	glbin_settings.m_layout_settings = m_setting_dlg->SavePerspective();
+	glbin_settings.m_layout_track = m_track_dlg->SavePerspective();
+	glbin_settings.m_layout_convert = m_convert_dlg->SavePerspective();
+	glbin_settings.Save();
+
+	m_aui_mgr.UnInit();
+
+	m_waker.Stop();
+}
+
+void MainFrame::CreateUI()
 {
 #ifdef _DARWIN
 	SetWindowVariant(wxWINDOW_VARIANT_SMALL);
@@ -435,7 +483,7 @@ MainFrame::MainFrame(
 	m->SetBitmap(wxGetBitmap(icon_about_mini));
 
 	//create primary render view
-	RenderViewPanel *vrv = glbin_flui_builder.BuildRenderViewPanel(this, nullptr);
+	RenderViewPanel* vrv = glbin_flui_builder.BuildRenderViewPanel(this, nullptr);
 	m_renderview_panels.push_back(vrv);
 
 	//use the project panel for both tree and list
@@ -456,7 +504,7 @@ MainFrame::MainFrame(
 
 	//clipping view
 	m_clip_plane_panel = glbin_flui_builder.BuildClipPlanePanel(this);
-	m_clip_plane_panel->SetSize(FromDIP(wxSize(140,700)));
+	m_clip_plane_panel->SetSize(FromDIP(wxSize(140, 700)));
 
 	//adjust view
 	m_output_adj_panel = glbin_flui_builder.BuildOutputAdjPanel(this);
@@ -655,9 +703,9 @@ MainFrame::MainFrame(
 	else
 		m_aui_mgr.GetPane(m_teser_dlg).Hide();
 
-	SetMinSize(FromDIP(wxSize(800,600)));
+	SetMinSize(FromDIP(wxSize(800, 600)));
 
-	if (!windowed)
+	if (!m_windowed)
 		StartupMaximize();
 
 	//drop target
@@ -768,7 +816,7 @@ MainFrame::MainFrame(
 	m = m_top_window->Append(ID_ClipPlanePanelMenu, "&Clipping Planes",
 		"Show or hide the clipping plane panel", wxITEM_CHECK);
 	m->SetBitmap(wxGetBitmap(disp_clipping));
-	m = m_top_window->Append(ID_PropPanelMenu,"P&roperties",
+	m = m_top_window->Append(ID_PropPanelMenu, "P&roperties",
 		"Show or hide the property panel", wxITEM_CHECK);
 	m->SetBitmap(wxGetBitmap(disp_properties));
 	m_top_window->Append(wxID_SEPARATOR);
@@ -807,20 +855,20 @@ MainFrame::MainFrame(
 		"Developer team information of FluoRender");
 	m->SetBitmap(wxGetBitmap(icon_about_mini));
 	//add the menus
-	m_top_menu->Append(m_top_file,"&File");
+	m_top_menu->Append(m_top_file, "&File");
 	m_top_menu->Append(m_top_edit, "&Edit");
-	m_top_menu->Append(m_top_tools,"&Tools");
-	m_top_menu->Append(m_top_window,"&Windows");
-	m_top_menu->Append(m_top_help,"&Help");
+	m_top_menu->Append(m_top_tools, "&Tools");
+	m_top_menu->Append(m_top_window, "&Windows");
+	m_top_menu->Append(m_top_help, "&Help");
 	SetMenuBar(m_top_menu);
 
-	if (fullscreen)
+	if (m_fullscreen)
 	{
 		vrv->SetFullScreen();
 		Iconize();
 	}
 
-	if (hidepanels)
+	if (m_hidepanels)
 		ToggleAllPanels(false);
 
 	wxMemorySize free_mem_size = wxGetFreeMemory();
@@ -864,47 +912,6 @@ MainFrame::MainFrame(
 	m_waker.Start(100);
 
 	m_aui_mgr.Update();
-
-}
-
-MainFrame::~MainFrame()
-{
-	//release
-	glbin_text_tex_manager.clear();
-	flvr::KernelProgram::release_context();
-
-	glbin_brush_def.Set(glbin_vol_selector);
-	glbin_comp_def.Set(glbin_comp_generator);
-	glbin_comp_def.Set(glbin_clusterizer);
-	glbin_comp_def.Set(glbin_comp_selector);
-	glbin_comp_def.Set(glbin_comp_analyzer);
-	glbin_mov_def.Set(glbin_moviemaker);
-	glbin_mesh_def.Set(glbin_conv_vol_mesh);
-	//ui settings
-	//mainframe layout
-	SavePlacement();
-	//dpi scale factor
-	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
-	//frame layout
-	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
-	//panels
-	glbin_settings.m_layout_clip = m_clip_plane_panel->SavePerspective();
-	glbin_settings.m_layout_movie = m_movie_panel->SavePerspective();
-	glbin_settings.m_layout_outadj = m_output_adj_panel->SavePerspective();
-	glbin_settings.m_layout_project = m_proj_panel->SavePerspective();
-	//dialogs
-	glbin_settings.m_layout_brush = m_brush_tool_dlg->SavePerspective();
-	glbin_settings.m_layout_component = m_component_dlg->SavePerspective();
-	glbin_settings.m_layout_machine_learning = m_machine_learning_dlg->SavePerspective();
-	glbin_settings.m_layout_measure = m_measure_dlg->SavePerspective();
-	glbin_settings.m_layout_settings = m_setting_dlg->SavePerspective();
-	glbin_settings.m_layout_track = m_track_dlg->SavePerspective();
-	glbin_settings.m_layout_convert = m_convert_dlg->SavePerspective();
-	glbin_settings.Save();
-
-	m_aui_mgr.UnInit();
-
-	m_waker.Stop();
 }
 
 void MainFrame::SavePlacement()

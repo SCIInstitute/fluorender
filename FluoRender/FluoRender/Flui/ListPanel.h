@@ -154,7 +154,8 @@ public:
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
 		const wxString& name = "ListPanel");
-	~ListPanel();
+
+	virtual void CreateUI() override;
 
 	void DeleteAllListItems();
 	void AppendListItem(ListItemType type, const std::wstring& name, const std::wstring& path);

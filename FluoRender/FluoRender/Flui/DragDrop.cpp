@@ -28,14 +28,6 @@ DEALINGS IN THE SOFTWARE.
 #include <DragDrop.h>
 #include <DragDropFileAgent.h>
 
-DnDFile::DnDFile()
-{
-}
-
-DnDFile::~DnDFile()
-{
-}
-
 wxDragResult DnDFile::OnDragOver(wxCoord x, wxCoord y, wxDragResult def)
 {
 	return wxDragCopy;

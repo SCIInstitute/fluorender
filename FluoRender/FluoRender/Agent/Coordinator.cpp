@@ -183,16 +183,4 @@ void Coordinator::BringToState(
 		agent->SetState(
 			AgentState::PreShutdown);
 	}
-
-	if (state < AgentState::Shutdown &&
-		target_state >= AgentState::Shutdown)
-	{
-		if (auto* owner = agent->GetOwner())
-			owner->DestroyUI();
-
-		agent->Shutdown();
-
-		agent->SetState(
-			AgentState::Shutdown);
-	}
 }

@@ -48,6 +48,8 @@ public:
 		const wxString& name="OutputAdjPanel");
 	~OutputAdjPanel();
 
+	virtual void CreateUI() override;
+
 	virtual void LoadPerspective(const std::string& str) override;
 
 	//update
@@ -80,6 +82,8 @@ public:
 	bool GetSync(int i);
 
 private:
+	wxSize m_size;
+
 	//sync red
 	wxUndoableToolbar* m_sync_r_chk;
 	//buttons
