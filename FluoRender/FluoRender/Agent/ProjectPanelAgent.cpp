@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Tokens.h>
 #include <MainFrameAgent.h>
 #include <Coordinator.h>
+#include <MainSettings.h>
 
 ProjectPanelAgent::ProjectPanelAgent(
 	ProjectPanel* dlg) :
@@ -51,7 +52,22 @@ void ProjectPanelAgent::UpdateData(const UpdateRequest& request)
 {
 }
 
-ProjectPanel* ProjectPanelAgent::GetDialog() const
+ProjectPanel* ProjectPanelAgent::GetPanel() const
 {
 	return static_cast<ProjectPanel*>(GetOwner());
 }
+
+void ProjectPanelAgent::ApplySettings()
+{
+	auto panel = GetPanel();
+	if (panel)
+		panel->LoadPerspective(glbin_settings.m_layout_project);
+}
+
+void ProjectPanelAgent::Shutdown()
+{
+	auto panel = GetPanel();
+	if (panel)
+		glbin_settings.m_layout_project = panel->SavePerspective();
+}
+

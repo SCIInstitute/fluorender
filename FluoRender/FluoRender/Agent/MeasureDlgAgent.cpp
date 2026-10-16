@@ -306,6 +306,20 @@ MeasureDlg* MeasureDlgAgent::GetDialog() const
 	return static_cast<MeasureDlg*>(GetOwner());
 }
 
+void MeasureDlgAgent::ApplySettings()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		dialog->LoadPerspective(glbin_settings.m_layout_measure);
+}
+
+void MeasureDlgAgent::Shutdown()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_settings.m_layout_measure = dialog->SavePerspective();
+}
+
 namespace
 {
 	std::string PointToString(const fluo::Point& p)

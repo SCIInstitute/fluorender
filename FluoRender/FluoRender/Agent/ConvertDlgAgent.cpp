@@ -41,6 +41,7 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <ColorMesh.h>
 #include <GridBuilder.h>
+#include <MainSettings.h>
 
 ConvertDlgAgent::ConvertDlgAgent(
 	ConvertDlg* dlg) :
@@ -201,6 +202,20 @@ void ConvertDlgAgent::UpdateData(const UpdateRequest& request)
 ConvertDlg* ConvertDlgAgent::GetDialog() const
 {
 	return static_cast<ConvertDlg*>(GetOwner());
+}
+
+void ConvertDlgAgent::ApplySettings()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		dialog->LoadPerspective(glbin_settings.m_layout_convert);
+}
+
+void ConvertDlgAgent::Shutdown()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_settings.m_layout_convert = dialog->SavePerspective();
 }
 
 void ConvertDlgAgent::SetIsoValue(double dval)

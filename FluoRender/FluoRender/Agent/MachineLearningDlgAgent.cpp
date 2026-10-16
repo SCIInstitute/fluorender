@@ -67,6 +67,20 @@ MachineLearningDlg* MachineLearningDlgAgent::GetDialog() const
 	return static_cast<MachineLearningDlg*>(GetOwner());
 }
 
+void MachineLearningDlgAgent::ApplySettings()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		dialog->LoadPerspective(glbin_settings.m_layout_machine_learning);
+}
+
+void MachineLearningDlgAgent::Shutdown()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_settings.m_layout_machine_learning = dialog->SavePerspective();
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 MachineLearningPanelAgent::MachineLearningPanelAgent(
 	MachineLearningPanel* panel) :

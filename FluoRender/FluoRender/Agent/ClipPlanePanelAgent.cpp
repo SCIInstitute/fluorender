@@ -293,6 +293,20 @@ ClipPlanePanel* ClipPlanePanelAgent::GetPanel() const
 	return static_cast<ClipPlanePanel*>(GetOwner());
 }
 
+void ClipPlanePanelAgent::ApplySettings()
+{
+	auto panel = GetPanel();
+	if (panel)
+		panel->LoadPerspective(glbin_settings.m_layout_clip);
+}
+
+void ClipPlanePanelAgent::Shutdown()
+{
+	auto panel = GetPanel();
+	if (panel)
+		glbin_settings.m_layout_clip = panel->SavePerspective();
+}
+
 std::shared_ptr<TreeLayer> ClipPlanePanelAgent::GetObject()
 {
 	int type = glbin_current.GetType();

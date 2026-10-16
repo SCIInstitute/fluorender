@@ -55,6 +55,20 @@ MoviePanel* MoviePanelAgent::GetPanel() const
 	return static_cast<MoviePanel*>(GetOwner());
 }
 
+void MoviePanelAgent::ApplySettings()
+{
+	auto panel = GetPanel();
+	if (panel)
+		panel->LoadPerspective(glbin_settings.m_layout_movie);
+}
+
+void MoviePanelAgent::Shutdown()
+{
+	auto panel = GetPanel();
+	if (panel)
+		glbin_settings.m_layout_movie = panel->SavePerspective();
+}
+
 void MoviePanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();

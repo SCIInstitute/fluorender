@@ -401,6 +401,20 @@ SettingDlg* SettingDlgAgent::GetDialog() const
 	return static_cast<SettingDlg*>(GetOwner());
 }
 
+void SettingDlgAgent::ApplySettings()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		dialog->LoadPerspective(glbin_settings.m_layout_settings);
+}
+
+void SettingDlgAgent::Shutdown()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_settings.m_layout_settings = dialog->SavePerspective();
+}
+
 bool SettingDlgAgent::GetFontList(std::vector<std::string>& list) const
 {
 	//populate fonts

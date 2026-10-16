@@ -44,6 +44,9 @@ public:
 
 	MachineLearningDlg* GetDialog() const;
 
+	virtual void ApplySettings() override;
+	virtual void Shutdown() override;
+
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override

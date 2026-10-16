@@ -303,6 +303,20 @@ TrackDlg* TrackDlgAgent::GetDialog() const
 	return static_cast<TrackDlg*>(GetOwner());
 }
 
+void TrackDlgAgent::ApplySettings()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		dialog->LoadPerspective(glbin_settings.m_layout_track);
+}
+
+void TrackDlgAgent::Shutdown()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_settings.m_layout_track = dialog->SavePerspective();
+}
+
 std::vector<TrackItem> TrackDlgAgent::BuildTrackList(
 	const flrd::CelpList& sel_cells,
 	bool shuffle)

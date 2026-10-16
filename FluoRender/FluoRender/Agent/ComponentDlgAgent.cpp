@@ -48,6 +48,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Coordinator.h>
 #include <RulerList.h>
 #include <GridBuilder.h>
+#include <MainSettings.h>
 #include <compatibility.h>
 
 ComponentDlgAgent::ComponentDlgAgent(
@@ -376,6 +377,20 @@ void ComponentDlgAgent::UpdateData(const UpdateRequest& request)
 ComponentDlg* ComponentDlgAgent::GetDialog() const
 {
 	return static_cast<ComponentDlg*>(GetOwner());
+}
+
+void ComponentDlgAgent::ApplySettings()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		dialog->LoadPerspective(glbin_settings.m_layout_component);
+}
+
+void ComponentDlgAgent::Shutdown()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_settings.m_layout_component = dialog->SavePerspective();
 }
 
 void ComponentDlgAgent::SetIter(int ival)

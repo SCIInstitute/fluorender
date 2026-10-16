@@ -28,69 +28,8 @@ DEALINGS IN THE SOFTWARE.
 
 #include <FluiBuilder.h>
 #include <Global.h>
-#include <AnnotatPropPanel.h>
-#include <AnnotatPropPanelAgent.h>
-#include <BrushToolDlg.h>
-#include <BrushToolDlgAgent.h>
-#include <CalculationDlg.h>
-#include <CalculationDlgAgent.h>
-#include <ClipPlanePanel.h>
-#include <ClipPlanePanelAgent.h>
-#include <ColocalizationDlg.h>
-#include <ColocalizationDlgAgent.h>
-#include <ComponentDlg.h>
-#include <ComponentDlgAgent.h>
-#include <ConvertDlg.h>
-#include <ConvertDlgAgent.h>
-#include <CountingDlg.h>
-#include <CountingDlgAgent.h>
-#include <DragDrop.h>
-#include <DragDropFileAgent.h>
-#include <FpRangeDlg.h>
-#include <FpRangeDlgAgent.h>
-#include <HelpDlg.h>
-#include <HelpDlgAgent.h>
-#include <ListPanel.h>
-#include <ListPanelAgent.h>
-#include <MachineLearningDlg.h>
-#include <MachineLearningDlgAgent.h>
-#include <MainFrame.h>
-#include <MainFrameAgent.h>
-#include <ManipPropPanel.h>
-#include <ManipPropPanelAgent.h>
-#include <MeasureDlg.h>
-#include <MeasureDlgAgent.h>
-#include <MeshPropPanel.h>
-#include <MeshPropPanelAgent.h>
-#include <MoviePanel.h>
-#include <MoviePanelAgent.h>
-#include <NoiseCancellingDlg.h>
-#include <NoiseCancellingDlgAgent.h>
-#include <OclDlg.h>
-#include <OclDlgAgent.h>
-#include <OutputAdjPanel.h>
-#include <OutputAdjPanelAgent.h>
-#include <ProjectPanel.h>
-#include <ProjectPanelAgent.h>
-#include <PropertyPanel.h>
-#include <PropertyPanelAgent.h>
-#include <RenderCanvas.h>
-#include <RenderCanvasAgent.h>
-#include <RenderViewPanel.h>
-#include <RenderViewPanelAgent.h>
-#include <ScriptBreakDlg.h>
-#include <ScriptBreakDlgAgent.h>
-#include <SettingDlg.h>
-#include <SettingDlgAgent.h>
-#include <TesterDlg.h>
-#include <TesterDlgAgent.h>
-#include <TrackDlg.h>
-#include <TrackDlgAgent.h>
-#include <TreePanel.h>
-#include <TreePanelAgent.h>
-#include <VolumePropPanel.h>
-#include <VolumePropPanelAgent.h>
-
+#include <PanelsAndDialogs.h>
+#include <PanelAndDialogAgents.h>
 #include <CurrentObjects.h>
 #include <DataManager.h>
 #include <RenderView.h>
@@ -208,7 +147,7 @@ MainFrame* FluiBuilder::BuildMainFrame(
 	bool windowed,
 	bool hidepanels)
 {
-	auto frame = new MainFrame(
+	auto* frame = new MainFrame(
 		title,
 		x, y,
 		w, h,
@@ -217,15 +156,17 @@ MainFrame* FluiBuilder::BuildMainFrame(
 		fullscreen,
 		windowed,
 		hidepanels);
-	
-	auto agent = std::make_unique<MainFrameAgent>(frame);
 
-	glbin_coordinator.Register(agent.get());
+	auto agent =
+		std::make_unique<MainFrameAgent>(frame);
 
 	frame->SetAgent(std::move(agent));
 
-	agent->Initialize();
-	agent->LoadRenderViewSettings();
+	glbin_coordinator.Register(
+		frame->GetAgent());
+
+	glbin_coordinator.AdvanceToState(
+		AgentState::Running);
 
 	return frame;
 }

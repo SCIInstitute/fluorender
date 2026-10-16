@@ -40,7 +40,10 @@ public:
 
 	virtual ~ProjectPanelAgent() = default;
 
-	ProjectPanel* GetDialog() const;
+	ProjectPanel* GetPanel() const;
+
+	virtual void ApplySettings() override;
+	virtual void Shutdown() override;
 
 protected:
 	std::span < const std::string_view>

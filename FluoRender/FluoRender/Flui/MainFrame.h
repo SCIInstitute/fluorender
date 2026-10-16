@@ -39,6 +39,7 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/auibar.h>
 #include <vector>
 #include <memory>
+#include <array>
 
 inline const std::string VERSION_CONTACT =
 "https://sciinstitute.github.io/fluorender/";
@@ -245,11 +246,14 @@ public:
 
 	virtual void CreateUI() override;
 
-	void LoadPerspective(const wxString& str);
-	wxString SavePerspective();
+	void LoadPerspective(const std::string& str);
+	std::string SavePerspective();
 
 	int GetReset() { return m_reset; }
 	bool GetBenchmark() { return m_benchmark; }
+
+	int GetDisplayId();
+	std::array<int, 4> GetMainFrameRect();
 
 	//volume
 	void OpenVolume();
@@ -331,8 +335,6 @@ public:
 	//machine learning dialog
 	MachineLearningDlg* GetMachineLearningDlg();
 
-	//views
-	void SavePlacement();
 
 	wxString CreateRenderViewPanel(int row = 1);
 	void DeleteRenderViewPanel(int i);

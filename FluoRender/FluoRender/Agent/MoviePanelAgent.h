@@ -46,6 +46,9 @@ public:
 
 	MoviePanel* GetPanel() const;
 
+	virtual void ApplySettings() override;
+	virtual void Shutdown() override;
+
 	void SelectKeyframe(int id);
 	void DeleteKeyframe(int id);
 	void DeleteAllKeyframes();

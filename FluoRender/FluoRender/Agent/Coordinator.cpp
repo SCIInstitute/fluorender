@@ -148,6 +148,7 @@ void Coordinator::BringToState(
 		agent->LoadSettings();
 		agent->SetState(
 			AgentState::SettingsLoaded);
+		state = AgentState::SettingsLoaded;
 	}
 
 	if (state < AgentState::UICreated &&
@@ -158,6 +159,7 @@ void Coordinator::BringToState(
 
 		agent->SetState(
 			AgentState::UICreated);
+		state = AgentState::UICreated;
 	}
 
 	if (state < AgentState::SettingsApplied &&
@@ -166,6 +168,7 @@ void Coordinator::BringToState(
 		agent->ApplySettings();
 		agent->SetState(
 			AgentState::SettingsApplied);
+		state = AgentState::SettingsApplied;
 	}
 
 	if (state < AgentState::Running &&
@@ -174,13 +177,15 @@ void Coordinator::BringToState(
 		agent->PostInitialize();
 		agent->SetState(
 			AgentState::Running);
+		state = AgentState::Running;
 	}
 
 	if (state < AgentState::PreShutdown &&
 		target_state >= AgentState::PreShutdown)
 	{
-		agent->PreShutdown();
+		agent->Shutdown();
 		agent->SetState(
 			AgentState::PreShutdown);
+		state = AgentState::PreShutdown;
 	}
 }

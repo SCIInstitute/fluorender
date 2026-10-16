@@ -38,6 +38,7 @@ DEALINGS IN THE SOFTWARE.
 #include <BrickTexture.h>
 #include <GlobalStates.h>
 #include <GridBuilder.h>
+#include <MainSettings.h>
 
 #define GM_2_ESTR(x) (1.0 - sqrt(1.0 - (x - 1.0) * (x - 1.0)))
 
@@ -374,6 +375,20 @@ void BrushToolDlgAgent::UpdateData(const UpdateRequest& request)
 BrushToolDlg* BrushToolDlgAgent::GetDialog() const
 {
 	return static_cast<BrushToolDlg*>(GetOwner());
+}
+
+void BrushToolDlgAgent::ApplySettings()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		dialog->LoadPerspective(glbin_settings.m_layout_brush);
+}
+
+void BrushToolDlgAgent::Shutdown()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_settings.m_layout_brush = dialog->SavePerspective();
 }
 
 void BrushToolDlgAgent::SetBrushSclTranslate(double dval)

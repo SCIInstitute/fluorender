@@ -45,12 +45,17 @@ public:
 
 	MainFrame* GetMainFrame() const;
 
+	virtual void LoadSettings() override;
+	virtual void ApplySettings() override;
+	virtual void Shutdown() override;
+
+	void ShutdownAll();
+
 	void SetFocusVRenderViews(wxBasisSlider* slider);
 
 	void AddRenderView(RenderViewPanelAgent* agent);
 	void RemoveRenderView(RenderViewPanelAgent* agent);
 
-	void Initialize();
 	void LoadRenderViewSettings();
 
 protected:

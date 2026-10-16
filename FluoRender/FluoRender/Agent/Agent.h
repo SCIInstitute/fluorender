@@ -200,7 +200,6 @@ public:
 	virtual void LoadSettings() {}
 	virtual void ApplySettings() {}
 	virtual void PostInitialize() {}
-	virtual void PreShutdown() {}
 	virtual void Shutdown() {}
 
 	template<class T>

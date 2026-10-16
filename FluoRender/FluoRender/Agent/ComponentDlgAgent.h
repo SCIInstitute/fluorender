@@ -46,6 +46,9 @@ public:
 
 	ComponentDlg* GetDialog() const;
 
+	virtual void ApplySettings() override;
+	virtual void Shutdown() override;
+
 	int GetMaxLines() { return m_max_lines; }
 
 	void SetIter(int ival);

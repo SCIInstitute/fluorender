@@ -292,6 +292,20 @@ OutputAdjPanel* OutputAdjPanelAgent::GetPanel() const
 	return static_cast<OutputAdjPanel*>(GetOwner());
 }
 
+void OutputAdjPanelAgent::ApplySettings()
+{
+	auto panel = GetPanel();
+	if (panel)
+		panel->LoadPerspective(glbin_settings.m_layout_outadj);
+}
+
+void OutputAdjPanelAgent::Shutdown()
+{
+	auto panel = GetPanel();
+	if (panel)
+		glbin_settings.m_layout_outadj = panel->SavePerspective();
+}
+
 void OutputAdjPanelAgent::UpdateSync()
 {
 	int i;

@@ -25,83 +25,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
-#include <KernelProgram.h>
 #include <Main.h>
 #include <MainFrame.h>
 #include <MainFrameAgent.h>
 #include <Global.h>
 #include <Tokens.h>
-#include <GlobalStates.h>
 #include <MainSettings.h>
-#include <Directory.h>
-#include <DragDrop.h>
-#include <AgentOwner.h>
-#include <ProjectPanel.h>
-#include <TreePanel.h>
-#include <ListPanel.h>
-#include <RenderViewPanel.h>
-#include <RenderCanvas.h>
-#include <PropertyPanel.h>
-#include <VolumePropPanel.h>
-#include <MeshPropPanel.h>
-#include <AnnotatPropPanel.h>
-#include <ManipPropPanel.h>
-#include <MoviePanel.h>
-#include <ClipPlanePanel.h>
-#include <OutputAdjPanel.h>
-#include <SettingDlg.h>
-#include <HelpDlg.h>
-#include <BrushToolDlg.h>
-#include <NoiseCancellingDlg.h>
-#include <CountingDlg.h>
-#include <ConvertDlg.h>
-#include <ColocalizationDlg.h>
-#include <MeasureDlg.h>
-#include <TrackDlg.h>
-#include <OclDlg.h>
-#include <ComponentDlg.h>
-#include <CalculationDlg.h>
-#include <MachineLearningDlg.h>
-#include <ScriptBreakDlg.h>
-#include <FpRangeDlg.h>
-#include <TesterDlg.h>
-#include <TextureRenderer.h>
-#include <msk_writer.h>
-#include <msk_reader.h>
-#include <DataManager.h>
-#include <CurrentObjects.h>
-#include <Root.h>
-#include <RenderView.h>
-#include <VolumeData.h>
-#include <MeshData.h>
-#include <AnnotData.h>
-#include <ScriptProc.h>
-#include <Project.h>
-#include <VolumeCalculator.h>
-#include <CompGenerator.h>
-#include <CompAnalyzer.h>
-#include <Clusterizer.h>
-#include <TrackMap.h>
-#include <KernelExecutor.h>
-#include <JVMInitializer.h>
-#include <PyBase.h>
-#include <MovieMaker.h>
-#include <KernelFactory.h>
-#include <Framebuffer.h>
-#include <VertexArray.h>
-#include <VolShader.h>
-#include <SegShader.h>
-#include <VolCalShader.h>
-#include <ImgShader.h>
-#include <LightFieldShader.h>
-#include <TextRenderer.h>
-#include <RenderCanvasAgent.h>
 #include <FluiBuilder.h>
+#include <JVMInitializer.h>
+#include <PanelsAndDialogs.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
 #include <wxBasisSlider.h>
 #include <wxToolbarArt.h>
-#include <ModalDlg.h>
 #include <wx/aboutdlg.h>
 #include <wx/hyperlink.h>
 #include <wx/accel.h>
@@ -150,48 +86,12 @@ MainFrame::MainFrame(
 	m_machine_learning_dlg(0),
 	m_script_break_dlg(0),
 	m_fp_range_dlg(0),
-	//m_vd_copy(0),
-	//m_copy_data(false),
 	m_waker(this)
 {
-
 }
 
 MainFrame::~MainFrame()
 {
-	//release
-	glbin_text_tex_manager.clear();
-	flvr::KernelProgram::release_context();
-
-	glbin_brush_def.Set(glbin_vol_selector);
-	glbin_comp_def.Set(glbin_comp_generator);
-	glbin_comp_def.Set(glbin_clusterizer);
-	glbin_comp_def.Set(glbin_comp_selector);
-	glbin_comp_def.Set(glbin_comp_analyzer);
-	glbin_mov_def.Set(glbin_moviemaker);
-	glbin_mesh_def.Set(glbin_conv_vol_mesh);
-	//ui settings
-	//mainframe layout
-	SavePlacement();
-	//dpi scale factor
-	glbin_settings.m_dpi_scale_factor = GetDPIScaleFactor();
-	//frame layout
-	glbin_settings.m_layout = m_aui_mgr.SavePerspective();
-	//panels
-	glbin_settings.m_layout_clip = m_clip_plane_panel->SavePerspective();
-	glbin_settings.m_layout_movie = m_movie_panel->SavePerspective();
-	glbin_settings.m_layout_outadj = m_output_adj_panel->SavePerspective();
-	glbin_settings.m_layout_project = m_proj_panel->SavePerspective();
-	//dialogs
-	glbin_settings.m_layout_brush = m_brush_tool_dlg->SavePerspective();
-	glbin_settings.m_layout_component = m_component_dlg->SavePerspective();
-	glbin_settings.m_layout_machine_learning = m_machine_learning_dlg->SavePerspective();
-	glbin_settings.m_layout_measure = m_measure_dlg->SavePerspective();
-	glbin_settings.m_layout_settings = m_setting_dlg->SavePerspective();
-	glbin_settings.m_layout_track = m_track_dlg->SavePerspective();
-	glbin_settings.m_layout_convert = m_convert_dlg->SavePerspective();
-	glbin_settings.Save();
-
 	m_aui_mgr.UnInit();
 
 	m_waker.Stop();
@@ -893,55 +793,9 @@ void MainFrame::CreateUI()
 	Bind(wxEVT_TIMER, [](wxTimerEvent& event) { wxWakeUpIdle(); });
 	Bind(wxEVT_SYS_COLOUR_CHANGED, &MainFrame::OnSysColorChanged, this);
 
-	if (fluo::InEpsilon(glbin_settings.m_dpi_scale_factor,
-		GetDPIScaleFactor()))
-		m_aui_mgr.LoadPerspective(glbin_settings.m_layout);
-	m_clip_plane_panel->LoadPerspective(glbin_settings.m_layout_clip);
-	m_movie_panel->LoadPerspective(glbin_settings.m_layout_movie);
-	m_output_adj_panel->LoadPerspective(glbin_settings.m_layout_outadj);
-	m_proj_panel->LoadPerspective(glbin_settings.m_layout_project);
-	m_brush_tool_dlg->LoadPerspective(glbin_settings.m_layout_brush);
-	m_component_dlg->LoadPerspective(glbin_settings.m_layout_component);
-	m_machine_learning_dlg->LoadPerspective(glbin_settings.m_layout_machine_learning);
-	m_measure_dlg->LoadPerspective(glbin_settings.m_layout_measure);
-	m_setting_dlg->LoadPerspective(glbin_settings.m_layout_settings);
-	m_track_dlg->LoadPerspective(glbin_settings.m_layout_track);
-	m_convert_dlg->LoadPerspective(glbin_settings.m_layout_convert);
-	glbin_moviemaker.SetMainFrame(this);
-
 	m_waker.Start(100);
 
 	m_aui_mgr.Update();
-}
-
-void MainFrame::SavePlacement()
-{
-	glbin_settings.m_mainframe_disp_id = wxDisplay::GetFromWindow(this);
-	//glbin_settings.m_mainframe_maximized = IsMaximized();
-
-#ifdef __WXMSW__
-	HWND hwnd = (HWND)GetHandle();
-
-	WINDOWPLACEMENT wp;
-	wp.length = sizeof(WINDOWPLACEMENT);
-
-	if (GetWindowPlacement(hwnd, &wp))
-	{
-		RECT r = wp.rcNormalPosition;
-
-		glbin_settings.m_mainframe_x = r.left;
-		glbin_settings.m_mainframe_y = r.top;
-		glbin_settings.m_mainframe_w = r.right - r.left;
-		glbin_settings.m_mainframe_h = r.bottom - r.top;
-	}
-#else
-	// fallback (non-Windows)
-	wxRect r = GetScreenRect();
-	glbin_settings.m_mainframe_x = r.x;
-	glbin_settings.m_mainframe_y = r.y;
-	glbin_settings.m_mainframe_w = r.width;
-	glbin_settings.m_mainframe_h = r.height;
-#endif
 }
 
 wxString MainFrame::CreateRenderViewPanel(int row)
@@ -1026,15 +880,45 @@ wxString MainFrame::CreateRenderViewPanel(int row)
 	return vrv->GetName();
 }
 
-void MainFrame::LoadPerspective(const wxString& str)
+void MainFrame::LoadPerspective(const std::string& str)
 {
 	m_aui_mgr.LoadPerspective(str);
 	m_aui_mgr.Update();
 }
 
-wxString MainFrame::SavePerspective()
+std::string MainFrame::SavePerspective()
 {
-	return m_aui_mgr.SavePerspective();
+	return m_aui_mgr.SavePerspective().ToStdString();
+}
+
+int MainFrame::GetDisplayId()
+{
+	return wxDisplay::GetFromWindow(this);
+}
+
+std::array<int, 4> MainFrame::GetMainFrameRect()
+{
+#ifdef __WXMSW__
+	HWND hwnd = (HWND)GetHandle();
+
+	WINDOWPLACEMENT wp;
+	wp.length = sizeof(WINDOWPLACEMENT);
+
+	if (GetWindowPlacement(hwnd, &wp))
+	{
+		RECT r = wp.rcNormalPosition;
+
+		return { r.left, r.top,
+			r.right - r.left,
+			r.bottom - r.top };
+	}
+#else
+	// fallback (non-Windows)
+	wxRect r = GetScreenRect();
+
+	return { r.x, r.y,
+		r.width, r.height };
+#endif
 }
 
 ProjectPanel* MainFrame::GetProjectPanel()
@@ -2811,21 +2695,9 @@ void MainFrame::OnPaneClose(wxAuiManagerEvent& event)
 
 void MainFrame::OnClose(wxCloseEvent& event)
 {
-	glbin_moviemaker.Stop();
-
-	bool vrv_saved = false;
-	for (unsigned int i = 0; i < m_renderview_panels.size(); ++i)
-	{
-		if (m_renderview_panels[i]->m_default_saved)
-		{
-			vrv_saved = true;
-			break;
-		}
-		m_renderview_panels[i]->CloseFullScreen();
-	}
-	if (!vrv_saved && !m_renderview_panels.empty())
-		m_renderview_panels[0]->SaveDefault(0xaff);
-	glbin.clear_python();
+	auto agent = m_agent->As<MainFrameAgent>();
+	if (agent)
+		agent->ShutdownAll();
 	event.Skip();
 }
 

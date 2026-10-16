@@ -45,6 +45,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Directory.h>
 #include <TextRenderer.h>
 #include <MovieMaker.h>
+#include <KernelProgram.h>
 
 MainFrameAgent::MainFrameAgent(
 	MainFrame* frame) :
@@ -75,38 +76,7 @@ MainFrame* MainFrameAgent::GetMainFrame() const
 	return static_cast<MainFrame*>(GetOwner());
 }
 
-void MainFrameAgent::SetFocusVRenderViews(wxBasisSlider* slider)
-{
-	for (auto view_agent : renderview_agent_list_)
-	{
-		if (!view_agent)
-			continue;
-
-		auto canvas_agent = view_agent->GetRenderCanvasAgent();
-		if (canvas_agent)
-		{
-			RenderCanvas* canvas = canvas_agent->GetCanvas();
-			if (canvas)
-				canvas->SetFocusedSlider(slider);
-		}
-	}
-}
-
-void MainFrameAgent::AddRenderView(RenderViewPanelAgent* agent)
-{
-	if (!agent)
-		return;
-	renderview_agent_list_.insert(agent);
-}
-
-void MainFrameAgent::RemoveRenderView(RenderViewPanelAgent* agent)
-{
-	if (!agent)
-		return;
-	renderview_agent_list_.erase(agent);
-}
-
-void MainFrameAgent::Initialize()
+void MainFrameAgent::LoadSettings()
 {
 	auto mainframe = GetMainFrame();
 	if (!mainframe)
@@ -118,6 +88,14 @@ void MainFrameAgent::Initialize()
 		glbin_settings.Read();
 	else if (reset == 2)
 		glbin_settings.Read("fluorender_default");
+}
+
+void MainFrameAgent::ApplySettings()
+{
+	auto mainframe = GetMainFrame();
+	if (!mainframe)
+		return;
+
 	glbin.apply_processor_settings();
 	glbin_comp_def.Apply(glbin_clusterizer);
 	glbin_comp_def.Apply(glbin_comp_analyzer);
@@ -160,7 +138,95 @@ void MainFrameAgent::Initialize()
 	//	auto view = renderview_agent_list_.begin();
 	//	glbin_moviemaker.SetView(*view);
 	//}
-	glbin_mov_def.Apply(glbin_moviemaker);
+	//glbin_mov_def.Apply(glbin_moviemaker);
+	if (fluo::InEpsilon(glbin_settings.m_dpi_scale_factor,
+		mainframe->GetDPIScaleFactor()))
+		mainframe->LoadPerspective(glbin_settings.m_layout);
+	//glbin_moviemaker.SetMainFrame(this);
+}
+
+void MainFrameAgent::Shutdown()
+{
+	auto mainframe = GetMainFrame();
+	if (!mainframe)
+		return;
+
+	glbin_moviemaker.Stop();
+
+	bool vrv_saved = false;
+	for (unsigned int i = 0; i < m_renderview_panels.size(); ++i)
+	{
+		if (m_renderview_panels[i]->m_default_saved)
+		{
+			vrv_saved = true;
+			break;
+		}
+		m_renderview_panels[i]->CloseFullScreen();
+	}
+	if (!vrv_saved && !m_renderview_panels.empty())
+		m_renderview_panels[0]->SaveDefault(0xaff);
+	glbin.clear_python();
+
+	//release
+	glbin_text_tex_manager.clear();
+	flvr::KernelProgram::release_context();
+
+	glbin_brush_def.Set(glbin_vol_selector);
+	glbin_comp_def.Set(glbin_comp_generator);
+	glbin_comp_def.Set(glbin_clusterizer);
+	glbin_comp_def.Set(glbin_comp_selector);
+	glbin_comp_def.Set(glbin_comp_analyzer);
+	glbin_mov_def.Set(glbin_moviemaker);
+	glbin_mesh_def.Set(glbin_conv_vol_mesh);
+	//ui settings
+	//mainframe layout
+	glbin_settings.m_mainframe_disp_id = mainframe->GetDisplayId();
+	auto rect = mainframe->GetMainFrameRect();
+	glbin_settings.m_mainframe_x = rect[0];
+	glbin_settings.m_mainframe_y = rect[1];
+	glbin_settings.m_mainframe_w = rect[2];
+	glbin_settings.m_mainframe_h = rect[3];
+	//dpi scale factor
+	glbin_settings.m_dpi_scale_factor = mainframe->GetDPIScaleFactor();
+	//frame layout
+	glbin_settings.m_layout = mainframe->SavePerspective();
+	glbin_settings.Save();
+}
+
+void MainFrameAgent::ShutdownAll()
+{
+	glbin_coordinator.AdvanceToState(AgentState::PreShutdown);
+}
+
+void MainFrameAgent::SetFocusVRenderViews(wxBasisSlider* slider)
+{
+	for (auto view_agent : renderview_agent_list_)
+	{
+		if (!view_agent)
+			continue;
+
+		auto canvas_agent = view_agent->GetRenderCanvasAgent();
+		if (canvas_agent)
+		{
+			RenderCanvas* canvas = canvas_agent->GetCanvas();
+			if (canvas)
+				canvas->SetFocusedSlider(slider);
+		}
+	}
+}
+
+void MainFrameAgent::AddRenderView(RenderViewPanelAgent* agent)
+{
+	if (!agent)
+		return;
+	renderview_agent_list_.insert(agent);
+}
+
+void MainFrameAgent::RemoveRenderView(RenderViewPanelAgent* agent)
+{
+	if (!agent)
+		return;
+	renderview_agent_list_.erase(agent);
 }
 
 void MainFrameAgent::SyncRenderViewPanels()
