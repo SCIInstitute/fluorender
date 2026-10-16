@@ -46,6 +46,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TextRenderer.h>
 #include <MovieMaker.h>
 #include <KernelProgram.h>
+#include <TextureRenderer.h>
 
 MainFrameAgent::MainFrameAgent(
 	MainFrame* frame) :
@@ -56,6 +57,101 @@ MainFrameAgent::MainFrameAgent(
 
 void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 {
+	int type = 0;
+	if (FOUND_VALUE(gstVolumePropPanel))
+		type = 2;
+	else if (FOUND_VALUE(gstMeshPropPanel))
+		type = 3;
+	else if (FOUND_VALUE(gstManipPropPanel))
+		type = 6;
+	else if (FOUND_VALUE(gstAnnotatPropPanel))
+		type = 4;
+	ShowPropPage(type,
+		glbin_current.render_view.lock(),
+		glbin_current.vol_group.lock(),
+		glbin_current.vol_data.lock(),
+		glbin_current.mesh_data.lock(),
+		glbin_current.mesh_group.lock(),
+		glbin_current.ann_data.lock());
+
+	//clear mesh bounds
+	//glbin_data_manager.ClearMeshSelection();
+	//auto md = glbin_current.mesh_data.lock();
+	//if (md)
+	//	md->SetDrawBounds(true);
+
+	bool update_all = vc.empty();
+	bool bval;
+	wxString str;
+	if (update_all || FOUND_VALUE(gstProjPanel))
+	{
+		//proj panel
+		bval = m_aui_mgr.GetPane(m_proj_panel).IsShown();
+		m_tb_menu_ui->Check(ID_ProjPanel, bval);
+		m_top_window->Check(ID_ProjPanelMenu, bval);
+	}
+	if (update_all || FOUND_VALUE(gstMoviePanel))
+	{
+		//movie panel
+		bval = m_aui_mgr.GetPane(m_movie_panel).IsShown();
+		m_tb_menu_ui->Check(ID_MoviePanel, bval);
+		m_top_window->Check(ID_MoviePanelMenu, bval);
+	}
+	if (update_all || FOUND_VALUE(gstPropPanel))
+	{
+		//prop panel
+		bval = m_aui_mgr.GetPane(m_prop_panel).IsShown();
+		m_tb_menu_ui->Check(ID_PropPanel, bval);
+		m_top_window->Check(ID_PropPanelMenu, bval);
+	}
+	if (FOUND_VALUE(gstTreeLayerName))
+	{
+		UpdatePropName();
+	}
+	if (update_all || FOUND_VALUE(gstOutAdjPanel))
+	{
+		//adjust panel
+		bval = m_aui_mgr.GetPane(m_output_adj_panel).IsShown();
+		m_tb_menu_ui->Check(ID_OutAdjPanel, bval);
+		m_top_window->Check(ID_OutAdjPanelMenu, bval);
+	}
+	if (update_all || FOUND_VALUE(gstClipPlanePanel))
+	{
+		//clipping plane panel
+		bval = m_aui_mgr.GetPane(m_clip_plane_panel).IsShown();
+		m_tb_menu_ui->Check(ID_ClipPlanePanel, bval);
+		m_top_window->Check(ID_ClipPlanePanelMenu, bval);
+	}
+	if (update_all || FOUND_VALUE(gstMainToolbar))
+	{
+		//main toolbar
+		bval = m_aui_mgr.GetPane(m_main_tb).IsShown();
+		m_top_window->Check(ID_ToolbarMenu, bval);
+	}
+
+	if (update_all || FOUND_VALUE(gstMainFrameTitle))
+	{
+		str = glbin_data_manager.GetProjectFile();
+		if (str.IsEmpty())
+			str = m_title;
+		else
+			str = m_title + " - " + str;
+		SetTitle(str);
+	}
+
+	if (update_all || FOUND_VALUE(gstMainStatusbarText))
+	{
+		m_statusbar->SetStatusText(glbin_states.m_status_str);
+	}
+	if (FOUND_VALUE(gstMainStatusbarPush))
+	{
+		m_statusbar->PushStatusText(glbin_states.m_status_str);
+	}
+	if (FOUND_VALUE(gstMainStatusbarPop))
+	{
+		m_statusbar->PopStatusText();
+	}
+
 	if (request.HasValue(gstRenderViewPanel))
 		SyncRenderViewPanels();
 	if (request.HasValue(gstScriptBreakDlg))
@@ -95,6 +191,10 @@ void MainFrameAgent::ApplySettings()
 	auto mainframe = GetMainFrame();
 	if (!mainframe)
 		return;
+
+	double mem_size = mainframe->GetMainMemorySizeInMB();
+	if (mem_size > flvr::TextureRenderer::get_mainmem_buf_size())
+		flvr::TextureRenderer::set_mainmem_buf_size(mem_size);
 
 	glbin.apply_processor_settings();
 	glbin_comp_def.Apply(glbin_clusterizer);

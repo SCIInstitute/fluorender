@@ -251,9 +251,9 @@ public:
 
 	int GetReset() { return m_reset; }
 	bool GetBenchmark() { return m_benchmark; }
-
 	int GetDisplayId();
 	std::array<int, 4> GetMainFrameRect();
+	double GetMainMemorySizeInMB();
 
 	//volume
 	void OpenVolume();
@@ -285,7 +285,6 @@ public:
 		bool show = true);
 	void UpdatePropName();
 	void UpdateProps(const fluo::ValueCollection& vc, int excl_self = 1, wxWindow* panel = 0);
-	void FluoUpdate(const fluo::ValueCollection& vc);
 	VolumePropPanel* FindVolumeProps(const std::shared_ptr<VolumeData>& vd);
 	MeshPropPanel* FindMeshProps(const std::shared_ptr<MeshData>& md);
 	AnnotatPropPanel* FindAnnotProps(const std::shared_ptr<AnnotData>& ad);
