@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentOwner.h>
 #include <RenderCanvasAgent.h>
 #include <RenderView.h>
+#include <MainFrameAgent.h>
 
 void Coordinator::Register(Agent* agent)
 {
@@ -65,6 +66,13 @@ void Coordinator::AdvanceToState(
 	for (auto* agent : agents_)
 	{
 		BringToState(agent, state);
+	}
+
+	if (state == AgentState::PreShutdown)
+	{
+		auto mainframe = FindAgent<MainFrameAgent>();
+		if (mainframe)
+			mainframe->Shutdown();
 	}
 }
 
@@ -183,9 +191,12 @@ void Coordinator::BringToState(
 	if (state < AgentState::PreShutdown &&
 		target_state >= AgentState::PreShutdown)
 	{
-		agent->Shutdown();
-		agent->SetState(
-			AgentState::PreShutdown);
-		state = AgentState::PreShutdown;
+		if (!dynamic_cast<MainFrameAgent*>(agent))
+		{
+			agent->Shutdown();
+			agent->SetState(
+				AgentState::PreShutdown);
+			state = AgentState::PreShutdown;
+		}
 	}
 }
