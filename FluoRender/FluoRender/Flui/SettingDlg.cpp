@@ -1546,6 +1546,7 @@ int SettingDlg::GetWavelengthColor() const
 		case 3:
 			return m_wav_color4_cmb->GetCurrentSelection() + 1;
 	}
+	return 0;
 }
 
 bool SettingDlg::GetMaxTextureSizeUse() const

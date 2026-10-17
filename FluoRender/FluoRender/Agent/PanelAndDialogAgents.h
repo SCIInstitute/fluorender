@@ -37,7 +37,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ComponentDlgAgent.h>
 #include <ConvertDlgAgent.h>
 #include <CountingDlgAgent.h>
-#include <DragDropAgent.h>
+#include <DragDropFileAgent.h>
 #include <FpRangeDlgAgent.h>
 #include <HelpDlgAgent.h>
 #include <ListPanelAgent.h>
