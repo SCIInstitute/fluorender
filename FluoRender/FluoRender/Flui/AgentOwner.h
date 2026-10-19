@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <string>
 
 class Agent;
+class TreeLayer;
 
 class AgentOwner
 {
@@ -77,7 +78,7 @@ public:
 		const wxPoint& pos = wxDefaultPosition,
 		const wxSize& size = wxDefaultSize,
 		long style = 0,
-		const wxString& name = "AgentPanel");
+		const wxString& name = "AgentDialog");
 
 protected:
 };

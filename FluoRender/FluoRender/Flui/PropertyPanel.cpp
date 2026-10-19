@@ -55,24 +55,177 @@ void PropertyPanel::CreateUI()
 	Thaw();
 }
 
-void PropertyPanel::CreatePage(PropPageInfo info)
+void PropertyPanel::RegisterPage(
+	const PropPageInfo& info)
 {
-
+	m_prop_pages.push_back({
+		info.key,
+		info.panel});
 }
 
-//prop pages
-void PropertyPanel::OnPropPageClose(wxAuiNotebookEvent& event)
+void PropertyPanel::ShowPage(
+	const PropPageInfo& info)
+{
+	auto page = FindPage(info.key);
+
+	if (!page || !page->panel)
+		return;
+
+	int page_no =
+		m_notebook->FindPage(page->panel);
+
+	if (page_no == wxNOT_FOUND)
+	{
+		m_notebook->AddPage(
+			page->panel,
+			info.title,
+			true);
+
+		page->panel->Show();
+	}
+	else
+	{
+		m_notebook->SetSelection(page_no);
+	}
+}
+
+void PropertyPanel::HidePage(
+	const PropPageInfo& info)
+{
+	auto page = FindPage(info.key);
+
+	if (!page || !page->panel)
+		return;
+
+	int page_no =
+		m_notebook->FindPage(page->panel);
+
+	if (page_no == wxNOT_FOUND)
+		return;
+
+	page->panel->Hide();
+
+	m_notebook->RemovePage(page_no);
+}
+
+void PropertyPanel::SelectPage(
+	const PropPageInfo& info)
+{
+	auto page = FindPage(info.key);
+
+	if (!page || !page->panel)
+		return;
+
+	int page_no =
+		m_notebook->FindPage(page->panel);
+
+	if (page_no != wxNOT_FOUND)
+		m_notebook->SetSelection(page_no);
+}
+
+void PropertyPanel::RenamePage(
+	const PropPageInfo& info)
+{
+	auto page = FindPage(info.key);
+
+	if (!page || !page->panel)
+		return;
+
+	int page_no =
+		m_notebook->FindPage(page->panel);
+
+	if (page_no != wxNOT_FOUND)
+	{
+		m_notebook->SetPageText(
+			page_no,
+			info.title);
+	}
+}
+
+void PropertyPanel::DeletePage(
+	const PropPageInfo& info)
+{
+	auto it = std::find_if(
+		m_prop_pages.begin(),
+		m_prop_pages.end(),
+		[&](const PropUiPage& page)
+		{
+			return page.key == info.key;
+		});
+
+	if (it == m_prop_pages.end())
+		return;
+
+	if (it->panel)
+	{
+		int page_no =
+			m_notebook->FindPage(it->panel);
+
+		if (page_no != wxNOT_FOUND)
+			m_notebook->RemovePage(page_no);
+
+		it->panel->Destroy();
+	}
+
+	m_prop_pages.erase(it);
+}
+
+PropUiPage*
+PropertyPanel::FindPage(const PageKey& key)
+{
+	auto it = std::find_if(
+		m_prop_pages.begin(),
+		m_prop_pages.end(),
+		[&](const PropUiPage& page)
+		{
+			return page.key == key;
+		});
+
+	return it == m_prop_pages.end() ?
+		nullptr :
+		&(*it);
+}
+
+PropUiPage*
+PropertyPanel::FindPage(
+	AgentPanel* panel)
+{
+	auto it = std::find_if(
+		m_prop_pages.begin(),
+		m_prop_pages.end(),
+		[&](const PropUiPage& page)
+		{
+			return page.panel == panel;
+		});
+
+	return it == m_prop_pages.end() ?
+		nullptr :
+		&(*it);
+}
+
+void PropertyPanel::OnPropPageClose(
+	wxAuiNotebookEvent& event)
 {
 	if (!m_notebook)
 		return;
-	wxAuiNotebook* panel = (wxAuiNotebook*)event.GetEventObject();
-	wxWindow* page = panel->GetPage(event.GetSelection());
-	if (page)
-	{
-		int page_no = m_notebook->FindPage(page);
-		page->Hide();
-		m_notebook->RemovePage(page_no);
-	}
+
+	auto* page =
+		dynamic_cast<AgentPanel*>(
+			m_notebook->GetPage(
+				event.GetSelection()));
+
+	if (!page)
+		return;
+
+	page->Hide();
+
+	m_notebook->RemovePage(
+		event.GetSelection());
+
+	m_page = page;
+	auto agent = GetAgentAs<PropertyPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstPropertyPageClose });
+
 	event.Veto();
 }
-

@@ -212,74 +212,6 @@ public:
 	void SaveProject();
 	void SaveAsProject();
 
-	//prop panels
-	wxWindow* AddProps(int type,//follow above
-		const std::shared_ptr<RenderView>& view = nullptr,
-		const std::shared_ptr<VolumeGroup>& group = nullptr,
-		const std::shared_ptr<VolumeData>& vd = nullptr,
-		const std::shared_ptr<MeshData>& md = nullptr,
-		const std::shared_ptr<MeshGroup>& mg = nullptr,
-		const std::shared_ptr<AnnotData>& ann = nullptr);
-	void DeleteProps(int type, const wxString& name);
-	void ShowPropPage(int type,
-		const std::shared_ptr<RenderView>& view = nullptr,
-		const std::shared_ptr<VolumeGroup>& group = nullptr,
-		const std::shared_ptr<VolumeData>& vd = nullptr,
-		const std::shared_ptr<MeshData>& md = nullptr,
-		const std::shared_ptr<MeshGroup>& mg = nullptr,
-		const std::shared_ptr<AnnotData>& ann = nullptr,
-		bool show = true);
-	void UpdatePropName();
-	void UpdateProps(const fluo::ValueCollection& vc, int excl_self = 1, wxWindow* panel = 0);
-	VolumePropPanel* FindVolumeProps(const std::shared_ptr<VolumeData>& vd);
-	MeshPropPanel* FindMeshProps(const std::shared_ptr<MeshData>& md);
-	AnnotatPropPanel* FindAnnotProps(const std::shared_ptr<AnnotData>& ad);
-	ManipPropPanel* FindMeshManip(const std::shared_ptr<MeshData>& md);
-	VolumePropPanel* FindVolumeProps(const wxString& str);
-	MeshPropPanel* FindMeshProps(const wxString& str);
-	AnnotatPropPanel* FindAnnotProps(const wxString& str);
-	ManipPropPanel* FindMeshManip(const wxString& str);
-
-	//project panels
-	ProjectPanel* GetProjectPanel();
-	TreePanel* GetTreePanel();
-	ListPanel* GetListPanel();
-	//outadj view
-	OutputAdjPanel* GetOutAdjPanel();
-	//movie view
-	MoviePanel* GetMoviePanel();
-	//clipping view
-	ClipPlanePanel* GetClipPlanePanel();
-	//system settings
-	SettingDlg* GetSettingDlg();
-	//help dialog
-	HelpDlg* GetHelpDlg();
-	//brush dialog
-	BrushToolDlg* GetBrushToolDlg();
-	//noise cancelling dialog
-	NoiseCancellingDlg* GetNoiseCancellingDlg();
-	//counting dialog
-	CountingDlg* GetCountingDlg();
-	//convert dialog
-	ConvertDlg* GetConvertDlg();
-	ColocalizationDlg* GetColocalizationDlg();
-	//measure dialog
-	MeasureDlg* GetMeasureDlg();
-	//trace dialog
-	TrackDlg* GetTrackDlg();
-	//ocl dialog
-	OclDlg* GetOclDlg();
-	//component dialog
-	ComponentDlg* GetComponentDlg();
-	//calculation dialog
-	CalculationDlg* GetCalculationDlg();
-	//script break dialog
-	ScriptBreakDlg* GetScriptBreakDlg();
-	//floating point voluem range
-	FpRangeDlg* GetFpRangeDlg();
-	//machine learning dialog
-	MachineLearningDlg* GetMachineLearningDlg();
-
 
 	wxString CreateRenderViewPanel(int row = 1);
 	void DeleteRenderViewPanel(int i);
@@ -412,9 +344,6 @@ private:
 	void OnChEmbedCheck(wxCommandEvent& event);
 	void OnChSaveCmpCheck(wxCommandEvent& event);
 	void OnSysColorChanged(wxSysColourChangedEvent& event);
-
-private:
-	bool update_props(int excl_self, wxWindow* p1, wxWindow* p2);
 };
 
 #endif//_MAINFRAME_H_

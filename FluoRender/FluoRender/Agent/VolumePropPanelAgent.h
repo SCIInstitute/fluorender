@@ -37,7 +37,7 @@ class VolumeData;
 class VolumeGroup;
 class RenderView;
 
-class VolumePropPanelAgent : public Agent
+class VolumePropPanelAgent : public DataAgent
 {
 public:
 	VolumePropPanelAgent(
@@ -50,9 +50,9 @@ public:
 
 	VolumePropPanel* GetPanel() const;
 
-	std::shared_ptr<VolumeData> GetData() const
+	std::shared_ptr<VolumeData> GetVolumeData() const
 	{
-		return m_vd.lock();
+		return std::dynamic_pointer_cast<VolumeData>(GetData());
 	}
 
 	void SetGroup(const std::shared_ptr<VolumeGroup>& group);
@@ -77,7 +77,6 @@ private:
 		gstCurrentSelect,
 	};
 
-	std::weak_ptr<VolumeData> m_vd;
 	std::weak_ptr<VolumeGroup> m_group;
 	std::weak_ptr<RenderView> m_view;
 

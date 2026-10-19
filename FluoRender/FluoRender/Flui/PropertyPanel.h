@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #define _PROPERTY_PANEL_H_
 
 #include <AgentOwner.h>
+#include <PropertyPageTypes.h>
 
 class PropertyPanel : public TabbedPanel
 {
@@ -41,16 +42,27 @@ public:
 
 	virtual void CreateUI() override;
 
-	void CreatePage(PropPageInfo info);
+	void RegisterPage(const PropPageInfo& info);
+	void ShowPage(const PropPageInfo& info);
+	void HidePage(const PropPageInfo& info);
+	void SelectPage(const PropPageInfo& info);
+	void RenamePage(const PropPageInfo& info);
+	void DeletePage(const PropPageInfo& info);
+
+	AgentPanel* GetPage() { return m_page; }
 
 private:
 	//prop pages
+	PropUiPage* FindPage(const PageKey& key);
+	PropUiPage* FindPage(AgentPanel* panel);
+
 	void OnPropPageClose(wxAuiNotebookEvent& event);
 
 private:
 	//prop panel children
-	std::vector<AgentPanel*> m_prop_pages;
+	std::vector<PropUiPage> m_prop_pages;
 
+	AgentPanel* m_page;
 };
 
 #endif // _PROPERTY_PANEL_H_

@@ -27,9 +27,9 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <Agent.h>
-
 #include <Coordinator.h>
 #include <Global.h>
+#include <TreeLayer.h>
 
 Agent::~Agent()
 {
@@ -55,3 +55,11 @@ void Agent::Notify(
 	glbin_coordinator.Dispatch(request);
 }
 
+DataAgent::DataAgent(
+	AgentOwner* owner,
+	const std::shared_ptr<TreeLayer>& data) :
+	Agent(owner),
+	data_(data)
+{
+
+}

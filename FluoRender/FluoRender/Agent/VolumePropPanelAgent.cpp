@@ -47,8 +47,7 @@ VolumePropPanelAgent::VolumePropPanelAgent(
 	const std::shared_ptr<VolumeData>& vd,
 	const std::shared_ptr<VolumeGroup>& group,
 	const std::shared_ptr<RenderView>& view) :
-	Agent(panel),
-	m_vd(vd),
+	DataAgent(panel, vd),
 	m_group(group),
 	m_view(view)
 {
@@ -78,7 +77,7 @@ void VolumePropPanelAgent::SetView(const std::shared_ptr<RenderView>& view)
 
 double VolumePropPanelAgent::GetBoundaryMax()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		return vd->GetBoundaryMax();
 	return 1.0;
@@ -89,7 +88,7 @@ void VolumePropPanelAgent::UpdateUI(const UpdateRequest& request)
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto vd = GetData();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -616,7 +615,7 @@ void VolumePropPanelAgent::UpdateData(const UpdateRequest& request)
 
 void VolumePropPanelAgent::UpdateGradient()
 {
-	auto vd = GetData();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -648,7 +647,7 @@ void VolumePropPanelAgent::SetMinMax()
 
 void VolumePropPanelAgent::SyncMinMax()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		SyncMinMax(vd->GetLowOffset(), vd->GetHighOffset());
 }
@@ -665,7 +664,7 @@ void VolumePropPanelAgent::SetDefaultMinMax()
 
 void VolumePropPanelAgent::SetMlMinMax()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	double val1 = vd->GetMlLowOffset();
@@ -687,7 +686,7 @@ void VolumePropPanelAgent::EnableMinMax()
 
 void VolumePropPanelAgent::ToggleMinMax()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	bool bval = !vd->GetMinMaxEnable();
@@ -710,7 +709,7 @@ void VolumePropPanelAgent::SetGamma()
 
 void VolumePropPanelAgent::SyncGamma()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		SyncGamma(vd->GetGamma());
 }
@@ -726,7 +725,7 @@ void VolumePropPanelAgent::SetDefaultGamma()
 
 void VolumePropPanelAgent::SetMlGamma()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	double val = vd->GetMlGamma();
@@ -747,7 +746,7 @@ void VolumePropPanelAgent::EnableGamma()
 
 void VolumePropPanelAgent::ToggleGamma()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	bool bval = !vd->GetGammaEnable();
@@ -773,7 +772,7 @@ void VolumePropPanelAgent::SetAlpha()
 
 void VolumePropPanelAgent::SyncAlpha()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		SyncAlpha(vd->GetAlpha());
 }
@@ -789,7 +788,7 @@ void VolumePropPanelAgent::SetDefaultAlpha()
 
 void VolumePropPanelAgent::SetMlAlpha()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	double val = vd->GetMlAlpha();
@@ -810,7 +809,7 @@ void VolumePropPanelAgent::EnableAlpha()
 
 void VolumePropPanelAgent::ToggleAlpha()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	bool bval = !vd->GetAlphaEnable();
@@ -836,7 +835,7 @@ void VolumePropPanelAgent::SetLuminance()
 
 void VolumePropPanelAgent::SyncLuminance()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		SyncLuminance(vd->GetLuminance());
 }
@@ -852,7 +851,7 @@ void VolumePropPanelAgent::SetDefaultLuminance()
 
 void VolumePropPanelAgent::SetMlLuminance()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	double val = vd->GetMlLuminance();
@@ -873,7 +872,7 @@ void VolumePropPanelAgent::EnableLuminance()
 
 void VolumePropPanelAgent::ToggleLuminance()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	bool bval = !vd->GetLuminanceEnable();
@@ -896,7 +895,7 @@ void VolumePropPanelAgent::SetSampleRate()
 
 void VolumePropPanelAgent::SyncSampleRate()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		SyncSampleRate(vd->GetSampleRate());
 }
@@ -912,7 +911,7 @@ void VolumePropPanelAgent::SetDefaultSampleRate()
 
 void VolumePropPanelAgent::SetMlSampleRate()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	double val = vd->GetMlSampleRate();
@@ -933,7 +932,7 @@ void VolumePropPanelAgent::EnableSampleRate()
 
 void VolumePropPanelAgent::ToggleSampleRate()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	bool bval = !vd->GetSampleRateEnable();
@@ -960,7 +959,7 @@ void VolumePropPanelAgent::SetThreshold()
 
 void VolumePropPanelAgent::SyncThreshold()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		SyncThreshold(vd->GetLeftThresh(), vd->GetRightThresh());
 }
@@ -977,7 +976,7 @@ void VolumePropPanelAgent::SetDefaultThreshold()
 
 void VolumePropPanelAgent::SetMlThreshold()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	double val1 = vd->GetMlLeftThresh();
@@ -999,7 +998,7 @@ void VolumePropPanelAgent::EnableThreshold()
 
 void VolumePropPanelAgent::ToggleThreshold()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	bool bval = !vd->GetThreshEnable();
@@ -1011,7 +1010,7 @@ void VolumePropPanelAgent::SetBoundary()
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1039,7 +1038,7 @@ void VolumePropPanelAgent::SetBoundary()
 
 void VolumePropPanelAgent::SyncBoundary()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		SyncBoundary(vd->GetBoundaryLow(), vd->GetBoundaryHigh());
 }
@@ -1056,7 +1055,7 @@ void VolumePropPanelAgent::SetDefaultBoundary()
 
 void VolumePropPanelAgent::SetMlBoundary()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	double val1 = vd->GetMlBoundaryLow();
@@ -1078,7 +1077,7 @@ void VolumePropPanelAgent::EnableBoundary()
 
 void VolumePropPanelAgent::ToggleBoundary()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	bool bval = !vd->GetThreshEnable();
@@ -1113,7 +1112,7 @@ void VolumePropPanelAgent::SetShadingShine()
 
 void VolumePropPanelAgent::SyncShading()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 	{
 		SyncShadingStrength(vd->GetShadingStrength());
@@ -1139,7 +1138,7 @@ void VolumePropPanelAgent::SetDefaultShading()
 
 void VolumePropPanelAgent::SetMlShading()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1168,7 +1167,7 @@ void VolumePropPanelAgent::EnableShading()
 
 void VolumePropPanelAgent::ToggleShading()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	bool bval = !vd->GetShadingEnable();
@@ -1190,7 +1189,7 @@ void VolumePropPanelAgent::SetShadowIntensity()
 
 void VolumePropPanelAgent::SyncShadowIntensity()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		SyncShadowInt(vd->GetShadowIntensity());
 }
@@ -1206,7 +1205,7 @@ void VolumePropPanelAgent::SetDefaultShadowIntensity()
 
 void VolumePropPanelAgent::SetMlShadowIntensity()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1228,7 +1227,7 @@ void VolumePropPanelAgent::EnableShadowIntensity()
 
 void VolumePropPanelAgent::ToggleShadowIntensity()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	bool bval = !vd->GetShadowEnable();
@@ -1258,7 +1257,7 @@ void VolumePropPanelAgent::SetColormap()
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1280,7 +1279,7 @@ void VolumePropPanelAgent::SetColormapSlider()
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1297,7 +1296,7 @@ void VolumePropPanelAgent::SetColormapSlider()
 
 void VolumePropPanelAgent::SyncColormap()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 	{
 		double val1, val2;
@@ -1319,7 +1318,7 @@ void VolumePropPanelAgent::SetDefaultColormap()
 
 void VolumePropPanelAgent::SetMlColormap()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1343,7 +1342,7 @@ void VolumePropPanelAgent::EnableColormap()
 
 void VolumePropPanelAgent::ToggleColormap()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1361,7 +1360,7 @@ void VolumePropPanelAgent::InvertColormap()
 
 	auto view = m_view.lock();
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	assert(view);
 	assert(group);
 	assert(vd);
@@ -1389,7 +1388,7 @@ void VolumePropPanelAgent::SetColormapType()
 
 	auto view = m_view.lock();
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	assert(view);
 	assert(group);
 	assert(vd);
@@ -1422,7 +1421,7 @@ void VolumePropPanelAgent::SetColormapProj()
 		static_cast<flvr::ColormapProj>(ival);
 
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetColormapProj(colormap_proj);
 	else if (vd)
@@ -1433,7 +1432,7 @@ void VolumePropPanelAgent::SetColormapProj()
 void VolumePropPanelAgent::SetMainColorMode()
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1450,7 +1449,7 @@ void VolumePropPanelAgent::SetMainColor()
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1462,7 +1461,7 @@ void VolumePropPanelAgent::SetMainColor()
 
 void VolumePropPanelAgent::SetAltColorMode()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1480,7 +1479,7 @@ void VolumePropPanelAgent::SetAltColor()
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -1493,7 +1492,7 @@ void VolumePropPanelAgent::SetAltColor()
 void VolumePropPanelAgent::EnableGamma(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetGammaEnable(bval);
 	else if (vd)
@@ -1505,7 +1504,7 @@ void VolumePropPanelAgent::EnableGamma(bool bval)
 void VolumePropPanelAgent::EnableMinMax(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetMinMaxEnable(bval);
 	else if (vd)
@@ -1517,7 +1516,7 @@ void VolumePropPanelAgent::EnableMinMax(bool bval)
 void VolumePropPanelAgent::EnableLuminance(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetLuminanceEnable(bval);
 	else if (vd)
@@ -1529,7 +1528,7 @@ void VolumePropPanelAgent::EnableLuminance(bool bval)
 void VolumePropPanelAgent::EnableAlpha(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetAlphaEnable(bval);
 	else if (vd)
@@ -1541,7 +1540,7 @@ void VolumePropPanelAgent::EnableAlpha(bool bval)
 void VolumePropPanelAgent::EnableShading(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetShadingEnable(bval);
 	else if (vd)
@@ -1553,7 +1552,7 @@ void VolumePropPanelAgent::EnableShading(bool bval)
 void VolumePropPanelAgent::EnableBoundary(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetBoundaryEnable(bval);
 	else if (vd)
@@ -1565,7 +1564,7 @@ void VolumePropPanelAgent::EnableBoundary(bool bval)
 void VolumePropPanelAgent::EnableThreshold(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetThreshEnable(bval);
 	else if (vd)
@@ -1577,7 +1576,7 @@ void VolumePropPanelAgent::EnableThreshold(bool bval)
 void VolumePropPanelAgent::EnableShadow(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetShadowEnable(bval);
 	else if (group && group->GetChannelMixMode() == ChannelMixMode::Depth)
@@ -1605,7 +1604,7 @@ void VolumePropPanelAgent::EnableShadowDir(bool bval)
 void VolumePropPanelAgent::EnableSampleRate(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetSampleRateEnable(bval);
 	else if (vd)
@@ -1618,7 +1617,7 @@ void VolumePropPanelAgent::EnableColormap(bool bval)
 {
 	auto view = m_view.lock();
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	bool mip_enable = vd->GetRenderMode() == flvr::RenderMode::Mip;
 	bool sync_view_depth_mip = mip_enable && view->GetChannelMixMode() == ChannelMixMode::Depth;
 	bool sync_group_depth_mip = mip_enable && vd->GetChannelMixMode() == ChannelMixMode::Depth;
@@ -1645,7 +1644,7 @@ void VolumePropPanelAgent::EnableMip(bool bval)
 {
 	auto view = m_view.lock();
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	bool depth_view = view->GetChannelMixMode() == ChannelMixMode::Depth;
 	bool depth_group = vd->GetChannelMixMode() == ChannelMixMode::Depth;
 	if (depth_view)
@@ -1661,7 +1660,7 @@ void VolumePropPanelAgent::EnableMip(bool bval)
 void VolumePropPanelAgent::EnableTransparent(bool bval)
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->SetTransparent(bval);
 	else if (vd)
@@ -1673,7 +1672,7 @@ void VolumePropPanelAgent::EnableTransparent(bool bval)
 //set values
 void VolumePropPanelAgent::SetGamma(double val)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetGamma() == val)
@@ -1685,7 +1684,7 @@ void VolumePropPanelAgent::SetGamma(double val)
 
 void VolumePropPanelAgent::SetMinMax(double val1, double val2)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetLowOffset() == val1 &&
@@ -1699,7 +1698,7 @@ void VolumePropPanelAgent::SetMinMax(double val1, double val2)
 
 void VolumePropPanelAgent::SetLuminance(double val)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetLuminance() == val)
@@ -1712,7 +1711,7 @@ void VolumePropPanelAgent::SetLuminance(double val)
 
 void VolumePropPanelAgent::SetAlpha(double val)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetAlpha() == val)
@@ -1724,7 +1723,7 @@ void VolumePropPanelAgent::SetAlpha(double val)
 
 void VolumePropPanelAgent::SetShadingStrength(double val)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetShadingStrength() == val)
@@ -1736,7 +1735,7 @@ void VolumePropPanelAgent::SetShadingStrength(double val)
 
 void VolumePropPanelAgent::SetShadingShine(double val)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetShadingShine() == val)
@@ -1748,7 +1747,7 @@ void VolumePropPanelAgent::SetShadingShine(double val)
 
 void VolumePropPanelAgent::SetBoundary(double val1, double val2)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetBoundaryLow() == val1 &&
@@ -1762,7 +1761,7 @@ void VolumePropPanelAgent::SetBoundary(double val1, double val2)
 
 void VolumePropPanelAgent::SetThreshold(double val1, double val2)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetLeftThresh() == val1 &&
@@ -1776,7 +1775,7 @@ void VolumePropPanelAgent::SetThreshold(double val1, double val2)
 
 void VolumePropPanelAgent::SetShadowInt(double val)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetShadowIntensity() == val)
@@ -1802,7 +1801,7 @@ void VolumePropPanelAgent::SetShadowDir(double dval)
 
 void VolumePropPanelAgent::SetSampleRate(double val)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetSampleRate() == val)
@@ -1814,7 +1813,7 @@ void VolumePropPanelAgent::SetSampleRate(double val)
 
 void VolumePropPanelAgent::SetColormapVal(double val1, double val2)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 	if (vd->GetColormapLow() == val1 &&
@@ -1971,7 +1970,7 @@ void VolumePropPanelAgent::SyncColormapVal(double val1, double val2)
 void VolumePropPanelAgent::SetMachineLearning()
 {
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 		group->ApplyMlVolProp();
 	else if (vd)
@@ -2000,7 +1999,7 @@ void VolumePropPanelAgent::SetInvert()
 		return;
 
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	bool val = panel->GetInvert();
 	if (m_sync_group && group)
 		group->SetInvert(val);
@@ -2017,7 +2016,7 @@ void VolumePropPanelAgent::SetOutline()
 		return;
 
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	bool val = panel->GetOutline();
 	if (m_sync_group && group)
 		group->SetOutline(val);
@@ -2036,7 +2035,7 @@ void VolumePropPanelAgent::SetInterpolate()
 
 	auto view = m_view.lock();
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	bool val = panel->GetInterpolate();
 	if (m_sync_group && group)
 		group->SetInterpolate(val);
@@ -2057,7 +2056,7 @@ void VolumePropPanelAgent::SetNoiseReduction()
 
 	auto view = m_view.lock();
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	bool val = panel->GetNoiseReduction();
 	bool depth_view = view && view->GetChannelMixMode() == ChannelMixMode::Depth;
 	bool depth_group = vd && vd->GetChannelMixMode() == ChannelMixMode::Depth;
@@ -2081,7 +2080,7 @@ void VolumePropPanelAgent::SetSyncGroup()
 	m_sync_group = panel->GetSyncGroup();
 	auto view = m_view.lock();
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (group)
 		group->SetVolumeSyncProp(m_sync_group);
 
@@ -2153,7 +2152,7 @@ void VolumePropPanelAgent::SetChannelMixDepth()
 		return;
 
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (panel->GetChannelMixDepth())
 	{
 		if (group)
@@ -2184,7 +2183,7 @@ void VolumePropPanelAgent::SetLegend()
 	if (!panel)
 		return;
 
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (vd)
 		vd->SetLegend(panel->GetLegend());
 
@@ -2193,7 +2192,7 @@ void VolumePropPanelAgent::SetLegend()
 
 void VolumePropPanelAgent::SaveMl()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -2245,7 +2244,7 @@ void VolumePropPanelAgent::SaveMl()
 
 void VolumePropPanelAgent::SaveDefault()
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	bool use_ml = glbin.get_vp_table_enable() && vd;
 	if (use_ml)
 		SaveMl();
@@ -2258,7 +2257,7 @@ void VolumePropPanelAgent::ResetDefault()
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd)
 		return;
 
@@ -2281,7 +2280,7 @@ void VolumePropPanelAgent::SetSpacing()
 	auto [spcx, spcy, spcz] = panel->GetSpacing();
 	fluo::Vector spc(spcx, spcy, spcz);
 	auto group = m_group.lock();
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (m_sync_group && group)
 	{
 		for (int i = 0; i < group->GetVolumeNum(); i++)
@@ -2309,7 +2308,7 @@ void VolumePropPanelAgent::SetSpacing()
 //update max value
 void VolumePropPanelAgent::UpdateMaxVal(double value)
 {
-	auto vd = m_vd.lock();
+	auto vd = GetVolumeData();
 	if (!vd) return;
 	int bits = vd->GetBits();
 	if (bits == 8)

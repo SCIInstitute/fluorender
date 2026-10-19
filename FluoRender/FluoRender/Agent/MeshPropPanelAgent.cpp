@@ -39,9 +39,10 @@ DEALINGS IN THE SOFTWARE.
 
 MeshPropPanelAgent::MeshPropPanelAgent(
 	MeshPropPanel* panel,
-	const std::shared_ptr<MeshData>& md) :
-	Agent(panel),
-	m_md(md)
+	const std::shared_ptr<MeshData>& md,
+	const std::shared_ptr<MeshGroup>& group) :
+	DataAgent(panel, md),
+	m_group(group)
 {
 
 }
@@ -56,7 +57,7 @@ void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto md = GetData();
+	auto md = GetMeshData();
 	if (!md)
 		return;
 
@@ -215,7 +216,7 @@ void MeshPropPanelAgent::SetOutline()
 
 	bool bval = panel->GetOutline();
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 		group->SetOutline(bval);
 	else if (md)
@@ -236,7 +237,7 @@ void MeshPropPanelAgent::SetSyncGroup()
 	m_sync_group = panel->GetSyncGroup();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group && md)
 	{
 		//outline
@@ -266,7 +267,7 @@ void MeshPropPanelAgent::SetLegend()
 	bool bval = panel->GetLegend();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 		group->SetLegend(bval);
 	else if (md)
@@ -280,7 +281,7 @@ void MeshPropPanelAgent::SetLegend()
 
 void MeshPropPanelAgent::SaveDefault()
 {
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (md)
 	{
 		glbin_mesh_def.Set(*md);
@@ -289,7 +290,7 @@ void MeshPropPanelAgent::SaveDefault()
 
 void MeshPropPanelAgent::ResetDefault()
 {
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (!md)
 		return;
 
@@ -310,7 +311,7 @@ void MeshPropPanelAgent::SetEnableShading()
 	bool bval = panel->GetShading();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 	{
 		group->SetShading(bval);
@@ -331,7 +332,7 @@ void MeshPropPanelAgent::SetShading()
 	double dval = panel->GetShading();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 	{
 		group->SetShadingStrength(dval);
@@ -352,7 +353,7 @@ void MeshPropPanelAgent::SetShine()
 	double dval = panel->GetShine();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 	{
 		group->SetShadingShine(dval);
@@ -373,7 +374,7 @@ void MeshPropPanelAgent::SetEnableAlpha()
 	bool bval = panel->GetEnableAlpha();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 	{
 		group->SetAlphaEnable(bval);
@@ -394,7 +395,7 @@ void MeshPropPanelAgent::SetAlpha()
 	double dval = panel->GetAlpha();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 	{
 		group->SetAlpha(dval);
@@ -415,7 +416,7 @@ void MeshPropPanelAgent::SetEnableScale()
 	bool bval = panel->GetEnableScale();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 	{
 		group->SetScalingEnable(bval);
@@ -436,7 +437,7 @@ void MeshPropPanelAgent::SetScale()
 	double dval = panel->GetScale();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 	{
 		group->SetScaling(fluo::Vector(dval, dval, dval));
@@ -457,7 +458,7 @@ void MeshPropPanelAgent::SetEnableShadow()
 	bool bval = panel->GetEnableShadow();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 	{
 		group->SetShadowEnable(bval);
@@ -478,7 +479,7 @@ void MeshPropPanelAgent::SetShadow()
 	double dval = panel->GetShadow();
 
 	auto group = m_group.lock();
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (m_sync_group && group)
 	{
 		group->SetShadowIntensity(dval);
@@ -545,7 +546,7 @@ void MeshPropPanelAgent::SetColor()
 	if (!panel)
 		return;
 
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (!md)
 		return;
 

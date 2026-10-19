@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 class ManipPropPanel;
 class MeshData;
 
-class ManipPropPanelAgent : public Agent
+class ManipPropPanelAgent : public DataAgent
 {
 public:
 	ManipPropPanelAgent(
@@ -46,9 +46,9 @@ public:
 
 	ManipPropPanel* GetPanel() const;
 
-	std::shared_ptr<MeshData> GetData() const
+	std::shared_ptr<MeshData> GetMeshData() const
 	{
-		return m_md.lock();
+		return std::dynamic_pointer_cast<MeshData>(GetData());
 	}
 
 protected:
@@ -70,8 +70,6 @@ private:
 		gstMeshScale,
 		gstManipUpdateMesh
 	};
-
-	std::weak_ptr<MeshData> m_md;
 
 	void UpdateMeshData();
 };

@@ -1459,6 +1459,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstPropertyPageShow "property page show"
 #define gstPropertyPageHide "property page hide"
 #define gstPropertyPageRename "property page rename"
+#define gstPropertyPageClose "property page close"
 
 //render canvas
 #define gstInitViewAll "init view all"

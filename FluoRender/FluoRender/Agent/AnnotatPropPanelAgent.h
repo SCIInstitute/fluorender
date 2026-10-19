@@ -35,7 +35,7 @@ DEALINGS IN THE SOFTWARE.
 class AnnotatPropPanel;
 class AnnotData;
 
-class AnnotatPropPanelAgent : public Agent
+class AnnotatPropPanelAgent : public DataAgent
 {
 public:
 	AnnotatPropPanelAgent(
@@ -46,9 +46,9 @@ public:
 
 	AnnotatPropPanel* GetPanel() const;
 
-	std::shared_ptr<AnnotData> GetData() const
+	std::shared_ptr<AnnotData> GetAnnotData() const
 	{
-		return m_ann.lock();
+		return std::dynamic_pointer_cast<AnnotData>(GetData());
 	}
 
 protected:
@@ -68,8 +68,6 @@ private:
 		gstAnnotMemoText,
 		gstAnnotMemoReadOnly
 	};
-
-	std::weak_ptr<AnnotData> m_ann;
 };
 
 #endif // AnnotatPropPanelAgent_h

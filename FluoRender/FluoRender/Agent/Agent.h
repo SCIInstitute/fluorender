@@ -277,4 +277,17 @@ private:
 	AgentState state_{ AgentState::Uninitialized };
 };
 
+class TreeLayer;
+class DataAgent : public Agent
+{
+public:
+	DataAgent(AgentOwner* owner,
+		const std::shared_ptr<TreeLayer>& data);
+
+	std::shared_ptr<TreeLayer> GetData() const { return data_.lock(); }
+
+private:
+	std::weak_ptr<TreeLayer> data_;
+};
+
 #endif//Agent_h

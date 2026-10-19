@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderViewPanel.h>
 #include <RenderView.h>
 #include <Root.h>
+#include <TreeLayer.h>
 #include <DataManager.h>
 #include <RenderCanvasAgent.h>
 #include <wxNotebookSerializer.h>

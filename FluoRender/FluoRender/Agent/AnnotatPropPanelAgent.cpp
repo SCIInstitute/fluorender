@@ -33,8 +33,7 @@ DEALINGS IN THE SOFTWARE.
 AnnotatPropPanelAgent::AnnotatPropPanelAgent(
 	AnnotatPropPanel* panel,
 	const std::shared_ptr<AnnotData>& ann) :
-	Agent(panel),
-	m_ann(ann)
+	DataAgent(panel, ann)
 {
 
 }
@@ -49,7 +48,7 @@ void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto ann = GetData();
+	auto ann = GetAnnotData();
 	if (!ann)
 		return;
 
@@ -70,7 +69,7 @@ void AnnotatPropPanelAgent::UpdateData(const UpdateRequest& request)
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto ann = GetData();
+	auto ann = GetAnnotData();
 	if (!ann)
 		return;
 

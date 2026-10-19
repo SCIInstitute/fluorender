@@ -36,23 +36,29 @@ class MeshPropPanel;
 class MeshData;
 class MeshGroup;
 
-class MeshPropPanelAgent : public Agent
+class MeshPropPanelAgent : public DataAgent
 {
 public:
 	MeshPropPanelAgent(
 		MeshPropPanel* panel,
-		const std::shared_ptr<MeshData>& md);
+		const std::shared_ptr<MeshData>& md,
+		const std::shared_ptr<MeshGroup>& group);
 
 	virtual ~MeshPropPanelAgent() = default;
 
 	MeshPropPanel* GetPanel() const;
 
-	std::shared_ptr<MeshData> GetData() const
+	std::shared_ptr<MeshData> GetMeshData() const
 	{
-		return m_md.lock();
+		return std::dynamic_pointer_cast<MeshData>(GetData());
 	}
 
-	std::shared_ptr<MeshGroup> GetGroup() const
+	void SetMeshGroup(const std::shared_ptr<MeshGroup>& group)
+	{
+		m_group = group;
+	}
+
+	std::shared_ptr<MeshGroup> GetMeshGroup() const
 	{
 		return m_group.lock();
 	}
@@ -92,7 +98,6 @@ private:
 		gstEnableShadowDir
 	};
 
-	std::weak_ptr<MeshData> m_md;
 	std::weak_ptr<MeshGroup> m_group;
 	bool m_sync_group;
 

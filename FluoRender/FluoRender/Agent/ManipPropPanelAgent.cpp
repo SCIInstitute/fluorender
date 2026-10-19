@@ -34,8 +34,7 @@ DEALINGS IN THE SOFTWARE.
 ManipPropPanelAgent::ManipPropPanelAgent(
 	ManipPropPanel* panel,
 	const std::shared_ptr<MeshData>& md) :
-	Agent(panel),
-	m_md(md)
+	DataAgent(panel, md)
 {
 
 }
@@ -50,7 +49,7 @@ void ManipPropPanelAgent::UpdateUI(const UpdateRequest& request)
 	auto panel = GetPanel();
 	if (!panel)
 		return;
-	auto md = GetData();
+	auto md = GetMeshData();
 	if (!md)
 		return;
 
@@ -83,7 +82,7 @@ void ManipPropPanelAgent::UpdateData(const UpdateRequest& request)
 
 void ManipPropPanelAgent::UpdateMeshData()
 {
-	auto md = m_md.lock();
+	auto md = GetMeshData();
 	if (!md)
 		return;
 	auto panel = GetPanel();

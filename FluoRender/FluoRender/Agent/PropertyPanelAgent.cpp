@@ -36,6 +36,11 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeData.h>
 #include <MeshData.h>
 #include <AnnotData.h>
+#include <FluiBuilder.h>
+#include <VolumePropPanel.h>
+#include <MeshPropPanel.h>
+#include <AnnotatPropPanel.h>
+#include <ManipPropPanel.h>
 
 PropertyPanelAgent::PropertyPanelAgent(
 	PropertyPanel* dlg) :
@@ -62,6 +67,9 @@ void PropertyPanelAgent::UpdateUI(const UpdateRequest& request)
 
 	if (request.HasValue(gstPropertyPageRename))
 		RenamePage();
+
+	if (request.HasValue(gstPropertyPageClose))
+		ClosePage();
 }
 
 void PropertyPanelAgent::UpdateData(const UpdateRequest& request)
@@ -136,28 +144,161 @@ PropertyPanelAgent::FindPage(const PageKey& key)
 		&(*it);
 }
 
+PageEntry*
+PropertyPanelAgent::FindPage(
+	Agent* agent)
+{
+	auto it = std::find_if(
+		m_pages.begin(),
+		m_pages.end(),
+		[&](const PageEntry& page)
+		{
+			return page.agent == agent;
+		});
+
+	return it == m_pages.end() ?
+		nullptr :
+		&(*it);
+}
+
+std::optional<PageEntry>
+PropertyPanelAgent::CreateChildPage(
+	const PageKey& key)
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return std::nullopt;
+
+	switch (key.type)
+	{
+	case PropPageType::Volume:
+	{
+		auto vd = glbin_current.vol_data.lock();
+		auto group = glbin_current.vol_group.lock();
+		auto view = glbin_current.render_view.lock();
+		if (!vd)
+			return std::nullopt;
+
+		auto ui =
+			glbin_flui_builder.BuildVolumePropPanel(
+				panel, vd, group, view);
+
+		return PageEntry{
+			key,
+			ui->GetAgent(),
+			ui,
+			false };
+	}
+
+	case PropPageType::Mesh:
+	{
+		auto md = glbin_current.mesh_data.lock();
+		if (!md)
+			return std::nullopt;
+
+		auto ui =
+			glbin_flui_builder.BuildMeshPropPanel(
+				panel, md);
+
+		return PageEntry{
+			key,
+			ui->GetAgent(),
+			ui,
+			false };
+	}
+
+	case PropPageType::Annotation:
+	{
+		auto ann = glbin_current.ann_data.lock();
+		if (!ann)
+			return std::nullopt;
+
+		auto ui =
+			glbin_flui_builder.BuildAnnotatPropPanel(
+				panel, ann);
+
+		return PageEntry{
+			key,
+			ui->GetAgent(),
+			ui,
+			false };
+	}
+
+	case PropPageType::MeshManip:
+	{
+		auto md = glbin_current.mesh_data.lock();
+		if (!md)
+			return std::nullopt;
+
+		auto ui =
+			glbin_flui_builder.BuildManipPropPanel(
+				panel, md);
+
+		return PageEntry{
+			key,
+			ui->GetAgent(),
+			ui,
+			false };
+	}
+
+	default:
+		break;
+	}
+
+	return std::nullopt;
+}
+
+void PropertyPanelAgent::DeleteChildAgent(
+	Agent* agent)
+{
+	auto it = std::find_if(
+		m_pages.begin(),
+		m_pages.end(),
+		[&](const PageEntry& page)
+		{
+			return page.agent == agent;
+		});
+
+	if (it != m_pages.end())
+		m_pages.erase(it);
+}
+
 void PropertyPanelAgent::CreatePage()
 {
 	auto key = GetSelectedPageKey();
 	if (!key)
 		return;
 
-	auto page = FindPage(*key);
-
-	if (page)
-	{
-		ShowPage();
+	if (FindPage(*key))
 		return;
-	}
 
-	PageEntry entry;
+	auto page = CreateChildPage(*key);
 
-	entry.key = *key;
-	entry.agent = CreateChildAgent(*key);
+	m_pages.push_back(std::move(*page));
 
-	m_pages.push_back(std::move(entry));
+	auto& stored = m_pages.back();
 
-	ShowPage();
+	GetPanel()->RegisterPage(
+		{
+			stored.key,
+			stored.panel,
+			stored.key.name
+		});
+}
+
+void PropertyPanelAgent::DeletePage()
+{
+	auto key = GetSelectedPageKey();
+	if (!key)
+		return;
+
+	auto page = FindPage(*key);
+	if (!page)
+		return;
+
+	Agent* agent = page->agent;
+
+	DeleteChildAgent(agent);
 }
 
 void PropertyPanelAgent::ShowPage()
@@ -174,11 +315,22 @@ void PropertyPanelAgent::ShowPage()
 	{
 		page->visible = true;
 
-		GetPanel()->ShowPage(page->agent);
+		GetPanel()->ShowPage(
+			{
+				*key,
+				page->panel,
+				key->name
+			});
 	}
 	else
 	{
-		GetPanel()->SelectPage(page->agent);
+		GetPanel()->SelectPage(
+			{
+				*key,
+				page->panel,
+				key->name
+			});
+
 	}
 }
 
@@ -194,37 +346,54 @@ void PropertyPanelAgent::HidePage()
 
 	page->visible = false;
 
-	GetPanel()->HidePage(page->agent);
-}
+	GetPanel()->HidePage(
+		{
+			*key,
+			page->panel,
+			key->name
+		});
 
-void PropertyPanelAgent::DeletePage()
-{
-	auto key = GetSelectedPageKey();
-	if (!key)
-		return;
-
-	auto page = FindPage(*key);
-	if (!page)
-		return;
-
-	GetPanel()->DeletePage(page->agent);
-
-	DeleteChildAgent(page->agent);
-
-	//...
 }
 
 void PropertyPanelAgent::RenamePage()
 {
 	for (auto& page : m_pages)
 	{
-		std::wstring name =
-			GetCurrentPageName(page);
+		auto* agent =
+			dynamic_cast<DataAgent*>(
+				page.agent);
 
-		page.key.name = name;
+		if (!agent)
+			continue;
+
+		auto data = agent->GetData();
+		if (!data)
+			continue;
+
+		page.key.name = data->GetName();
 
 		GetPanel()->RenamePage(
-			page.agent,
-			name);
+			{
+				page.key,
+				page.panel,
+				page.key.name
+			});
+	}
+}
+
+void PropertyPanelAgent::ClosePage()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto page_to_close = panel->GetPage();
+	for (auto& page : m_pages)
+	{
+		if (page.panel == page_to_close)
+		{
+			page.visible = false;
+			break;
+		}
 	}
 }
