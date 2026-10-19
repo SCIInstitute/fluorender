@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 #include <FluiBuilder.h>
 #include <JVMInitializer.h>
 #include <PanelsAndDialogs.h>
+#include <UiText.h>
 #include <Debug.h>
 #include <wxGaugeStatusbar.h>
 #include <wxBasisSlider.h>

@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <RulerHandler.h>
 #include <Ruler.h>
+#include <CurrentObjects.h>
 
 int RenderViewPanelAgent::m_max_id = 1;
 
@@ -48,13 +49,44 @@ RenderViewPanelAgent::RenderViewPanelAgent(
 	const std::shared_ptr<RenderView>& view) :
 	Agent(panel),
 	m_view(view),
-	m_default_saved(false)
+	m_save_mask(-1)
 {
 	m_id = m_max_id++;
 	m_fullscreen_trigger.setFunc([this]()
 	{
 		SetFullScreen();
 	});
+}
+
+void RenderViewPanelAgent::LoadSettings()
+{
+	auto view = GetView();
+	if (!view)
+		return;
+
+	glbin_view_def.Apply(*view);
+	m_rot_slider = glbin_view_def.m_rot_slider;
+
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
+	NotifyViewUpdate({}, target);
+}
+
+void RenderViewPanelAgent::Shutdown()
+{
+	//close full screen
+	auto panel = GetPanel();
+	if (panel)
+		panel->CloseFullScreen();
+	//save default
+	auto view = GetView();
+	auto cur_view = glbin_current.render_view.lock();
+	if (view && cur_view &&
+		view == cur_view)
+	{
+		SetSaveMask(0xaff);
+		SaveDefault();
+	}
 }
 
 RenderViewPanel* RenderViewPanelAgent::GetPanel() const
@@ -745,7 +777,7 @@ void RenderViewPanelAgent::SetCamMode()
 	NotifyViewUpdate({ gstCamMode }, target);
 }
 
-void RenderViewPanelAgent::SaveDefault(unsigned int mask)
+void RenderViewPanelAgent::SaveDefault()
 {
 	auto view = GetView();
 	if (!view)
@@ -755,58 +787,58 @@ void RenderViewPanelAgent::SaveDefault(unsigned int mask)
 	wxColor cVal;
 
 	//render modes
-	if (mask & 0x1)
+	if (m_save_mask & 0x1)
 		glbin_view_def.m_channel_mix_mode = view->GetChannelMixMode();
 	//background color
-	if (mask & 0x2)
+	if (m_save_mask & 0x2)
 		glbin_view_def.m_bg_color = view->GetBackgroundColor();
 	//camera center
-	if (mask & 0x4)
+	if (m_save_mask & 0x4)
 		glbin_view_def.m_draw_camctr = view->m_draw_camctr;
 	//camctr size
-	if (mask & 0x8)
+	if (m_save_mask & 0x8)
 		glbin_view_def.m_camctr_size = view->m_camctr_size;
 	//fps
-	if (mask & 0x10)
+	if (m_save_mask & 0x10)
 		glbin_view_def.m_draw_info = view->m_draw_info;
 	//selection
-	if (mask & 0x20)
+	if (m_save_mask & 0x20)
 		glbin_view_def.m_draw_legend = view->m_draw_legend;
 	//mouse focus
-	if (mask & 0x40)
+	if (m_save_mask & 0x40)
 		glbin_view_def.m_mouse_focus = view->m_mouse_focus;
 	//ortho/persp
-	if (mask & 0x80)
+	if (m_save_mask & 0x80)
 	{
 		glbin_view_def.m_persp = view->GetPersp();
 		glbin_view_def.m_aov = view->GetAov();
 		glbin_view_def.m_cam_mode = view->GetCamMode();
 	}
 	//rotations
-	if (mask & 0x100)
+	if (m_save_mask & 0x100)
 	{
 		glbin_view_def.m_rot = view->GetRotations();
 		glbin_view_def.m_rot_lock = view->GetRotLock();
 		glbin_view_def.m_rot_slider = m_rot_slider;
 	}
 	//depth atten
-	if (mask & 0x200)
+	if (m_save_mask & 0x200)
 	{
 		glbin_view_def.m_use_fog = view->GetFog();
 		glbin_view_def.m_fog_intensity = view->GetFogIntensity();
 	}
 	//scale factor
-	if (mask & 0x400)
+	if (m_save_mask & 0x400)
 	{
 		glbin_view_def.m_pin_rot_center = view->m_pin_rot_ctr;
 		glbin_view_def.m_scale_factor = view->m_scale_factor;
 		glbin_view_def.m_scale_mode = view->m_scale_mode;
 	}
 	//camera center
-	if (mask & 0x800)
+	if (m_save_mask & 0x800)
 		glbin_view_def.m_center = view->GetCenters();
 	//colormap
-	if (mask & 0x1000)
+	if (m_save_mask & 0x1000)
 		glbin_view_def.m_colormap_disp = view->m_colormap_disp;
 }
 
@@ -1159,19 +1191,5 @@ void RenderViewPanelAgent::ResetRotations()
 	std::set<Agent*> target{ this };
 	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
 	NotifyViewUpdate({ gstCamRotation }, target);
-}
-
-void RenderViewPanelAgent::LoadSettings()
-{
-	auto view = GetView();
-	if (!view)
-		return;
-
-	glbin_view_def.Apply(*view);
-	m_rot_slider = glbin_view_def.m_rot_slider;
-
-	std::set<Agent*> target{ this };
-	target.insert(glbin_coordinator.FindRenderCanvasAgent(GetView()));
-	NotifyViewUpdate({}, target);
 }
 

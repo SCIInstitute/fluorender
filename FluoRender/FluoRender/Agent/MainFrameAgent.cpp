@@ -57,30 +57,13 @@ MainFrameAgent::MainFrameAgent(
 
 void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 {
-	int type = 0;
-	if (FOUND_VALUE(gstVolumePropPanel))
-		type = 2;
-	else if (FOUND_VALUE(gstMeshPropPanel))
-		type = 3;
-	else if (FOUND_VALUE(gstManipPropPanel))
-		type = 6;
-	else if (FOUND_VALUE(gstAnnotatPropPanel))
-		type = 4;
-	ShowPropPage(type,
-		glbin_current.render_view.lock(),
-		glbin_current.vol_group.lock(),
-		glbin_current.vol_data.lock(),
-		glbin_current.mesh_data.lock(),
-		glbin_current.mesh_group.lock(),
-		glbin_current.ann_data.lock());
-
 	//clear mesh bounds
 	//glbin_data_manager.ClearMeshSelection();
 	//auto md = glbin_current.mesh_data.lock();
 	//if (md)
 	//	md->SetDrawBounds(true);
 
-	bool update_all = vc.empty();
+	bool update_all = request.values.empty();
 	bool bval;
 	wxString str;
 	if (update_all || FOUND_VALUE(gstProjPanel))
@@ -253,18 +236,6 @@ void MainFrameAgent::Shutdown()
 
 	glbin_moviemaker.Stop();
 
-	bool vrv_saved = false;
-	for (unsigned int i = 0; i < m_renderview_panels.size(); ++i)
-	{
-		if (m_renderview_panels[i]->m_default_saved)
-		{
-			vrv_saved = true;
-			break;
-		}
-		m_renderview_panels[i]->CloseFullScreen();
-	}
-	if (!vrv_saved && !m_renderview_panels.empty())
-		m_renderview_panels[0]->SaveDefault(0xaff);
 	glbin.clear_python();
 
 	//release

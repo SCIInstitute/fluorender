@@ -1453,6 +1453,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstTesterDlg "tester dlg"
 #define gstScriptBreakDlg "script break dlg"
 
+//proptery panel
+#define gstPropertyPageCreate "property page create"
+#define gstPropertyPageDelete "property page delete"
+#define gstPropertyPageShow "property page show"
+#define gstPropertyPageHide "property page hide"
+#define gstPropertyPageRename "property page rename"
+
 //render canvas
 #define gstInitViewAll "init view all"
 #define gstInitViewBoundsCenter "init view bounds center"

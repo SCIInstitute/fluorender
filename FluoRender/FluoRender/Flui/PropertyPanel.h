@@ -41,9 +41,15 @@ public:
 
 	virtual void CreateUI() override;
 
+	void CreatePage(PropPageInfo info);
+
 private:
 	//prop pages
 	void OnPropPageClose(wxAuiNotebookEvent& event);
+
+private:
+	//prop panel children
+	std::vector<AgentPanel*> m_prop_pages;
 
 };
 

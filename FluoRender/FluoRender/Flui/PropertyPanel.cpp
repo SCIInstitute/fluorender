@@ -55,6 +55,11 @@ void PropertyPanel::CreateUI()
 	Thaw();
 }
 
+void PropertyPanel::CreatePage(PropPageInfo info)
+{
+
+}
+
 //prop pages
 void PropertyPanel::OnPropPageClose(wxAuiNotebookEvent& event)
 {

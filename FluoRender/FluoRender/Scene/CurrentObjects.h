@@ -52,7 +52,6 @@ namespace fluo
 {
 	class ClippingBox;
 }
-class MainFrame;
 class RenderView;
 class VolumeGroup;
 class MeshGroup;
@@ -62,8 +61,7 @@ class AnnotData;
 class TrackGroup;
 struct CurrentObjects
 {
-	CurrentObjects() :
-		mainframe(0)
+	CurrentObjects()
 	{}
 
 	//0:root, 1:view, 2:volume, 3:mesh, 4:annotations, 5:group, 6:mesh group, 7:ruler, 8:traces
@@ -113,7 +111,6 @@ struct CurrentObjects
 	std::optional<std::reference_wrapper<fluo::ClippingBox>>
 		GetClippingBox() const;
 
-	MainFrame* mainframe;//this is temporary before a global scenegraph is added
 	std::weak_ptr<RenderView> render_view;//currently selected render view
 	std::weak_ptr<RenderView> render_view_drawing;//currently drawing render view, may not be selected
 	std::weak_ptr<VolumeGroup> vol_group;

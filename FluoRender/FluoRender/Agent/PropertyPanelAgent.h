@@ -30,8 +30,36 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Agent.h>
 #include <Tokens.h>
+#include <vector>
+#include <optional>
 
 class PropertyPanel;
+enum class PropPageType : int
+{
+	Unknown = 0,
+	Volume,
+	Mesh,
+	Annotation,
+	MeshManip
+};
+
+struct PageKey
+{
+	PropPageType type = PropPageType::Unknown;
+	std::wstring name;
+
+	bool operator==(const PageKey&) const = default;
+};
+
+struct PageEntry
+{
+	PageKey key;
+
+	Agent* agent = nullptr;
+
+	bool visible = false;
+};
+
 class PropertyPanelAgent : public Agent
 {
 public:
@@ -40,7 +68,7 @@ public:
 
 	virtual ~PropertyPanelAgent() = default;
 
-	PropertyPanel* GetDialog() const;
+	PropertyPanel* GetPanel() const;
 
 protected:
 	std::span < const std::string_view>
@@ -58,6 +86,20 @@ private:
 	{
 		gstCurrentSelect
 	};
+
+	std::vector<PageEntry> m_pages;
+
+private:
+	std::optional<PageKey> GetSelectedPageKey() const;
+	PageEntry* FindPage(const PageKey& key);
+	Agent* CreateChildAgent(const PageKey& key);
+	std::wstring GetCurrentPageName(const PageEntry& page) const;
+
+	void CreatePage();
+	void DeletePage();
+	void RenamePage();
+	void ShowPage();
+	void HidePage();
 };
 
 #endif // PropertyPanelAgent_h

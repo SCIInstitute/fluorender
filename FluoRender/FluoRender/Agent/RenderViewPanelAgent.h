@@ -46,6 +46,9 @@ public:
 
 	virtual ~RenderViewPanelAgent() = default;
 
+	virtual void LoadSettings() override;
+	virtual void Shutdown() override;
+
 	RenderViewPanel* GetPanel() const;
 
 	std::shared_ptr<RenderView> GetView() const
@@ -62,11 +65,11 @@ public:
 		return m_canvas_agent;
 	}
 
+	void SetSaveMask(int mask) { m_save_mask = mask; }
 	int GetId() const { return m_id; }
 	int GetViewId();
 	//reset counter
 	static void ResetID();
-	void LoadSettings();
 
 protected:
 	std::span < const std::string_view>
@@ -142,7 +145,7 @@ private:
 	int m_pin_by_user = 0;//override pin by scale: 0:by scale; 1:always pin; 2:always not pin
 	bool m_pin_by_scale = false;
 	//bit mask for items to save
-	bool m_default_saved;
+	int m_save_mask;
 	fluo::AsyncTimer m_fullscreen_trigger;
 
 private:
@@ -163,7 +166,7 @@ private:
 	void SetAov();
 	void SetProjection();
 	void SetCamMode();
-	void SaveDefault(unsigned int mask = 0xffffffff);
+	void SaveDefault();
 	void SetStereography();
 	void SetHolography();
 	void SetFullScreen();
