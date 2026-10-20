@@ -48,10 +48,7 @@ public:
 
 	MeshPropPanel* GetPanel() const;
 
-	std::shared_ptr<MeshData> GetMeshData() const
-	{
-		return std::dynamic_pointer_cast<MeshData>(GetData());
-	}
+	std::shared_ptr<MeshData> GetMeshData() const;
 
 	void SetMeshGroup(const std::shared_ptr<MeshGroup>& group)
 	{

@@ -60,6 +60,11 @@ VolumePropPanel* VolumePropPanelAgent::GetPanel() const
 	return static_cast<VolumePropPanel*>(GetOwner());
 }
 
+std::shared_ptr<VolumeData> VolumePropPanelAgent::GetVolumeData() const
+{
+	return std::dynamic_pointer_cast<VolumeData>(GetData());
+}
+
 void VolumePropPanelAgent::SetGroup(const std::shared_ptr<VolumeGroup>& group)
 {
 	m_group = group;

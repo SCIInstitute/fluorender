@@ -50,10 +50,7 @@ public:
 
 	VolumePropPanel* GetPanel() const;
 
-	std::shared_ptr<VolumeData> GetVolumeData() const
-	{
-		return std::dynamic_pointer_cast<VolumeData>(GetData());
-	}
+	std::shared_ptr<VolumeData> GetVolumeData() const;
 
 	void SetGroup(const std::shared_ptr<VolumeGroup>& group);
 	void SetView(const std::shared_ptr<RenderView>& view);

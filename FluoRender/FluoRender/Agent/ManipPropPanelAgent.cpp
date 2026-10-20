@@ -44,6 +44,11 @@ ManipPropPanel* ManipPropPanelAgent::GetPanel() const
 	return static_cast<ManipPropPanel*>(GetOwner());
 }
 
+std::shared_ptr<MeshData> ManipPropPanelAgent::GetMeshData() const
+{
+	return std::dynamic_pointer_cast<MeshData>(GetData());
+}
+
 void ManipPropPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();

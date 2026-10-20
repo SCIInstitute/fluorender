@@ -46,10 +46,7 @@ public:
 
 	ManipPropPanel* GetPanel() const;
 
-	std::shared_ptr<MeshData> GetMeshData() const
-	{
-		return std::dynamic_pointer_cast<MeshData>(GetData());
-	}
+	std::shared_ptr<MeshData> GetMeshData() const;
 
 protected:
 	std::span < const std::string_view>

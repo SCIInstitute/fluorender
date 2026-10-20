@@ -43,6 +43,11 @@ AnnotatPropPanel* AnnotatPropPanelAgent::GetPanel() const
 	return static_cast<AnnotatPropPanel*>(GetOwner());
 }
 
+std::shared_ptr<AnnotData> AnnotatPropPanelAgent::GetAnnotData() const
+{
+	return std::dynamic_pointer_cast<AnnotData>(GetData());
+}
+
 void AnnotatPropPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();

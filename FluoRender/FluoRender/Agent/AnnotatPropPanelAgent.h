@@ -46,10 +46,7 @@ public:
 
 	AnnotatPropPanel* GetPanel() const;
 
-	std::shared_ptr<AnnotData> GetAnnotData() const
-	{
-		return std::dynamic_pointer_cast<AnnotData>(GetData());
-	}
+	std::shared_ptr<AnnotData> GetAnnotData() const;
 
 protected:
 	std::span < const std::string_view>

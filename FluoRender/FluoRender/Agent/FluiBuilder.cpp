@@ -188,10 +188,11 @@ MeasureDlg* FluiBuilder::BuildMeasureDlg(
 
 MeshPropPanel* FluiBuilder::BuildMeshPropPanel(
 	wxWindow* parent,
-	const std::shared_ptr<MeshData>& md)
+	const std::shared_ptr<MeshData>& md,
+	const std::shared_ptr<MeshGroup>& group)
 {
 	return BuildUi<MeshPropPanel,
-		MeshPropPanelAgent>(parent, md);
+		MeshPropPanelAgent>(parent, md, group);
 }
 
 MoviePanel* FluiBuilder::BuildMoviePanel(

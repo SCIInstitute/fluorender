@@ -193,12 +193,13 @@ PropertyPanelAgent::CreateChildPage(
 	case PropPageType::Mesh:
 	{
 		auto md = glbin_current.mesh_data.lock();
+		auto group = glbin_current.mesh_group.lock();
 		if (!md)
 			return std::nullopt;
 
 		auto ui =
 			glbin_flui_builder.BuildMeshPropPanel(
-				panel, md);
+				panel, md, group);
 
 		return PageEntry{
 			key,

@@ -65,6 +65,7 @@ class MainFrame;
 
 class ManipPropPanel;
 class MeshData;
+class MeshGroup;
 
 class MeasureDlg;
 
@@ -163,7 +164,8 @@ public:
 
 	static MeshPropPanel* BuildMeshPropPanel(
 		wxWindow* parent,
-		const std::shared_ptr<MeshData>& md);
+		const std::shared_ptr<MeshData>& md,
+		const std::shared_ptr<MeshGroup>& group);
 
 	static MoviePanel* BuildMoviePanel(
 		wxWindow* parent);

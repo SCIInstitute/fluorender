@@ -52,6 +52,11 @@ MeshPropPanel* MeshPropPanelAgent::GetPanel() const
 	return static_cast<MeshPropPanel*>(GetOwner());
 }
 
+std::shared_ptr<MeshData> MeshPropPanelAgent::GetMeshData() const
+{
+	return std::dynamic_pointer_cast<MeshData>(GetData());
+}
+
 void MeshPropPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
