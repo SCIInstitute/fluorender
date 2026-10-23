@@ -28,15 +28,17 @@ DEALINGS IN THE SOFTWARE.
 
 #include <MainFrameAgent.h>
 #include <MainFrame.h>
+#include <RenderViewPanel.h>
+#include <RenderCanvas.h>
+#include <RenderCanvasAgent.h>
+#include <RenderViewPanelAgent.h>
 #include <Global.h>
 #include <Tokens.h>
 #include <Root.h>
 #include <DataManager.h>
 #include <RenderView.h>
+#include <VolumeData.h>
 #include <Coordinator.h>
-#include <RenderCanvas.h>
-#include <RenderCanvasAgent.h>
-#include <RenderViewPanelAgent.h>
 #include <MainSettings.h>
 #include <ScriptProc.h>
 #include <CurrentObjects.h>
@@ -57,84 +59,58 @@ MainFrameAgent::MainFrameAgent(
 
 void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 {
-	//clear mesh bounds
-	//glbin_data_manager.ClearMeshSelection();
-	//auto md = glbin_current.mesh_data.lock();
-	//if (md)
-	//	md->SetDrawBounds(true);
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
 
 	bool update_all = request.values.empty();
-	bool bval;
-	wxString str;
-	if (update_all || FOUND_VALUE(gstProjPanel))
+
+	if (update_all || request.HasValue(gstProjPanel))
 	{
-		//proj panel
-		bval = m_aui_mgr.GetPane(m_proj_panel).IsShown();
-		m_tb_menu_ui->Check(ID_ProjPanel, bval);
-		m_top_window->Check(ID_ProjPanelMenu, bval);
+		frame->UpdateProjPanel();
 	}
-	if (update_all || FOUND_VALUE(gstMoviePanel))
+	if (update_all || request.HasValue(gstMoviePanel))
 	{
-		//movie panel
-		bval = m_aui_mgr.GetPane(m_movie_panel).IsShown();
-		m_tb_menu_ui->Check(ID_MoviePanel, bval);
-		m_top_window->Check(ID_MoviePanelMenu, bval);
+		frame->UpdateMoviePanel();
 	}
-	if (update_all || FOUND_VALUE(gstPropPanel))
+	if (update_all || request.HasValue(gstPropertyPanel))
 	{
-		//prop panel
-		bval = m_aui_mgr.GetPane(m_prop_panel).IsShown();
-		m_tb_menu_ui->Check(ID_PropPanel, bval);
-		m_top_window->Check(ID_PropPanelMenu, bval);
+		frame->UpdatePropertyPanel();
 	}
-	if (FOUND_VALUE(gstTreeLayerName))
+	if (update_all || request.HasValue(gstOutAdjPanel))
 	{
-		UpdatePropName();
+		frame->UpdateOutAdjPanel();
 	}
-	if (update_all || FOUND_VALUE(gstOutAdjPanel))
+	if (update_all || request.HasValue(gstClipPlanePanel))
 	{
-		//adjust panel
-		bval = m_aui_mgr.GetPane(m_output_adj_panel).IsShown();
-		m_tb_menu_ui->Check(ID_OutAdjPanel, bval);
-		m_top_window->Check(ID_OutAdjPanelMenu, bval);
+		frame->UpdateClipPlanePanel();
 	}
-	if (update_all || FOUND_VALUE(gstClipPlanePanel))
+	if (update_all || request.HasValue(gstMainToolbar))
 	{
-		//clipping plane panel
-		bval = m_aui_mgr.GetPane(m_clip_plane_panel).IsShown();
-		m_tb_menu_ui->Check(ID_ClipPlanePanel, bval);
-		m_top_window->Check(ID_ClipPlanePanelMenu, bval);
+		frame->UpdateMainToolbar();
 	}
-	if (update_all || FOUND_VALUE(gstMainToolbar))
+	if (update_all || request.HasValue(gstMainFrameTitle))
 	{
-		//main toolbar
-		bval = m_aui_mgr.GetPane(m_main_tb).IsShown();
-		m_top_window->Check(ID_ToolbarMenu, bval);
+		auto str = glbin_data_manager.GetProjectFile();
+		frame->UpdateMainFrameTitle(str);
+	}
+	if (update_all || request.HasValue(gstMainStatusbarText))
+	{
+		frame->UpdateMainStatusbarText(glbin_states.m_status_str);
+	}
+	if (request.HasValue(gstMainStatusbarPush))
+	{
+		frame->PushMainStatusbarText(glbin_states.m_status_str);
+	}
+	if (request.HasValue(gstMainStatusbarPop))
+	{
+		frame->PopMainStatusbarText();
 	}
 
-	if (update_all || FOUND_VALUE(gstMainFrameTitle))
-	{
-		str = glbin_data_manager.GetProjectFile();
-		if (str.IsEmpty())
-			str = m_title;
-		else
-			str = m_title + " - " + str;
-		SetTitle(str);
-	}
-
-	if (update_all || FOUND_VALUE(gstMainStatusbarText))
-	{
-		m_statusbar->SetStatusText(glbin_states.m_status_str);
-	}
-	if (FOUND_VALUE(gstMainStatusbarPush))
-	{
-		m_statusbar->PushStatusText(glbin_states.m_status_str);
-	}
-	if (FOUND_VALUE(gstMainStatusbarPop))
-	{
-		m_statusbar->PopStatusText();
-	}
-
+	if (request.HasValue(gstCreateRenderViewPanel))
+		CreateRenderViewPanel();
+	if (request.HasValue(gstRenderViewPanelLayout))
+		LayoutRenderViewPanels();
 	if (request.HasValue(gstRenderViewPanel))
 		SyncRenderViewPanels();
 	if (request.HasValue(gstScriptBreakDlg))
@@ -298,6 +274,91 @@ void MainFrameAgent::RemoveRenderView(RenderViewPanelAgent* agent)
 	if (!agent)
 		return;
 	renderview_agent_list_.erase(agent);
+}
+
+void MainFrameAgent::CreateRenderViewPanel()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	//create ui
+	auto panel = frame->CreateRenderViewPanel();
+	if (!panel)
+		return;
+
+	auto view_agent = panel->GetAgent()->As<RenderViewPanelAgent>();
+	if (!view_agent)
+		return;
+	auto view = view_agent->GetView();
+	if (!view)
+		return;
+
+	//set view default settings
+	//if (m_output_adj_panel)
+	//{
+		/*Color gamma, brightness, hdr;
+		bool sync_r, sync_g, sync_b;
+		m_output_adj_panel->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
+		vrv->m_canvas->SetGamma(gamma);
+		vrv->m_canvas->SetBrightness(brightness);
+		vrv->m_canvas->SetHdr(hdr);*/
+		//view->SetSyncR(true);
+		//view->SetSyncG(true);
+		//view->SetSyncB(true);
+	//}
+
+	//add volumes
+	Root* root = glbin_data_manager.GetRoot();
+	if (root && root->GetViewNum() > 0)
+	{
+		auto view0 = root->GetView(0);
+		if (view0)
+		{
+			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
+			{
+				auto vd = view0->GetDispVolumeData(i);
+				if (vd)
+				{
+					auto vd_add = glbin_data_manager.DuplicateVolumeData(vd);
+
+					if (vd_add)
+					{
+						int chan_num = view->GetAny();
+						fluo::Color color(1.0, 1.0, 1.0);
+						if (chan_num == 0)
+							color = fluo::Color(1.0, 0.0, 0.0);
+						else if (chan_num == 1)
+							color = fluo::Color(0.0, 1.0, 0.0);
+						else if (chan_num == 2)
+							color = fluo::Color(0.0, 0.0, 1.0);
+
+						if (chan_num >= 0 && chan_num < 3)
+							vd_add->SetColor(color);
+
+						view->AddVolumeData(vd_add);
+					}
+				}
+			}
+		}
+		//update
+		view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
+	}
+
+	//? check later
+	//vrv->LoadSettings();
+
+	NotifyDataToUI({ gstRenderViewPanelLayout, gstMovViewList, gstMovViewIndex, gstTreeCtrl, gstUpdateSync });
+}
+
+void MainFrameAgent::LayoutRenderViewPanels()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	frame->LayoutRenderViewPanels(
+		frame->GetRenderViewLayout());
 }
 
 void MainFrameAgent::SyncRenderViewPanels()

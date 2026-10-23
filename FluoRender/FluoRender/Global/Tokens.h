@@ -119,7 +119,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstAnnotatPropPanel "annotat prop panel"
 #define gstProjPanel "proj panel"
 #define gstMoviePanel "movie panel"
-#define gstPropPanel "prop panel"
+#define gstPropertyPanel "property panel"
 #define gstOutAdjPanel "out adj panel"
 #define gstClipPlanePanel "clip plane panel"
 #define gstMainToolbar "main toolbar"
@@ -1452,6 +1452,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstOclDlg "ocl dlg"
 #define gstTesterDlg "tester dlg"
 #define gstScriptBreakDlg "script break dlg"
+#define gstCreateRenderViewPanel "create renderview panel"
+#define gstRenderViewPanelLayout "renderview panel layout"
 
 //proptery panel
 #define gstPropertyPageCreate "property page create"

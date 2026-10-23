@@ -65,7 +65,8 @@ void PropertyPanelAgent::UpdateUI(const UpdateRequest& request)
 	else if (request.HasValue(gstPropertyPageHide))
 		HidePage();
 
-	if (request.HasValue(gstPropertyPageRename))
+	if (request.HasValue(gstTreeLayerName) ||
+		request.HasValue(gstPropertyPageRename))
 		RenamePage();
 
 	if (request.HasValue(gstPropertyPageClose))

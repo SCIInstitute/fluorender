@@ -70,7 +70,7 @@ MainFrame::MainFrame(
 	m_movie_panel(0),
 	m_tree_panel(0),
 	m_list_panel(0),
-	m_prop_panel(0),
+	m_property_panel(0),
 	m_clip_plane_panel(0),
 	m_output_adj_panel(0),
 	m_setting_dlg(0),
@@ -401,7 +401,7 @@ void MainFrame::CreateUI()
 	m_movie_panel->SetSize(FromDIP(wxSize(350, 450)));
 
 	//create prop panel
-	m_prop_panel = glbin_flui_builder.BuildPropertyPanel(this);
+	m_property_panel = glbin_flui_builder.BuildPropertyPanel(this);
 
 	//clipping view
 	m_clip_plane_panel = glbin_flui_builder.BuildClipPlanePanel(this);
@@ -474,8 +474,8 @@ void MainFrame::CreateUI()
 		BestSize(FromDIP(wxSize(320, 500))).
 		FloatingSize(FromDIP(wxSize(320, 500))).
 		Left().CloseButton(true).Layer(3));
-	m_aui_mgr.AddPane(m_prop_panel, wxAuiPaneInfo().
-		Name("m_prop_panel").Caption(UITEXT_PROPERTIES).
+	m_aui_mgr.AddPane(m_property_panel, wxAuiPaneInfo().
+		Name("m_property_panel").Caption(UITEXT_PROPERTIES).
 		BestSize(FromDIP(wxSize(1100, 160))).
 		FloatingSize(FromDIP(wxSize(1100, 160))).
 		Bottom().CloseButton(true).Layer(2));
@@ -794,88 +794,6 @@ void MainFrame::CreateUI()
 	m_aui_mgr.Update();
 }
 
-wxString MainFrame::CreateRenderViewPanel(int row)
-{
-	RenderViewPanel* vrv = 0;
-	if (m_renderview_panels.size()>0)
-	{
-		wxGLContext* sharedContext = m_renderview_panels[0]->GetContext();
-		vrv = new RenderViewPanel(this, sharedContext);
-	}
-	else
-	{
-		vrv = new RenderViewPanel(this);
-	}
-
-	if (!vrv)
-		return "NO_NAME";
-
-	RenderView* this_view = vrv->GetRenderView();
-	m_renderview_panels.push_back(vrv);
-	if (m_movie_panel)
-		m_movie_panel->FluoUpdate({ gstMovViewList });
-
-	//m_aui_mgr.Update();
-	LayoutRenderViewPanels(1);
-
-	//set view default settings
-	//if (m_output_adj_panel)
-	//{
-		/*Color gamma, brightness, hdr;
-		bool sync_r, sync_g, sync_b;
-		m_output_adj_panel->GetDefaults(gamma, brightness, hdr, sync_r, sync_g, sync_b);
-		vrv->m_canvas->SetGamma(gamma);
-		vrv->m_canvas->SetBrightness(brightness);
-		vrv->m_canvas->SetHdr(hdr);*/
-		//view->SetSyncR(true);
-		//view->SetSyncG(true);
-		//view->SetSyncB(true);
-	//}
-
-	//add volumes
-	Root* root = glbin_data_manager.GetRoot();
-	if (root && root->GetViewNum() > 0)
-	{
-		auto view0 = root->GetView(0);
-		if (view0)
-		{
-			for (int i = 0; i < view0->GetDispVolumeNum(); ++i)
-			{
-				auto vd = view0->GetDispVolumeData(i);
-				if (vd)
-				{
-					auto vd_add = glbin_data_manager.DuplicateVolumeData(vd);
-
-					if (vd_add)
-					{
-						int chan_num = this_view->GetAny();
-						fluo::Color color(1.0, 1.0, 1.0);
-						if (chan_num == 0)
-							color = fluo::Color(1.0, 0.0, 0.0);
-						else if (chan_num == 1)
-							color = fluo::Color(0.0, 1.0, 0.0);
-						else if (chan_num == 2)
-							color = fluo::Color(0.0, 0.0, 1.0);
-
-						if (chan_num >= 0 && chan_num < 3)
-							vd_add->SetColor(color);
-
-						this_view->AddVolumeData(vd_add);
-					}
-				}
-			}
-		}
-		//update
-		this_view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
-	}
-
-	vrv->LoadSettings();
-
-	UpdateProps({ gstMovViewList, gstMovViewIndex, gstTreeCtrl, gstUpdateSync });
-
-	return vrv->GetName();
-}
-
 void MainFrame::LoadPerspective(const std::string& str)
 {
 	m_aui_mgr.LoadPerspective(str);
@@ -886,6 +804,360 @@ std::string MainFrame::SavePerspective()
 {
 	return m_aui_mgr.SavePerspective().ToStdString();
 }
+
+void MainFrame::UpdateProjPanel()
+{
+	bool bval = m_aui_mgr.GetPane(m_proj_panel).IsShown();
+	m_tb_menu_ui->Check(ID_ProjPanel, bval);
+	m_top_window->Check(ID_ProjPanelMenu, bval);
+}
+
+void MainFrame::UpdateMoviePanel()
+{
+	bool bval = m_aui_mgr.GetPane(m_movie_panel).IsShown();
+	m_tb_menu_ui->Check(ID_MoviePanel, bval);
+	m_top_window->Check(ID_MoviePanelMenu, bval);
+}
+
+void MainFrame::UpdatePropertyPanel()
+{
+	bool bval = m_aui_mgr.GetPane(m_property_panel).IsShown();
+	m_tb_menu_ui->Check(ID_PropPanel, bval);
+	m_top_window->Check(ID_PropPanelMenu, bval);
+}
+
+void MainFrame::UpdateOutAdjPanel()
+{
+	bool bval = m_aui_mgr.GetPane(m_output_adj_panel).IsShown();
+	m_tb_menu_ui->Check(ID_OutAdjPanel, bval);
+	m_top_window->Check(ID_OutAdjPanelMenu, bval);
+}
+
+void MainFrame::UpdateClipPlanePanel()
+{
+	bool bval = m_aui_mgr.GetPane(m_clip_plane_panel).IsShown();
+	m_tb_menu_ui->Check(ID_ClipPlanePanel, bval);
+	m_top_window->Check(ID_ClipPlanePanelMenu, bval);
+}
+
+void MainFrame::UpdateMainToolbar()
+{
+	bool bval = m_aui_mgr.GetPane(m_main_tb).IsShown();
+	m_top_window->Check(ID_ToolbarMenu, bval);
+}
+
+void MainFrame::UpdateMainFrameTitle(const std::wstring& title)
+{
+	wxString str = title;
+	if (str.IsEmpty())
+		str = m_title;
+	else
+		str = m_title + " - " + str;
+	SetTitle(str);
+}
+
+void MainFrame::UpdateMainStatusbarText(const std::string& text)
+{
+	m_statusbar->SetStatusText(text);
+}
+
+void MainFrame::PushMainStatusbarText(const std::string& text)
+{
+	m_statusbar->PushStatusText(text);
+}
+
+void MainFrame::PopMainStatusbarText()
+{
+	m_statusbar->PopStatusText();
+}
+
+RenderViewPanel* MainFrame::CreateRenderViewPanel()
+{
+	RenderViewPanel* panel = 0;
+	if (m_renderview_panels.size()>0)
+	{
+		wxGLContext* sharedContext = m_renderview_panels[0]->GetContext();
+		panel = glbin_flui_builder.BuildRenderViewPanel(this, sharedContext);
+	}
+	else
+	{
+		panel = glbin_flui_builder.BuildRenderViewPanel(this, nullptr);
+	}
+
+	if (!panel)
+		return nullptr;
+
+	m_renderview_panels.push_back(panel);
+
+	return panel;
+}
+
+void MainFrame::LayoutRenderViewPanels(RenderViewLayout layout)
+{
+	const int paneNum =
+		static_cast<int>(m_renderview_panels.size());
+
+	if (paneNum == 0)
+		return;
+
+	// determine available area
+	int minx = 0, miny = 0;
+	int maxx = 0, maxy = 0;
+
+	for (int i = 0; i < paneNum; ++i)
+	{
+		auto panel = m_renderview_panels[i];
+		if (!panel)
+			continue;
+
+		auto& pane = m_aui_mgr.GetPane(panel);
+		if (!pane.IsOk())
+			continue;
+
+		wxPoint pos = panel->GetPosition();
+		wxSize size = panel->GetSize();
+
+		int x1 = pos.x;
+		int y1 = pos.y;
+		int x2 = x1 + size.x;
+		int y2 = y1 + size.y;
+
+		if (i == 0)
+		{
+			minx = x1;
+			miny = y1;
+			maxx = x2;
+			maxy = y2;
+		}
+		else
+		{
+			minx = std::min(minx, x1);
+			miny = std::min(miny, y1);
+			maxx = std::max(maxx, x2);
+			maxy = std::max(maxy, y2);
+		}
+	}
+
+	const int width = std::max(100, maxx - minx);
+	const int height = std::max(100, maxy - miny);
+
+	// detach all panes
+	for (auto panel : m_renderview_panels)
+	{
+		if (panel)
+			m_aui_mgr.DetachPane(panel);
+	}
+
+	//--------------------------------------------------
+	// Horizontal (1 x N)
+	//--------------------------------------------------
+
+	if (layout == RenderViewLayout::Horizontal)
+	{
+		const int w = width / paneNum;
+
+		for (int i = 0; i < paneNum; ++i)
+		{
+			auto panel = m_renderview_panels[i];
+
+			wxAuiPaneInfo info;
+			info.Name(panel->GetName())
+				.Caption(panel->GetName())
+				.Dockable(true)
+				.CloseButton(false)
+				.Resizable()
+				.BestSize(w, height);
+
+			if (i == 0)
+				info.Centre();
+			else
+				info.Right();
+
+			m_aui_mgr.AddPane(panel, info);
+		}
+	}
+
+	//--------------------------------------------------
+	// Vertical (N x 1)
+	//--------------------------------------------------
+
+	else if (layout == RenderViewLayout::Vertical)
+	{
+		const int h = height / paneNum;
+
+		for (int i = 0; i < paneNum; ++i)
+		{
+			auto panel = m_renderview_panels[i];
+
+			wxAuiPaneInfo info;
+			info.Name(panel->GetName())
+				.Caption(panel->GetName())
+				.Dockable(true)
+				.CloseButton(false)
+				.Resizable()
+				.BestSize(width, h);
+
+			if (i == 0)
+				info.Centre();
+			else
+				info.Bottom();
+
+			m_aui_mgr.AddPane(panel, info);
+		}
+	}
+
+	//--------------------------------------------------
+	// 3 views: 2 top, 1 bottom
+	//--------------------------------------------------
+
+	else if (layout == RenderViewLayout::ThreeTopBottom &&
+		paneNum >= 3)
+	{
+		m_aui_mgr.AddPane(
+			m_renderview_panels[0],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[0]->GetName()).
+			Caption(m_renderview_panels[0]->GetName()).
+			Centre());
+
+		m_aui_mgr.AddPane(
+			m_renderview_panels[1],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[1]->GetName()).
+			Caption(m_renderview_panels[1]->GetName()).
+			Right());
+
+		m_aui_mgr.AddPane(
+			m_renderview_panels[2],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[2]->GetName()).
+			Caption(m_renderview_panels[2]->GetName()).
+			Bottom());
+
+		// extra panels
+		for (int i = 3; i < paneNum; ++i)
+		{
+			m_aui_mgr.AddPane(
+				m_renderview_panels[i],
+				wxAuiPaneInfo().
+				Name(m_renderview_panels[i]->GetName()).
+				Caption(m_renderview_panels[i]->GetName()).
+				Right());
+		}
+	}
+
+	//--------------------------------------------------
+	// 3 views: 2 left, 1 right
+	//--------------------------------------------------
+
+	else if (layout == RenderViewLayout::ThreeLeftRight &&
+		paneNum >= 3)
+	{
+		m_aui_mgr.AddPane(
+			m_renderview_panels[0],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[0]->GetName()).
+			Caption(m_renderview_panels[0]->GetName()).
+			Centre());
+
+		m_aui_mgr.AddPane(
+			m_renderview_panels[1],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[1]->GetName()).
+			Caption(m_renderview_panels[1]->GetName()).
+			Bottom());
+
+		m_aui_mgr.AddPane(
+			m_renderview_panels[2],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[2]->GetName()).
+			Caption(m_renderview_panels[2]->GetName()).
+			Right());
+
+		for (int i = 3; i < paneNum; ++i)
+		{
+			m_aui_mgr.AddPane(
+				m_renderview_panels[i],
+				wxAuiPaneInfo().
+				Name(m_renderview_panels[i]->GetName()).
+				Caption(m_renderview_panels[i]->GetName()).
+				Bottom());
+		}
+	}
+
+	//--------------------------------------------------
+	// 4 views grid
+	//--------------------------------------------------
+
+	else if (layout == RenderViewLayout::Grid2x2 &&
+		paneNum >= 4)
+	{
+		m_aui_mgr.AddPane(
+			m_renderview_panels[0],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[0]->GetName()).
+			Caption(m_renderview_panels[0]->GetName()).
+			Centre());
+
+		m_aui_mgr.AddPane(
+			m_renderview_panels[1],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[1]->GetName()).
+			Caption(m_renderview_panels[1]->GetName()).
+			Right());
+
+		m_aui_mgr.AddPane(
+			m_renderview_panels[2],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[2]->GetName()).
+			Caption(m_renderview_panels[2]->GetName()).
+			Bottom());
+
+		m_aui_mgr.AddPane(
+			m_renderview_panels[3],
+			wxAuiPaneInfo().
+			Name(m_renderview_panels[3]->GetName()).
+			Caption(m_renderview_panels[3]->GetName()).
+			Bottom());
+
+		for (int i = 4; i < paneNum; ++i)
+		{
+			m_aui_mgr.AddPane(
+				m_renderview_panels[i],
+				wxAuiPaneInfo().
+				Name(m_renderview_panels[i]->GetName()).
+				Caption(m_renderview_panels[i]->GetName()).
+				Right());
+		}
+	}
+
+	//--------------------------------------------------
+	// fallback
+	//--------------------------------------------------
+
+	else
+	{
+		LayoutRenderViewPanels(RenderViewLayout::Horizontal);
+		return;
+	}
+
+	m_aui_mgr.Update();
+
+	// release size locks
+	for (auto panel : m_renderview_panels)
+	{
+		if (!panel)
+			continue;
+
+		auto& pane = m_aui_mgr.GetPane(panel);
+
+		pane.MinSize(-1, -1);
+		pane.MaxSize(-1, -1);
+	}
+
+	m_aui_mgr.Update();
+}
+
 
 int MainFrame::GetDisplayId()
 {
@@ -972,13 +1244,13 @@ void MainFrame::ToggleAllPanels(bool cur_state)
 	{
 		if (m_aui_mgr.GetPane(m_proj_panel).IsShown() &&
 			m_aui_mgr.GetPane(m_movie_panel).IsShown() &&
-			m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
+			m_aui_mgr.GetPane(m_property_panel).IsShown() &&
 			m_aui_mgr.GetPane(m_output_adj_panel).IsShown() &&
 			m_aui_mgr.GetPane(m_clip_plane_panel).IsShown())
 			bval = true;
 		else if (!m_aui_mgr.GetPane(m_proj_panel).IsShown() &&
 			!m_aui_mgr.GetPane(m_movie_panel).IsShown() &&
-			!m_aui_mgr.GetPane(m_prop_panel).IsShown() &&
+			!m_aui_mgr.GetPane(m_property_panel).IsShown() &&
 			!m_aui_mgr.GetPane(m_output_adj_panel).IsShown() &&
 			!m_aui_mgr.GetPane(m_clip_plane_panel).IsShown())
 			bval = false;
@@ -990,7 +1262,7 @@ void MainFrame::ToggleAllPanels(bool cur_state)
 	//movie view (float only)
 	m_aui_mgr.GetPane(m_movie_panel).Show(bval);
 	//properties
-	m_aui_mgr.GetPane(m_prop_panel).Show(bval);
+	m_aui_mgr.GetPane(m_property_panel).Show(bval);
 	//adjust view
 	m_aui_mgr.GetPane(m_output_adj_panel).Show(bval);
 	//clipping view
@@ -998,7 +1270,7 @@ void MainFrame::ToggleAllPanels(bool cur_state)
 
 	m_aui_mgr.Update();
 
-	FluoUpdate({ gstProjPanel, gstMoviePanel, gstPropPanel, gstOutAdjPanel, gstClipPlanePanel });
+	FluoUpdate({ gstProjPanel, gstMoviePanel, gstPropertyPanel, gstOutAdjPanel, gstClipPlanePanel });
 }
 
 void MainFrame::ToggleLastOpen()
@@ -1340,11 +1612,11 @@ void MainFrame::ShowClipPlanePanel()
 
 void MainFrame::ShowPropPanel()
 {
-	bool bval = m_aui_mgr.GetPane(m_prop_panel).IsShown();
+	bool bval = m_aui_mgr.GetPane(m_property_panel).IsShown();
 	bval = !bval;
-	m_aui_mgr.GetPane(m_prop_panel).Show(bval);
+	m_aui_mgr.GetPane(m_property_panel).Show(bval);
 	m_aui_mgr.Update();
-	FluoUpdate({ gstPropPanel });
+	FluoUpdate({ gstPropertyPanel });
 }
 
 void MainFrame::ShowToolbar()
@@ -1354,123 +1626,6 @@ void MainFrame::ShowToolbar()
 	m_aui_mgr.GetPane(m_main_tb).Show(bval);
 	m_aui_mgr.Update();
 	FluoUpdate({ gstMainToolbar });
-}
-
-//organize render views
-void MainFrame::LayoutRenderViewPanels(int mode)
-{
-	int width = 0;
-	int height = 0;
-	int minx = 0;
-	int miny = 0;
-	int maxx = 0;
-	int maxy = 0;
-	int paneNum = (int)m_renderview_panels.size();
-	int i;
-	//get total area
-	for (i = 0; i < paneNum; i++)
-	{
-		RenderViewPanel* vrv = m_renderview_panels[i];
-		if (vrv && m_aui_mgr.GetPane(vrv).IsOk())
-		{
-			wxPoint pos = vrv->GetPosition();
-			wxSize size = vrv->GetSize();
-			//width += size.x;
-			//height += size.y;
-			int x1 = pos.x;
-			int y1 = pos.y;
-			int x2 = x1 + size.x;
-			int y2 = y1 + size.y;
-			if (i == 0)
-			{
-				minx = x1;
-				miny = y1;
-				maxx = x2;
-				maxy = y2;
-			}
-			else
-			{
-				minx = x1 < minx ? x1 : minx;
-				miny = y1 < miny ? y1 : miny;
-				maxx = x2 > maxx ? x2 : maxx;
-				maxy = y2 > maxy ? y2 : maxy;
-			}
-		}
-	}
-	if (maxx - minx > 0 && maxy - miny > 0)
-	{
-		width = maxx - minx;
-		height = maxy - miny;
-	}
-	//detach all panes
-	for (i = 0; i < paneNum; ++i)
-	{
-		RenderViewPanel* vrv = m_renderview_panels[i];
-		if (vrv)
-			m_aui_mgr.DetachPane(vrv);
-	}
-	//add back
-	for (i = 0; i < paneNum; i++)
-	{
-		RenderViewPanel* vrv = m_renderview_panels[i];
-		if (vrv)
-		{
-			switch (mode)
-			{
-			case 0://top-bottom
-				vrv->SetSize(width, height / paneNum);
-				m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
-					Name(vrv->GetName()).Caption(vrv->GetName()).
-					Dockable(true).CloseButton(false).Resizable().
-					FloatingSize(width, height / paneNum).
-					MinSize(width, height / paneNum).
-					MaxSize(width, height / paneNum).
-					Layer(0).Centre());
-				break;
-			case 1://left-right
-				vrv->SetSize(width / paneNum, height);
-				if (i == 0)
-					m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
-						Name(vrv->GetName()).Caption(vrv->GetName()).
-						Dockable(true).CloseButton(false).Resizable().
-						FloatingSize(width / paneNum, height).
-						MinSize(width / paneNum, height).
-						MaxSize(width / paneNum, height).
-						Layer(0).Centre());
-				else
-					m_aui_mgr.AddPane(vrv, wxAuiPaneInfo().
-						Name(vrv->GetName()).Caption(vrv->GetName()).
-						Dockable(true).CloseButton(false).Resizable().
-						FloatingSize(width / paneNum, height).
-						MinSize(width / paneNum, height).
-						MaxSize(width / paneNum, height).
-						Layer(0).Centre().Right());
-				break;
-			}
-		}
-	}
-	m_aui_mgr.Update();
-	for (i = 0; i < paneNum; ++i)
-	{
-		RenderViewPanel* vrv = m_renderview_panels[i];
-		if (vrv)
-		{
-			switch (mode)
-			{
-			case 0://top-bottom
-				m_aui_mgr.GetPane(vrv).
-					MinSize(-1, -1).MaxSize(-1, -1).
-					BestSize(width, height / paneNum);
-				break;
-			case 1://left-right
-				m_aui_mgr.GetPane(vrv).
-					MinSize(-1, -1).MaxSize(-1, -1).
-					BestSize(width / paneNum, height);
-				break;
-			}
-		}
-	}
-	m_aui_mgr.Update();
 }
 
 void MainFrame::LayoutOutputAdjPanel()
@@ -1491,7 +1646,7 @@ void MainFrame::ResetLayout()
 		BestSize(FromDIP(wxSize(320, 500))).
 		FloatingSize(FromDIP(wxSize(320, 500))).
 		Left().Layer(3);
-	m_aui_mgr.GetPane(m_prop_panel).Show().Dock().
+	m_aui_mgr.GetPane(m_property_panel).Show().Dock().
 		BestSize(FromDIP(wxSize(1100, 160))).
 		FloatingSize(FromDIP(wxSize(1100, 160))).
 		Bottom().Layer(2);
@@ -1506,7 +1661,7 @@ void MainFrame::ResetLayout()
 	LayoutRenderViewPanels(1);
 	LayoutOutputAdjPanel();
 	glbin_settings.m_layout.clear();
-	FluoUpdate({ gstMainToolbar, gstProjPanel, gstMoviePanel, gstPropPanel, gstOutAdjPanel, gstClipPlanePanel });
+	FluoUpdate({ gstMainToolbar, gstProjPanel, gstMoviePanel, gstPropertyPanel, gstOutAdjPanel, gstClipPlanePanel });
 }
 
 void MainFrame::FullScreen()
@@ -1861,6 +2016,7 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 //toolbar
 void MainFrame::OnMainMenu(wxCommandEvent& event)
 {
+	fluo::ValueCollection vc;
 	int id = event.GetId();
 
 	switch (id)
@@ -1885,7 +2041,7 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		SaveProject();
 		break;
 	case ID_ViewNew:
-		CreateRenderViewPanel();
+		vc.insert(gstCreateRenderViewPanel);
 		break;
 	case ID_Panels:
 		ToggleAllPanels(true);
@@ -2060,7 +2216,7 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		ResetLayout();
 		break;
 	case ID_ViewNewMenu:
-		CreateRenderViewPanel();
+		vc.insert(gstCreateRenderViewPanel);
 		break;
 	case ID_FullscreenMenu:
 		FullScreen();
@@ -2089,13 +2245,16 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		break;
 	}
 
+	auto agent = m_agent->As<MainFrameAgent>();
+	if (agent)
+		agent->UpdateUIToData(vc);
 	//event.StopPropagation();
 }
 
 //panes
 void MainFrame::OnPaneClose(wxAuiManagerEvent& event)
 {
-	FluoUpdate({ gstProjPanel, gstMoviePanel, gstPropPanel, gstOutAdjPanel, gstClipPlanePanel });
+	FluoUpdate({ gstProjPanel, gstMoviePanel, gstPropertyPanel, gstOutAdjPanel, gstClipPlanePanel });
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)

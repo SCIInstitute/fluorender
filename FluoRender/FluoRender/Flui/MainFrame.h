@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentOwner.h>
 #include <Value.hpp>
 #include <Version.h>
+#include <Layout.h>
 #include <wx/wx.h>
 #include <wx/menu.h>
 #include <wx/aui/aui.h>
@@ -195,11 +196,28 @@ public:
 	void LoadPerspective(const std::string& str);
 	std::string SavePerspective();
 
+	//update
+	void UpdateProjPanel();
+	void UpdateMoviePanel();
+	void UpdatePropertyPanel();
+	void UpdateOutAdjPanel();
+	void UpdateClipPlanePanel();
+	void UpdateMainToolbar();
+	void UpdateMainFrameTitle(const std::wstring& title);
+	void UpdateMainStatusbarText(const std::string& text);
+	void PushMainStatusbarText(const std::string& text);
+	void PopMainStatusbarText();
+
+	RenderViewPanel* CreateRenderViewPanel();
+	void LayoutRenderViewPanels(RenderViewLayout layout);
+
+	//get
 	int GetReset() { return m_reset; }
 	bool GetBenchmark() { return m_benchmark; }
 	int GetDisplayId();
 	std::array<int, 4> GetMainFrameRect();
 	double GetMainMemorySizeInMB();
+	RenderViewLayout GetRenderViewLayout() { return m_renderview_layout; }
 
 	//volume
 	void OpenVolume();
@@ -213,7 +231,6 @@ public:
 	void SaveAsProject();
 
 
-	wxString CreateRenderViewPanel(int row = 1);
 	void DeleteRenderViewPanel(int i);
 	void DeleteRenderViewPanel(const std::wstring& name);
 
@@ -248,8 +265,6 @@ public:
 	void ShowInfo();
 	std::wstring ScriptDialog(const std::wstring& title,
 		const std::wstring& wildcard, long style);
-	//organize render views
-	void LayoutRenderViewPanels(int mode);
 	void LayoutOutputAdjPanel();
 	//reset layout
 	void ResetLayout();
@@ -268,6 +283,9 @@ private:
 	bool m_fullscreen{ false };
 	bool m_windowed{ true };
 	bool m_hidepanels{ false };
+
+	//layout
+	RenderViewLayout m_renderview_layout{ RenderViewLayout::Horizontal };
 
 	//aui manager
 	wxAuiManager m_aui_mgr;
@@ -289,7 +307,7 @@ private:
 	TreePanel* m_tree_panel;
 	ListPanel* m_list_panel;
 	std::vector<RenderViewPanel*> m_renderview_panels;
-	PropertyPanel* m_prop_panel;
+	PropertyPanel* m_property_panel;
 	ClipPlanePanel* m_clip_plane_panel;
 	OutputAdjPanel* m_output_adj_panel;
 	MoviePanel* m_movie_panel;

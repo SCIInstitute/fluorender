@@ -78,6 +78,8 @@ private:
 	std::set<RenderViewPanelAgent*> renderview_agent_list_;
 
 private:
+	void CreateRenderViewPanel();
+	void LayoutRenderViewPanels();
 	void SyncRenderViewPanels();
 	void ToggleScriptBreakDlg();
 	void ShowMachineLearningDlg();
