@@ -62,7 +62,7 @@ void MoviePanelAgent::ApplySettings()
 		panel->LoadPerspective(glbin_settings.m_layout_movie);
 }
 
-void MoviePanelAgent::Shutdown()
+void MoviePanelAgent::PreShutdown()
 {
 	auto panel = GetPanel();
 	if (panel)

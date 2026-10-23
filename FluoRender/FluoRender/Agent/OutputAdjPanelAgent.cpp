@@ -299,7 +299,7 @@ void OutputAdjPanelAgent::ApplySettings()
 		panel->LoadPerspective(glbin_settings.m_layout_outadj);
 }
 
-void OutputAdjPanelAgent::Shutdown()
+void OutputAdjPanelAgent::PreShutdown()
 {
 	auto panel = GetPanel();
 	if (panel)

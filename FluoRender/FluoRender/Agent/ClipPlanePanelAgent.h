@@ -50,7 +50,7 @@ public:
 	ClipPlanePanel* GetPanel() const;
 
 	virtual void ApplySettings() override;
-	virtual void Shutdown() override;
+	virtual void PreShutdown() override;
 
 	void SetClipValue(fluo::ClipPlane i, int val, bool link = false);//index: 0~5 = X1~Z2
 	void SetClipValues(fluo::ClipPlane i, int val1, int val2);//index: clip mask

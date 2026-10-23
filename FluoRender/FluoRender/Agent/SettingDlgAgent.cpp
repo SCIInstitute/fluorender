@@ -408,7 +408,7 @@ void SettingDlgAgent::ApplySettings()
 		dialog->LoadPerspective(glbin_settings.m_layout_settings);
 }
 
-void SettingDlgAgent::Shutdown()
+void SettingDlgAgent::PreShutdown()
 {
 	auto dialog = GetDialog();
 	if (dialog)

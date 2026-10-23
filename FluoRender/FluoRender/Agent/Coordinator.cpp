@@ -72,7 +72,7 @@ void Coordinator::AdvanceToState(
 	{
 		auto mainframe = FindAgent<MainFrameAgent>();
 		if (mainframe)
-			mainframe->Shutdown();
+			mainframe->PreShutdown();
 	}
 }
 
@@ -193,10 +193,19 @@ void Coordinator::BringToState(
 	{
 		if (!dynamic_cast<MainFrameAgent*>(agent))
 		{
-			agent->Shutdown();
+			agent->PreShutdown();
 			agent->SetState(
 				AgentState::PreShutdown);
 			state = AgentState::PreShutdown;
 		}
+	}
+
+	if (state < AgentState::Closed &&
+		target_state >= AgentState::Closed)
+	{
+		agent->Close();
+		agent->SetState(
+			AgentState::Closed);
+		state = AgentState::Closed;
 	}
 }

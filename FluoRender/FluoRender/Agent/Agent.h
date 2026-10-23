@@ -200,7 +200,8 @@ public:
 	virtual void LoadSettings() {}
 	virtual void ApplySettings() {}
 	virtual void PostInitialize() {}
-	virtual void Shutdown() {}
+	virtual void PreShutdown() {}
+	virtual void Close() {}
 
 	template<class T>
 	T* As()

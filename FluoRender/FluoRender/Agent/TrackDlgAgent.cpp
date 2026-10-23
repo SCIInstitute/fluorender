@@ -310,7 +310,7 @@ void TrackDlgAgent::ApplySettings()
 		dialog->LoadPerspective(glbin_settings.m_layout_track);
 }
 
-void TrackDlgAgent::Shutdown()
+void TrackDlgAgent::PreShutdown()
 {
 	auto dialog = GetDialog();
 	if (dialog)

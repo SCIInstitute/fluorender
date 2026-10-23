@@ -43,7 +43,7 @@ public:
 	ConvertDlg* GetDialog() const;
 
 	virtual void ApplySettings() override;
-	virtual void Shutdown() override;
+	virtual void PreShutdown() override;
 
 	void SetIsoValue(double dval);
 	void SetDownSample(int ival);

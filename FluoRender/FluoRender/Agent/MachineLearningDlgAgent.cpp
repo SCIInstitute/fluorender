@@ -74,7 +74,7 @@ void MachineLearningDlgAgent::ApplySettings()
 		dialog->LoadPerspective(glbin_settings.m_layout_machine_learning);
 }
 
-void MachineLearningDlgAgent::Shutdown()
+void MachineLearningDlgAgent::PreShutdown()
 {
 	auto dialog = GetDialog();
 	if (dialog)

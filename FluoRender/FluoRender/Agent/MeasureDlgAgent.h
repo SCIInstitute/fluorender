@@ -48,7 +48,7 @@ public:
 	MeasureDlg* GetDialog() const;
 
 	virtual void ApplySettings() override;
-	virtual void Shutdown() override;
+	virtual void PreShutdown() override;
 
 	void SetCurrentRuler(const RulerCurrentInfo& info);
 	void SetIntensityMethod(int ival);

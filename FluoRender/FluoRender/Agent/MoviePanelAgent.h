@@ -47,7 +47,7 @@ public:
 	MoviePanel* GetPanel() const;
 
 	virtual void ApplySettings() override;
-	virtual void Shutdown() override;
+	virtual void PreShutdown() override;
 
 	void SelectKeyframe(int id);
 	void DeleteKeyframe(int id);

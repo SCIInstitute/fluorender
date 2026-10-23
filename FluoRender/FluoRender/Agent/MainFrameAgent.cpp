@@ -115,6 +115,25 @@ void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 		SyncRenderViewPanels();
 	if (request.HasValue(gstScriptBreakDlg))
 		ToggleScriptBreakDlg();
+	if (request.HasValue(gstShowAllPanels))
+		frame->ToggleAllPanels(1);
+	if (request.HasValue(gstHideAllPanels))
+		frame->ToggleAllPanels(0);
+	if (request.HasValue(gstToggleAllPanels))
+		frame->ToggleAllPanels(2);
+	if (request.HasValue(gstToggleToolbar))
+		ToggleToolbar();
+	if (request.HasValue(gstToggleProjPanel))
+		ToggleProjPanel();
+	if (request.HasValue(gstToggleMoviePanel))
+		ToggleMoviePanel();
+	if (request.HasValue(gstToggleOutAdjPanel))
+		ToggleOutAdjPanel();
+	if (request.HasValue(gstToggleClipPlanePanel))
+		ToggleClipPlanePanel();
+	if (request.HasValue(gstTogglePropertyPanel))
+		TogglePropertyPanel();
+
 	if (request.HasValue(gstMachineLearningDlg))
 		ShowMachineLearningDlg();
 	if (request.HasValue(gstManipPropPanel))
@@ -171,7 +190,7 @@ void MainFrameAgent::ApplySettings()
 	//glbin_current.mainframe = this;
 	//progress
 	//these global objects are constructed before mainframe. therefore need to set progress functions again
-	glbin.InitProgress(std::bind(&MainFrame::SetProgress, mainframe,
+	glbin.InitProgress(std::bind(&MainFrame::UpdateProgress, mainframe,
 		std::placeholders::_1, std::placeholders::_2));
 
 	glbin_states.m_benchmark = mainframe->GetBenchmark();
@@ -204,7 +223,7 @@ void MainFrameAgent::ApplySettings()
 	//glbin_moviemaker.SetMainFrame(this);
 }
 
-void MainFrameAgent::Shutdown()
+void MainFrameAgent::PreShutdown()
 {
 	auto mainframe = GetMainFrame();
 	if (!mainframe)
@@ -274,6 +293,18 @@ void MainFrameAgent::RemoveRenderView(RenderViewPanelAgent* agent)
 	if (!agent)
 		return;
 	renderview_agent_list_.erase(agent);
+}
+
+void MainFrameAgent::DeleteRenderViewPanel(RenderViewPanelAgent* agent)
+{
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		auto panel = agent->GetPanel();
+		int i = frame->DeleteRenderViewPanel(panel);
+		if (glbin_mov_def.m_view_idx >= i)
+			glbin_mov_def.m_view_idx--;
+	}
 }
 
 void MainFrameAgent::CreateRenderViewPanel()
@@ -346,7 +377,7 @@ void MainFrameAgent::CreateRenderViewPanel()
 	}
 
 	//bring view state up to running
-	glbin_coordinator.AdvanceToState(AgentState::Running);
+	glbin_coordinator.BringToState(view_agent, AgentState::Running);
 
 	NotifyDataToUI({ gstRenderViewPanelLayout, gstMovViewList, gstMovViewIndex, gstTreeCtrl, gstUpdateSync });
 }
@@ -366,21 +397,133 @@ void MainFrameAgent::SyncRenderViewPanels()
 	//update render view panels by views under root
 }
 
-void MainFrameAgent::LoadRenderViewSettings()
-{
-	for (auto renderview_agent : renderview_agent_list_)
-	{
-		if (renderview_agent)
-			renderview_agent->LoadSettings();
-	}
-}
-
 void MainFrameAgent::ToggleScriptBreakDlg()
 {
 	auto mainframe = GetMainFrame();
 	if (mainframe)
 		mainframe->ToggleScriptBreakDlg();
 }
+
+void MainFrameAgent::LastOpen()
+{
+	unsigned int last_open = glbin_settings.m_last_open_type;
+	switch (last_open)
+	{
+	case 0://volume
+		OpenVolume();
+		break;
+	case 1://mesh
+		OpenMesh();
+		break;
+	case 2://imagej
+		ImportVolume();
+		break;
+	}
+}
+
+void MainFrameAgent::LastTool()
+{
+	unsigned int tool = glbin_settings.m_last_tool;
+	switch (tool)
+	{
+	case 0:
+	case TOOL_PAINT_BRUSH:
+	default:
+		ShowBrushDlg();
+		break;
+	case TOOL_MEASUREMENT:
+		ShowMeasureDlg();
+		break;
+	case TOOL_TRACKING:
+		ShowTrackDlg();
+		break;
+	case TOOL_NOISE_REDUCTION:
+		ShowNoiseCancellingDlg();
+		break;
+	case TOOL_VOLUME_SIZE:
+		ShowCountingDlg();
+		break;
+	case TOOL_COLOCALIZATION:
+		ShowColocalizationDlg();
+		break;
+	case TOOL_CONVERT:
+		ShowConvertDlg();
+		break;
+	case TOOL_OPENCL:
+		ShowOclDlg();
+		break;
+	case TOOL_COMPONENT:
+		ShowComponentDlg();
+		break;
+	case TOOL_CALCULATIONS:
+		ShowCalculationDlg();
+		break;
+	case TOOL_MACHINE_LEARNING:
+		ShowMachineLearningDlg();
+		break;
+	}
+}
+
+void MainFrameAgent::ToggleToolbar()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowToolbar(!frame->GetToolbarShown());
+		UpdateDataToUI({ gstMainToolbar });
+	}
+}
+
+void MainFrameAgent::ToggleProjPanel()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowToolbar(!frame->GetProjPanelShown());
+		UpdateDataToUI({ gstProjPanel });
+	}
+}
+
+void MainFrameAgent::ToggleMoviePanel()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowToolbar(!frame->GetMoviePanelShown());
+		UpdateDataToUI({ gstMoviePanel });
+	}
+}
+
+void MainFrameAgent::ToggleOutAdjPanel()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowToolbar(!frame->GetOutAdjPanelShown());
+		UpdateDataToUI({ gstOutAdjPanel });
+	}
+}
+
+void MainFrameAgent::ToggleClipPlanePanel()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowToolbar(!frame->GetClipPlanePanelShown());
+		UpdateDataToUI({ gstClipPlanePanel });
+	}
+}
+
+void MainFrameAgent::TogglePropertyPanel()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowToolbar(!frame->GetPropertyPanelShown());
+		UpdateDataToUI({ gstPropertyPanel });
+	}
+}
+
 
 void MainFrameAgent::ShowMachineLearningDlg()
 {
@@ -391,3 +534,4 @@ void MainFrameAgent::ShowManipPropPanel()
 {
 
 }
+

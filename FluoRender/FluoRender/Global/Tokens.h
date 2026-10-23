@@ -1454,6 +1454,15 @@ DEALINGS IN THE SOFTWARE.
 #define gstScriptBreakDlg "script break dlg"
 #define gstCreateRenderViewPanel "create renderview panel"
 #define gstRenderViewPanelLayout "renderview panel layout"
+#define gstShowAllPanels "show all panels"
+#define gstHideAllPanels "hide all panels"
+#define gstToggleAllPanels "toggle all panels"
+#define gstToggleToolbar "toggle toolbar"
+#define gstToggleProjPanel "toggle proj panel"
+#define gstToggleMoviePanel "toggle movie panel"
+#define gstToggleOutAdjPanel "toggle out adj panel"
+#define gstToggleClipPlanePanel "toggle clip plane panel"
+#define gstTogglePropertyPanel "toggle property panel"
 
 //proptery panel
 #define gstPropertyPageCreate "property page create"

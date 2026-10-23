@@ -770,7 +770,11 @@ void MainFrame::CreateUI()
 	}
 
 	if (m_hidepanels)
-		ToggleAllPanels(false);
+	{
+		auto agent = m_agent->As<MainFrameAgent>();
+		if (agent)
+			agent->UpdateDataToUI({ gstHideAllPanels });
+	}
 
 	//keyboard shortcuts
 	wxAcceleratorEntry entries[5];
@@ -869,6 +873,14 @@ void MainFrame::PushMainStatusbarText(const std::string& text)
 void MainFrame::PopMainStatusbarText()
 {
 	m_statusbar->PopStatusText();
+}
+
+void MainFrame::UpdateProgress(int val, const std::string& str)
+{
+	wxGetApp().Yield();
+	m_statusbar->SetGaugeValue(val);
+	if (str != "NOT_SET")
+		m_statusbar->SetGaugeText(str);
 }
 
 RenderViewPanel* MainFrame::CreateRenderViewPanel()
@@ -1158,6 +1170,29 @@ void MainFrame::LayoutRenderViewPanels(RenderViewLayout layout)
 	m_aui_mgr.Update();
 }
 
+int MainFrame::DeleteRenderViewPanel(RenderViewPanel* panel)
+{
+	int i = -1;
+	for (int pi = 0; pi < (int)m_renderview_panels.size(); ++i)
+	{
+		if (m_renderview_panels[pi] == panel)
+		{
+			i = pi;
+			break;
+		}
+	}
+	if (i > 0)
+	{
+		m_renderview_panels.erase(m_renderview_panels.begin() + i);
+		m_aui_mgr.DetachPane(panel);
+		panel->Close();
+		panel->Destroy();
+		m_aui_mgr.Update();
+		return i;
+	}
+	return static_cast<int>(m_renderview_panels.size());
+}
+
 
 int MainFrame::GetDisplayId()
 {
@@ -1195,52 +1230,163 @@ double MainFrame::GetMainMemorySizeInMB()
 	return free_mem_size.ToDouble() * 0.8 / 1024.0 / 1024.0;
 }
 
-void MainFrame::DeleteRenderViewPanel(int i)
+bool MainFrame::GetToolbarShown()
 {
-	if (m_renderview_panels[i])
-	{
-		RenderViewPanel* vrv = m_renderview_panels[i];
-		RenderView* view = vrv->GetRenderView();
-		for (int j=0 ; j<view->GetAllVolumeNum() ; j++)
-			view->GetAllVolumeData(j)->SetDisp(true);
-		for (int j=0 ; j< view->GetMeshNum() ; j++)
-			view->GetMeshData(j)->SetDisp(true);
-
-		m_renderview_panels.erase(m_renderview_panels.begin()+i);
-		m_aui_mgr.DetachPane(vrv);
-		vrv->Close();
-		vrv->Destroy();
-		m_aui_mgr.Update();
-
-		if (glbin_mov_def.m_view_idx >= i)
-			glbin_mov_def.m_view_idx--;
-	}
+	return m_aui_mgr.GetPane(m_main_tb).IsShown();
 }
 
-void MainFrame::DeleteRenderViewPanel(const std::wstring &name)
+bool MainFrame::GetProjPanelShown()
 {
-	for (size_t i=0; i<m_renderview_panels.size(); i++)
+	return m_aui_mgr.GetPane(m_proj_panel).IsShown();
+}
+
+bool MainFrame::GetMoviePanelShown()
+{
+	return m_aui_mgr.GetPane(m_movie_panel).IsShown();
+}
+
+bool MainFrame::GetOutAdjPanelShown()
+{
+	return m_aui_mgr.GetPane(m_output_adj_panel).IsShown();
+}
+
+bool MainFrame::GetClipPlanePanelShown()
+{
+	return m_aui_mgr.GetPane(m_clip_plane_panel).IsShown();
+}
+
+bool MainFrame::GetPropertyPanelShown()
+{
+	return m_aui_mgr.GetPane(m_property_panel).IsShown();
+}
+
+void MainFrame::StartupMaximize()
+{
+	const auto& s = glbin_settings;
+
+	int chosenDisplay = wxNOT_FOUND;
+	bool chosenLandscape = true;
+
+	// ----------------------------
+	// 1. Try using saved rect first
+	// ----------------------------
+	if (s.m_mainframe_w > 0 && s.m_mainframe_h > 0)
 	{
-		RenderView* view = m_renderview_panels[i]->GetRenderView();
-		if (view && name == view->GetName() && view->Id() > 1)
+		wxPoint pt(s.m_mainframe_x, s.m_mainframe_y);
+
+		int disp = wxDisplay::GetFromPoint(pt);
+		if (disp != wxNOT_FOUND)
 		{
-			DeleteRenderViewPanel(i);
-			break;
+			chosenDisplay = disp;
+
+			// Restore position/size first
+			SetSize(s.m_mainframe_x,
+				s.m_mainframe_y,
+				s.m_mainframe_w,
+				s.m_mainframe_h);
+		}
+		if (chosenDisplay != wxNOT_FOUND)
+		{
+			wxDisplay d(chosenDisplay);
+			wxRect r = d.GetClientArea();
+			chosenDisplay = wxDisplay::GetFromRect(r);
+			chosenLandscape = r.width >= r.height;
 		}
 	}
+
+	// -----------------------------------
+	// 2. Fallback to saved display ID
+	// -----------------------------------
+	if (chosenDisplay == wxNOT_FOUND ||
+		!chosenLandscape)
+	{
+		if (s.m_mainframe_disp_id >= 0 &&
+			s.m_mainframe_disp_id < wxDisplay::GetCount())
+		{
+			chosenDisplay = s.m_mainframe_disp_id;
+		}
+		if (chosenDisplay != wxNOT_FOUND)
+		{
+			wxDisplay d(chosenDisplay);
+			wxRect r = d.GetClientArea();
+			chosenDisplay = wxDisplay::GetFromRect(r);
+			chosenLandscape = r.width >= r.height;
+		}
+	}
+
+	// -----------------------------------
+	// 3. Intelligent fallback selection
+	// -----------------------------------
+	if (chosenDisplay == wxNOT_FOUND ||
+		!chosenLandscape)
+	{
+		int bestDisplay = wxNOT_FOUND;
+		int bestX = INT_MAX;
+
+		for (int i = 0; i < wxDisplay::GetCount(); ++i)
+		{
+			wxDisplay d(i);
+			wxRect r = d.GetClientArea();
+
+			// Prefer landscape first
+			if (r.width < r.height)
+				continue;
+
+			// Find left-most (smallest x)
+			if (r.x < bestX)
+			{
+				bestX = r.x;
+				bestDisplay = i;
+			}
+		}
+
+		// If no landscape found, just pick left-most
+		if (bestDisplay == wxNOT_FOUND)
+		{
+			for (int i = 0; i < wxDisplay::GetCount(); ++i)
+			{
+				wxDisplay d(i);
+				wxRect r = d.GetClientArea();
+
+				if (r.x < bestX)
+				{
+					bestX = r.x;
+					bestDisplay = i;
+				}
+			}
+		}
+
+		chosenDisplay = (bestDisplay != wxNOT_FOUND) ? bestDisplay : 0;
+	}
+
+	// -----------------------------------
+	// 4. Apply display placement if needed
+	// -----------------------------------
+	if (chosenDisplay != wxNOT_FOUND)
+	{
+		wxDisplay d(chosenDisplay);
+		wxRect rect = d.GetClientArea();
+
+		SetPosition(rect.GetTopLeft());
+		SetSize(rect.GetSize());
+	}
+
+	// -----------------------------------
+	// 5. Maximize last (important)
+	// -----------------------------------
+	Maximize();
 }
 
-//hide/show tools
 void MainFrame::ToggleScriptBreakDlg()
 {
 	bool shown = m_script_break_dlg->IsShown();
 	m_script_break_dlg->Show(!shown);
 }
 
-void MainFrame::ToggleAllPanels(bool cur_state)
+void MainFrame::ToggleAllPanels(int mode)
 {
 	bool bval = true;
-	if (cur_state)
+	if (mode == 2)
 	{
 		if (m_aui_mgr.GetPane(m_proj_panel).IsShown() &&
 			m_aui_mgr.GetPane(m_movie_panel).IsShown() &&
@@ -1256,6 +1402,10 @@ void MainFrame::ToggleAllPanels(bool cur_state)
 			bval = false;
 		bval = !bval;
 	}
+	else if (mode == 0)
+		bval = false;
+	else if (mode == 1)
+		bval = true;
 
 	//data view
 	m_aui_mgr.GetPane(m_proj_panel).Show(bval);
@@ -1270,77 +1420,46 @@ void MainFrame::ToggleAllPanels(bool cur_state)
 
 	m_aui_mgr.Update();
 
-	FluoUpdate({ gstProjPanel, gstMoviePanel, gstPropertyPanel, gstOutAdjPanel, gstClipPlanePanel });
+	auto agent = m_agent->As<MainFrameAgent>();
+	agent->NotifyDataToUI({ gstProjPanel, gstMoviePanel, gstPropertyPanel, gstOutAdjPanel, gstClipPlanePanel });
 }
 
-void MainFrame::ToggleLastOpen()
+void MainFrame::ShowToolbar(bool bval)
 {
-	unsigned int last_open = glbin_settings.m_last_open_type;
-	switch (last_open)
-	{
-	case 0://volume
-		OpenVolume();
-		break;
-	case 1://mesh
-		OpenMesh();
-		break;
-	case 2://imagej
-		ImportVolume();
-		break;
-	}
+	m_aui_mgr.GetPane(m_main_tb).Show(bval);
+	m_aui_mgr.Update();
 }
 
-void MainFrame::ToggleLastTool()
+void MainFrame::ShowProjPanel(bool bval)
 {
-	unsigned int tool = glbin_settings.m_last_tool;
-	switch (tool)
-	{
-	case 0:
-	case TOOL_PAINT_BRUSH:
-	default:
-		ShowBrushDlg();
-		break;
-	case TOOL_MEASUREMENT:
-		ShowMeasureDlg();
-		break;
-	case TOOL_TRACKING:
-		ShowTrackDlg();
-		break;
-	case TOOL_NOISE_REDUCTION:
-		ShowNoiseCancellingDlg();
-		break;
-	case TOOL_VOLUME_SIZE:
-		ShowCountingDlg();
-		break;
-	case TOOL_COLOCALIZATION:
-		ShowColocalizationDlg();
-		break;
-	case TOOL_CONVERT:
-		ShowConvertDlg();
-		break;
-	case TOOL_OPENCL:
-		ShowOclDlg();
-		break;
-	case TOOL_COMPONENT:
-		ShowComponentDlg();
-		break;
-	case TOOL_CALCULATIONS:
-		ShowCalculationDlg();
-		break;
-	case TOOL_MACHINE_LEARNING:
-		ShowMachineLearningDlg();
-		break;
-	}
+	m_aui_mgr.GetPane(m_proj_panel).Show(bval);
+	m_aui_mgr.Update();
 }
 
-void MainFrame::ShowPanel(wxPanel* pane, bool show)
+void MainFrame::ShowMoviePanel(bool bval)
 {
-	if (m_aui_mgr.GetPane(pane).IsOk())
-	{
-		m_aui_mgr.GetPane(pane).Show(show);
-		m_aui_mgr.Update();
-	}
+	m_aui_mgr.GetPane(m_movie_panel).Show(bval);
+	m_aui_mgr.Update();
 }
+
+void MainFrame::ShowOutAdjPanel(bool bval)
+{
+	m_aui_mgr.GetPane(m_output_adj_panel).Show(bval);
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowClipPlanePanel(bool bval)
+{
+	m_aui_mgr.GetPane(m_clip_plane_panel).Show(bval);
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowPropertyPanel(bool bval)
+{
+	m_aui_mgr.GetPane(m_property_panel).Show(bval);
+	m_aui_mgr.Update();
+}
+
 
 void MainFrame::ShowSettingDlg()
 {
@@ -1574,60 +1693,6 @@ std::wstring MainFrame::ScriptDialog(const std::wstring& title,
 	return result;
 }
 
-void MainFrame::ShowProjPanel()
-{
-	bool bval = m_aui_mgr.GetPane(m_proj_panel).IsShown();
-	bval = !bval;
-	m_aui_mgr.GetPane(m_proj_panel).Show(bval);
-	m_aui_mgr.Update();
-	FluoUpdate({ gstProjPanel });
-}
-
-void MainFrame::ShowMoviePanel()
-{
-	bool bval = m_aui_mgr.GetPane(m_movie_panel).IsShown();
-	bval = !bval;
-	m_aui_mgr.GetPane(m_movie_panel).Show(bval);
-	m_aui_mgr.Update();
-	FluoUpdate({ gstMoviePanel });
-}
-
-void MainFrame::ShowOutAdjPanel()
-{
-	bool bval = m_aui_mgr.GetPane(m_output_adj_panel).IsShown();
-	bval = !bval;
-	m_aui_mgr.GetPane(m_output_adj_panel).Show(bval);
-	m_aui_mgr.Update();
-	FluoUpdate({ gstOutAdjPanel });
-}
-
-void MainFrame::ShowClipPlanePanel()
-{
-	bool bval = m_aui_mgr.GetPane(m_clip_plane_panel).IsShown();
-	bval = !bval;
-	m_aui_mgr.GetPane(m_clip_plane_panel).Show(bval);
-	m_aui_mgr.Update();
-	FluoUpdate({ gstClipPlanePanel });
-}
-
-void MainFrame::ShowPropPanel()
-{
-	bool bval = m_aui_mgr.GetPane(m_property_panel).IsShown();
-	bval = !bval;
-	m_aui_mgr.GetPane(m_property_panel).Show(bval);
-	m_aui_mgr.Update();
-	FluoUpdate({ gstPropertyPanel });
-}
-
-void MainFrame::ShowToolbar()
-{
-	bool bval = m_aui_mgr.GetPane(m_main_tb).IsShown();
-	bval = !bval;
-	m_aui_mgr.GetPane(m_main_tb).Show(bval);
-	m_aui_mgr.Update();
-	FluoUpdate({ gstMainToolbar });
-}
-
 void MainFrame::LayoutOutputAdjPanel()
 {
 	m_output_adj_panel->LoadPerspective("");
@@ -1682,131 +1747,6 @@ void MainFrame::FullScreen()
 		if (m)
 			m->SetBitmap(wxGetBitmap(full_screen_back_menu));
 	}
-}
-
-void MainFrame::StartupMaximize()
-{
-	const auto& s = glbin_settings;
-
-	int chosenDisplay = wxNOT_FOUND;
-	bool chosenLandscape = true;
-
-	// ----------------------------
-	// 1. Try using saved rect first
-	// ----------------------------
-	if (s.m_mainframe_w > 0 && s.m_mainframe_h > 0)
-	{
-		wxPoint pt(s.m_mainframe_x, s.m_mainframe_y);
-
-		int disp = wxDisplay::GetFromPoint(pt);
-		if (disp != wxNOT_FOUND)
-		{
-			chosenDisplay = disp;
-
-			// Restore position/size first
-			SetSize(s.m_mainframe_x,
-				s.m_mainframe_y,
-				s.m_mainframe_w,
-				s.m_mainframe_h);
-		}
-		if (chosenDisplay != wxNOT_FOUND)
-		{
-			wxDisplay d(chosenDisplay);
-			wxRect r = d.GetClientArea();
-			chosenDisplay = wxDisplay::GetFromRect(r);
-			chosenLandscape = r.width >= r.height;
-		}
-	}
-
-	// -----------------------------------
-	// 2. Fallback to saved display ID
-	// -----------------------------------
-	if (chosenDisplay == wxNOT_FOUND ||
-		!chosenLandscape)
-	{
-		if (s.m_mainframe_disp_id >= 0 &&
-			s.m_mainframe_disp_id < wxDisplay::GetCount())
-		{
-			chosenDisplay = s.m_mainframe_disp_id;
-		}
-		if (chosenDisplay != wxNOT_FOUND)
-		{
-			wxDisplay d(chosenDisplay);
-			wxRect r = d.GetClientArea();
-			chosenDisplay = wxDisplay::GetFromRect(r);
-			chosenLandscape = r.width >= r.height;
-		}
-	}
-
-	// -----------------------------------
-	// 3. Intelligent fallback selection
-	// -----------------------------------
-	if (chosenDisplay == wxNOT_FOUND ||
-		!chosenLandscape)
-	{
-		int bestDisplay = wxNOT_FOUND;
-		int bestX = INT_MAX;
-
-		for (int i = 0; i < wxDisplay::GetCount(); ++i)
-		{
-			wxDisplay d(i);
-			wxRect r = d.GetClientArea();
-
-			// Prefer landscape first
-			if (r.width < r.height)
-				continue;
-
-			// Find left-most (smallest x)
-			if (r.x < bestX)
-			{
-				bestX = r.x;
-				bestDisplay = i;
-			}
-		}
-
-		// If no landscape found, just pick left-most
-		if (bestDisplay == wxNOT_FOUND)
-		{
-			for (int i = 0; i < wxDisplay::GetCount(); ++i)
-			{
-				wxDisplay d(i);
-				wxRect r = d.GetClientArea();
-
-				if (r.x < bestX)
-				{
-					bestX = r.x;
-					bestDisplay = i;
-				}
-			}
-		}
-
-		chosenDisplay = (bestDisplay != wxNOT_FOUND) ? bestDisplay : 0;
-	}
-
-	// -----------------------------------
-	// 4. Apply display placement if needed
-	// -----------------------------------
-	if (chosenDisplay != wxNOT_FOUND)
-	{
-		wxDisplay d(chosenDisplay);
-		wxRect rect = d.GetClientArea();
-
-		SetPosition(rect.GetTopLeft());
-		SetSize(rect.GetSize());
-	}
-
-	// -----------------------------------
-	// 5. Maximize last (important)
-	// -----------------------------------
-	Maximize();
-}
-
-void MainFrame::SetProgress(int val, const std::string& str)
-{
-	wxGetApp().Yield();
-	m_statusbar->SetGaugeValue(val);
-	if (str != "NOT_SET")
-		m_statusbar->SetGaugeText(str);
 }
 
 void MainFrame::OpenVolume()
@@ -2188,7 +2128,7 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		break;
 		//window
 	case ID_ToolbarMenu:
-		ShowToolbar();
+		vc.insert(gstToggleToolbar);
 		break;
 	case ID_PanelsMenu:
 		ToggleAllPanels(true);

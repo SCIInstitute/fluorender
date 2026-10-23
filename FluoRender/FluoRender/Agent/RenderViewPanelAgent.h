@@ -47,7 +47,8 @@ public:
 	virtual ~RenderViewPanelAgent() = default;
 
 	virtual void LoadSettings() override;
-	virtual void Shutdown() override;
+	virtual void PreShutdown() override;
+	virtual void Close() override;
 
 	RenderViewPanel* GetPanel() const;
 

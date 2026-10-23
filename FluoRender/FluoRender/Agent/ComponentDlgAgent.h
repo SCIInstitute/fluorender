@@ -47,7 +47,7 @@ public:
 	ComponentDlg* GetDialog() const;
 
 	virtual void ApplySettings() override;
-	virtual void Shutdown() override;
+	virtual void PreShutdown() override;
 
 	int GetMaxLines() { return m_max_lines; }
 

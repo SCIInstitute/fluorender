@@ -64,7 +64,7 @@ void ProjectPanelAgent::ApplySettings()
 		panel->LoadPerspective(glbin_settings.m_layout_project);
 }
 
-void ProjectPanelAgent::Shutdown()
+void ProjectPanelAgent::PreShutdown()
 {
 	auto panel = GetPanel();
 	if (panel)

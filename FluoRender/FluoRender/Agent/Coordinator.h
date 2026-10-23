@@ -44,6 +44,7 @@ public:
 	void Unregister(Agent* agent);
 
 	void AdvanceToState(AgentState state);
+	void BringToState(Agent* agent, AgentState state);
 
 	void Dispatch(const UpdateRequest& request);
 
@@ -61,8 +62,5 @@ public:
 private:
 	std::set<Agent*> agents_;
 	AgentState current_state_{ AgentState::Uninitialized };
-
-private:
-	void BringToState(Agent* agent, AgentState state);
 };
 #endif//Coordinator_h

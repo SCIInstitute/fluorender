@@ -207,9 +207,11 @@ public:
 	void UpdateMainStatusbarText(const std::string& text);
 	void PushMainStatusbarText(const std::string& text);
 	void PopMainStatusbarText();
+	void UpdateProgress(int val, const std::string& str);
 
 	RenderViewPanel* CreateRenderViewPanel();
 	void LayoutRenderViewPanels(RenderViewLayout layout);
+	int DeleteRenderViewPanel(RenderViewPanel* panel);
 
 	//get
 	int GetReset() { return m_reset; }
@@ -218,63 +220,25 @@ public:
 	std::array<int, 4> GetMainFrameRect();
 	double GetMainMemorySizeInMB();
 	RenderViewLayout GetRenderViewLayout() { return m_renderview_layout; }
+	bool GetToolbarShown();
+	bool GetProjPanelShown();
+	bool GetMoviePanelShown();
+	bool GetOutAdjPanelShown();
+	bool GetClipPlanePanelShown();
+	bool GetPropertyPanelShown();
 
-	//volume
-	void OpenVolume();
-	void ImportVolume();
-	//mesh
-	void OpenMesh();
-	//project
-	void NewProject();
-	void OpenProject();
-	void SaveProject();
-	void SaveAsProject();
-
-
-	void DeleteRenderViewPanel(int i);
-	void DeleteRenderViewPanel(const std::wstring& name);
-
-	//hide/show tools
-	void ToggleScriptBreakDlg();
-	void ToggleAllPanels(bool cur_state);
-	void ToggleLastOpen();
-	void ToggleLastTool();
-	void ShowPanel(wxPanel* pane, bool show = true);
-	//main toolbar
-	void ShowToolbar();
-	//panels
-	void ShowProjPanel();
-	void ShowMoviePanel();
-	void ShowOutAdjPanel();
-	void ShowClipPlanePanel();
-	void ShowPropPanel();
-	//dialogs
-	void ShowSettingDlg();
-	void ShowBrushDlg();
-	void ShowMeasureDlg();
-	void ShowComponentDlg();
-	void ShowTrackDlg();
-	void ShowCalculationDlg();
-	void ShowNoiseCancellingDlg();
-	void ShowCountingDlg();
-	void ShowColocalizationDlg();
-	void ShowConvertDlg();
-	void ShowOclDlg();
-	void ShowMachineLearningDlg();
-	void ShowScriptBreakDlg(bool show = true);
-	void ShowInfo();
-	std::wstring ScriptDialog(const std::wstring& title,
-		const std::wstring& wildcard, long style);
-	void LayoutOutputAdjPanel();
-	//reset layout
-	void ResetLayout();
-	//fullscreen
-	void FullScreen();
 	//startup maximize
 	void StartupMaximize();
 
-	//set status bar callback
-	void SetProgress(int val, const std::string& str);
+	//child panels/dlgs
+	void ToggleScriptBreakDlg();
+	void ToggleAllPanels(int mode);//0:hide;1:show;2:use current
+	void ShowToolbar(bool bval);
+	void ShowProjPanel(bool bval);
+	void ShowMoviePanel(bool bval);
+	void ShowOutAdjPanel(bool bval);
+	void ShowClipPlanePanel(bool bval);
+	void ShowPropertyPanel(bool bval);
 
 private:
 	//cmd settings
@@ -286,6 +250,7 @@ private:
 
 	//layout
 	RenderViewLayout m_renderview_layout{ RenderViewLayout::Horizontal };
+	std::vector<RenderViewPanel*> m_renderview_panels;
 
 	//aui manager
 	wxAuiManager m_aui_mgr;
@@ -306,7 +271,6 @@ private:
 	ProjectPanel* m_proj_panel;
 	TreePanel* m_tree_panel;
 	ListPanel* m_list_panel;
-	std::vector<RenderViewPanel*> m_renderview_panels;
 	PropertyPanel* m_property_panel;
 	ClipPlanePanel* m_clip_plane_panel;
 	OutputAdjPanel* m_output_adj_panel;

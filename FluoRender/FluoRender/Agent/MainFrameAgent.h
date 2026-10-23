@@ -47,7 +47,7 @@ public:
 
 	virtual void LoadSettings() override;
 	virtual void ApplySettings() override;
-	virtual void Shutdown() override;
+	virtual void PreShutdown() override;
 
 	void ShutdownAll();
 
@@ -55,8 +55,7 @@ public:
 
 	void AddRenderView(RenderViewPanelAgent* agent);
 	void RemoveRenderView(RenderViewPanelAgent* agent);
-
-	void LoadRenderViewSettings();
+	void DeleteRenderViewPanel(RenderViewPanelAgent* agent);
 
 protected:
 	std::span < const std::string_view>
@@ -82,8 +81,55 @@ private:
 	void LayoutRenderViewPanels();
 	void SyncRenderViewPanels();
 	void ToggleScriptBreakDlg();
+	void LastOpen();
+	void LastTool();
+
+	void ToggleToolbar();
+
+	void ToggleProjPanel();
+	void ToggleMoviePanel();
+	void ToggleOutAdjPanel();
+	void ToggleClipPlanePanel();
+	void TogglePropertyPanel();
+
 	void ShowMachineLearningDlg();
 	void ShowManipPropPanel();
+
+	//volume
+	void OpenVolume();
+	void ImportVolume();
+	//mesh
+	void OpenMesh();
+	//project
+	void NewProject();
+	void OpenProject();
+	void SaveProject();
+	void SaveAsProject();
+
+
+	//panels
+	//dialogs
+	void ShowSettingDlg();
+	void ShowBrushDlg();
+	void ShowMeasureDlg();
+	void ShowComponentDlg();
+	void ShowTrackDlg();
+	void ShowCalculationDlg();
+	void ShowNoiseCancellingDlg();
+	void ShowCountingDlg();
+	void ShowColocalizationDlg();
+	void ShowConvertDlg();
+	void ShowOclDlg();
+	void ShowMachineLearningDlg();
+	void ShowScriptBreakDlg(bool show = true);
+	void ShowInfo();
+	std::wstring ScriptDialog(const std::wstring& title,
+		const std::wstring& wildcard, long style);
+	void LayoutOutputAdjPanel();
+	//reset layout
+	void ResetLayout();
+	//fullscreen
+	void FullScreen();
 
 };
 

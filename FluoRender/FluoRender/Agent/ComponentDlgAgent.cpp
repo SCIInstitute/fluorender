@@ -386,7 +386,7 @@ void ComponentDlgAgent::ApplySettings()
 		dialog->LoadPerspective(glbin_settings.m_layout_component);
 }
 
-void ComponentDlgAgent::Shutdown()
+void ComponentDlgAgent::PreShutdown()
 {
 	auto dialog = GetDialog();
 	if (dialog)

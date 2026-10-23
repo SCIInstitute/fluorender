@@ -384,7 +384,7 @@ void BrushToolDlgAgent::ApplySettings()
 		dialog->LoadPerspective(glbin_settings.m_layout_brush);
 }
 
-void BrushToolDlgAgent::Shutdown()
+void BrushToolDlgAgent::PreShutdown()
 {
 	auto dialog = GetDialog();
 	if (dialog)

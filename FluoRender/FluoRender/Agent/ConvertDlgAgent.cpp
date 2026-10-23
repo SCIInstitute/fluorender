@@ -211,7 +211,7 @@ void ConvertDlgAgent::ApplySettings()
 		dialog->LoadPerspective(glbin_settings.m_layout_convert);
 }
 
-void ConvertDlgAgent::Shutdown()
+void ConvertDlgAgent::PreShutdown()
 {
 	auto dialog = GetDialog();
 	if (dialog)

@@ -41,6 +41,8 @@ DEALINGS IN THE SOFTWARE.
 #include <RulerHandler.h>
 #include <Ruler.h>
 #include <CurrentObjects.h>
+#include <MainFrameAgent.h>
+#include <MeshData.h>
 
 int RenderViewPanelAgent::m_max_id = 1;
 
@@ -72,7 +74,7 @@ void RenderViewPanelAgent::LoadSettings()
 	NotifyViewUpdate({}, target);
 }
 
-void RenderViewPanelAgent::Shutdown()
+void RenderViewPanelAgent::PreShutdown()
 {
 	//close full screen
 	auto panel = GetPanel();
@@ -87,6 +89,22 @@ void RenderViewPanelAgent::Shutdown()
 		SetSaveMask(0xaff);
 		SaveDefault();
 	}
+}
+
+void RenderViewPanelAgent::Close()
+{
+	auto view = GetView();
+	if (view)
+	{
+		for (int j = 0; j < view->GetAllVolumeNum(); j++)
+			view->GetAllVolumeData(j)->SetDisp(true);
+		for (int j = 0; j < view->GetMeshNum(); j++)
+			view->GetMeshData(j)->SetDisp(true);
+	}
+
+	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (frame)
+		frame->DeleteRenderViewPanel(this);
 }
 
 RenderViewPanel* RenderViewPanelAgent::GetPanel() const

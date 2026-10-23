@@ -313,7 +313,7 @@ void MeasureDlgAgent::ApplySettings()
 		dialog->LoadPerspective(glbin_settings.m_layout_measure);
 }
 
-void MeasureDlgAgent::Shutdown()
+void MeasureDlgAgent::PreShutdown()
 {
 	auto dialog = GetDialog();
 	if (dialog)

@@ -44,7 +44,7 @@ public:
 	BrushToolDlg* GetDialog() const;
 
 	virtual void ApplySettings() override;
-	virtual void Shutdown() override;
+	virtual void PreShutdown() override;
 
 	//settings
 	void SetBrushSclTranslate(double dval);

@@ -58,7 +58,11 @@ enum class AgentState : int
 	// Save settings, disconnect observers,
 	// unregister callbacks, etc.
 	// UI still exists.
-	PreShutdown
+	PreShutdown,
+
+	//everything is gone
+	//should be of no use
+	Closed
 };
 
 #endif//AgentState_h

@@ -300,7 +300,7 @@ void ClipPlanePanelAgent::ApplySettings()
 		panel->LoadPerspective(glbin_settings.m_layout_clip);
 }
 
-void ClipPlanePanelAgent::Shutdown()
+void ClipPlanePanelAgent::PreShutdown()
 {
 	auto panel = GetPanel();
 	if (panel)

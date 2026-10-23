@@ -45,7 +45,7 @@ public:
 	MachineLearningDlg* GetDialog() const;
 
 	virtual void ApplySettings() override;
-	virtual void Shutdown() override;
+	virtual void PreShutdown() override;
 
 protected:
 	std::span < const std::string_view>
