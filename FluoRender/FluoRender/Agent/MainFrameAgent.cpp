@@ -345,8 +345,8 @@ void MainFrameAgent::CreateRenderViewPanel()
 		view->InitView(INIT_BOUNDS | INIT_CENTER | INIT_TRANSL | INIT_ROTATE);
 	}
 
-	//? check later
-	//vrv->LoadSettings();
+	//bring view state up to running
+	glbin_coordinator.AdvanceToState(AgentState::Running);
 
 	NotifyDataToUI({ gstRenderViewPanelLayout, gstMovViewList, gstMovViewIndex, gstTreeCtrl, gstUpdateSync });
 }
