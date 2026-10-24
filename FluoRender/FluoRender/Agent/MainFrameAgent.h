@@ -93,7 +93,6 @@ private:
 	void TogglePropertyPanel();
 
 	void ShowMachineLearningDlg();
-	void ShowManipPropPanel();
 
 	//volume
 	void OpenVolume();
@@ -120,7 +119,6 @@ private:
 	void ShowColocalizationDlg();
 	void ShowConvertDlg();
 	void ShowOclDlg();
-	void ShowMachineLearningDlg();
 	void ShowScriptBreakDlg(bool show = true);
 	void ShowInfo();
 	std::wstring ScriptDialog(const std::wstring& title,
