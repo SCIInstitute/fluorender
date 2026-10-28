@@ -809,6 +809,107 @@ std::string MainFrame::SavePerspective()
 	return m_aui_mgr.SavePerspective().ToStdString();
 }
 
+void MainFrame::UpdateLastTool(int id)
+{
+	switch (id)
+	{
+	case ID_BrushDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_paint_brush));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Paint Brush");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Paint Brush: Use brush to select voxels in the volume for further analysis");
+		break;
+	case ID_CalcDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_calculations));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Calculations");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Calculations: Perform calculations on the volume data");
+		break;
+	case ID_ColocalDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_colocalization));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Colocalization");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Colocalization: Analyze the colocalization of different channels in the volume");
+		break;
+	case ID_ComponentDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_components));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Component Analyzer");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Component Analyzer: Segment structures into components and perform analysis");
+		break;
+	case ID_ConvertDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_convert));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Convert");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Convert: Convert volume data to mesh objects");
+		break;
+	case ID_CountDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_volume_size));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Volume Size");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Volume Size: Analyze the size of the volume data");
+		break;
+	case ID_MlDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_machine_learning));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Machine Learning");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Machine Learning: Use machine learning algorithms to analyze the volume data");
+		break;
+	case ID_MeasureDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_measurement));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Measurement");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Measurement: Measure distance, angle, and intensity in the volume");
+		break;
+	case ID_NoiseCancelDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_noise_reduc));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Noise Reduction");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Noise Reduction: Reduce noise in the volume data");
+		break;
+	case ID_OclDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(tb_volume_filter));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Volume Filter");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Volume Filter: Edit and apply volume filters using OpenCL");
+		break;
+	case ID_TrackDlg:
+		m_main_tb->SetToolBitmap(ID_LastTool,
+			wxGetBitmap(icon_tracking));
+		m_main_tb->SetToolShortHelp(ID_LastTool, "Tracking");
+		m_main_tb->SetToolLongHelp(ID_LastTool, "Tracking: Track objects or features in the volume");
+		break;
+	}
+}
+
+void MainFrame::UpdateLastOpen(int id)
+{
+	switch (id)
+	{
+	case ID_OpenVolume:
+		m_main_tb->SetToolBitmap(ID_LastOpen,
+			wxGetBitmap(icon_open_volume));
+		m_main_tb->SetToolLabel(ID_LastOpen, "Open Volume");
+		m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
+		m_main_tb->SetToolLongHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
+		break;
+	case ID_ImportVolume:
+		m_main_tb->SetToolBitmap(ID_LastOpen,
+			wxGetBitmap(icon_import));
+		m_main_tb->SetToolLabel(ID_LastOpen, "Import Volume");
+		m_main_tb->SetToolShortHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
+		m_main_tb->SetToolLongHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
+		break;
+	case ID_OpenMesh:
+		m_main_tb->SetToolBitmap(ID_LastOpen,
+			wxGetBitmap(icon_open_mesh));
+		m_main_tb->SetToolLabel(ID_LastOpen, "Open Mesh");
+		m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
+		m_main_tb->SetToolLongHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
+		break;
+	}
+}
+
 void MainFrame::UpdateProjPanel()
 {
 	bool bval = m_aui_mgr.GetPane(m_proj_panel).IsShown();
@@ -881,6 +982,22 @@ void MainFrame::UpdateProgress(int val, const std::string& str)
 	m_statusbar->SetGaugeValue(val);
 	if (str != "NOT_SET")
 		m_statusbar->SetGaugeText(str);
+}
+
+void MainFrame::UpdateFullscreenMenu()
+{
+	wxMenuItem* m = m_top_window->FindItem(ID_FullscreenMenu);
+	if (!m)
+		return;
+
+	if (IsFullScreen())
+	{
+		m->SetBitmap(wxGetBitmap(full_screen_back_menu));
+	}
+	else
+	{
+		m->SetBitmap(wxGetBitmap(full_screen_menu));
+	}
 }
 
 RenderViewPanel* MainFrame::CreateRenderViewPanel()
@@ -1379,8 +1496,16 @@ void MainFrame::StartupMaximize()
 
 void MainFrame::ToggleScriptBreakDlg()
 {
-	bool shown = m_script_break_dlg->IsShown();
-	m_script_break_dlg->Show(!shown);
+	bool show = !m_script_break_dlg->IsShown();
+	if (show)
+		m_aui_mgr.GetPane(m_script_break_dlg).
+		Show().Float().Caption(
+			m_script_break_dlg->GetLabel());
+	else
+		m_aui_mgr.GetPane(m_script_break_dlg).Hide();
+	m_aui_mgr.Update();
+	if (show)
+		m_script_break_dlg->SetFocus();
 }
 
 void MainFrame::ToggleAllPanels(int mode)
@@ -1460,6 +1585,65 @@ void MainFrame::ShowPropertyPanel(bool bval)
 	m_aui_mgr.Update();
 }
 
+void MainFrame::ShowBrushDlg()
+{
+	m_aui_mgr.GetPane(m_brush_tool_dlg).Show();
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowCalculationDlg()
+{
+	m_aui_mgr.GetPane(m_calculation_dlg).Show();
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowColocalizationDlg()
+{
+	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowComponentDlg()
+{
+	m_aui_mgr.GetPane(m_component_dlg).Show();
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowConvertDlg()
+{
+	m_aui_mgr.GetPane(m_convert_dlg).Show();
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowCountingDlg()
+{
+	m_aui_mgr.GetPane(m_counting_dlg).Show();
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowMachineLearningDlg()
+{
+	m_aui_mgr.GetPane(m_machine_learning_dlg).Show();
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowMeasureDlg()
+{
+	m_aui_mgr.GetPane(m_measure_dlg).Show();
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowNoiseCancellingDlg()
+{
+	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Show();
+	m_aui_mgr.Update();
+}
+
+void MainFrame::ShowOclDlg()
+{
+	m_aui_mgr.GetPane(m_ocl_dlg).Show();
+	m_aui_mgr.Update();
+}
 
 void MainFrame::ShowSettingDlg()
 {
@@ -1467,230 +1651,16 @@ void MainFrame::ShowSettingDlg()
 	m_aui_mgr.Update();
 }
 
-void MainFrame::ShowBrushDlg()
-{
-	m_aui_mgr.GetPane(m_brush_tool_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_PAINT_BRUSH;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_paint_brush));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Paint Brush");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Paint Brush: Use brush to select voxels in the volume for further analysis");
-	m_aui_mgr.Update();
-}
-
-void MainFrame::ShowMeasureDlg()
-{
-	m_aui_mgr.GetPane(m_measure_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_MEASUREMENT;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_measurement));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Measurement");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Measurement: Measure distance, angle, and intensity in the volume");
-	m_aui_mgr.Update();
-}
-
 void MainFrame::ShowTrackDlg()
 {
 	m_aui_mgr.GetPane(m_track_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_TRACKING;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_tracking));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Tracking");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Tracking: Track objects or features in the volume");
 	m_aui_mgr.Update();
 }
 
-void MainFrame::ShowNoiseCancellingDlg()
+void MainFrame::ShowAboutDlg()
 {
-	m_aui_mgr.GetPane(m_noise_cancelling_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_NOISE_REDUCTION;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_noise_reduc));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Noise Reduction");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Noise Reduction: Reduce noise in the volume data");
-	m_aui_mgr.Update();
-}
-
-void MainFrame::ShowCountingDlg()
-{
-	m_aui_mgr.GetPane(m_counting_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_VOLUME_SIZE;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_volume_size));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Volume Size");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Volume Size: Analyze the size of the volume data");
-	m_aui_mgr.Update();
-}
-
-void MainFrame::ShowColocalizationDlg()
-{
-	m_aui_mgr.GetPane(m_colocalization_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_COLOCALIZATION;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_colocalization));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Colocalization");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Colocalization: Analyze the colocalization of different channels in the volume");
-	m_aui_mgr.Update();
-}
-
-void MainFrame::ShowConvertDlg()
-{
-	m_aui_mgr.GetPane(m_convert_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_CONVERT;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_convert));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Convert");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Convert: Convert volume data to mesh objects");
-	m_aui_mgr.Update();
-}
-
-void MainFrame::ShowOclDlg()
-{
-	m_aui_mgr.GetPane(m_ocl_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_OPENCL;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(tb_volume_filter));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Volume Filter");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Volume Filter: Edit and apply volume filters using OpenCL");
-	m_aui_mgr.Update();
-}
-
-void MainFrame::ShowComponentDlg()
-{
-	m_aui_mgr.GetPane(m_component_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_COMPONENT;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_components));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Component Analyzer");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Component Analyzer: Segment structures into components and perform analysis");
-	m_aui_mgr.Update();
-}
-
-void MainFrame::ShowCalculationDlg()
-{
-	m_aui_mgr.GetPane(m_calculation_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_CALCULATIONS;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_calculations));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Calculations");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Calculations: Perform calculations on the volume data");
-	m_aui_mgr.Update();
-}
-
-void MainFrame::ShowMachineLearningDlg()
-{
-	m_aui_mgr.GetPane(m_machine_learning_dlg).Show();
-	glbin_settings.m_last_tool = TOOL_MACHINE_LEARNING;
-	m_main_tb->SetToolBitmap(ID_LastTool,
-		wxGetBitmap(icon_machine_learning));
-	m_main_tb->SetToolShortHelp(ID_LastTool, "Machine Learning");
-	m_main_tb->SetToolLongHelp(ID_LastTool, "Machine Learning: Use machine learning algorithms to analyze the volume data");
-	m_aui_mgr.Update();
-}
-
-void MainFrame::ShowScriptBreakDlg(bool show)
-{
-	if (show)
-		m_aui_mgr.GetPane(m_script_break_dlg).
-		Show().Float().Caption(
-			m_script_break_dlg->GetLabel());
-	else
-		m_aui_mgr.GetPane(m_script_break_dlg).Hide();
-	m_aui_mgr.Update();
-	if (show)
-		m_script_break_dlg->SetFocus();
-}
-
-void MainFrame::ShowInfo()
-{
-	wxString time = wxNow();
-	int psJan = time.Find("Jan");
-	int psDec = time.Find("Dec");
-	wxDialog* d = new wxDialog(this, wxID_ANY, "About FluoRender", wxDefaultPosition,
-		FromDIP(wxSize(600, 200)), wxDEFAULT_DIALOG_STYLE);
-	wxBoxSizer* main = new wxBoxSizer(wxHORIZONTAL);
-	wxBoxSizer* left = new wxBoxSizer(wxVERTICAL);
-	wxBoxSizer* right = new wxBoxSizer(wxVERTICAL);
-	//left
-	// FluoRender Image (rows 4-5)
-	wxToolBar* logo = new wxToolBar(d, wxID_ANY,
-		wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER);
-	wxBitmapBundle bitmap;
-	if (psJan != wxNOT_FOUND || psDec != wxNOT_FOUND)
-		bitmap = wxGetBitmap(logo_snow);
-	else
-		bitmap = wxGetBitmap(logo);
-	logo->AddTool(0, "", bitmap,
-		"Thank you for using FluoRender");
-	logo->SetToolLongHelp(0,
-		"Thank you for using FluoRender");
-	logo->Realize();
-	left->Add(logo, 0, wxEXPAND);
-	//right
-	wxStaticText* txt = new wxStaticText(d, wxID_ANY, fluo::AppTitle,
-		wxDefaultPosition, FromDIP(wxSize(-1, -1)));
-	wxFont font = wxFont(15, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-	txt->SetFont(font);
-	right->Add(txt, 0, wxEXPAND);
-	wxString version;
-	if (fluo::VersionPatch == 0)
-	{
-		version = wxString::Format("Version: %d.%d",
-			fluo::VersionMajor,
-			fluo::VersionMinor);
-	}
-	else
-	{
-		version = wxString::Format("Version: %d.%d.%d",
-			fluo::VersionMajor,
-			fluo::VersionMinor,
-			fluo::VersionPatch);
-	}
-	txt = new wxStaticText(
-		d,
-		wxID_ANY,
-		version,
-		wxDefaultPosition,
-		FromDIP(wxSize(50, -1)));
-	font = wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-	txt->SetFont(font);
-	right->Add(txt, 0, wxEXPAND);
-	txt = new wxStaticText(d, wxID_ANY, wxString("Copyright (c) ") + fluo::Copyright,
-		wxDefaultPosition, FromDIP(wxSize(-1, -1)));
-	font = wxFont(11, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-	txt->SetFont(font);
-	right->Add(txt, 0, wxEXPAND);
-	right->Add(3, 5, 0);
-	txt = new wxStaticText(d, wxID_ANY, VERSION_AUTHORS,
-		wxDefaultPosition, FromDIP(wxSize(300, -1)));
-	font = wxFont(7, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
-	txt->SetFont(font);
-	right->Add(txt, 0, wxEXPAND);
-	wxHyperlinkCtrl* hyp = new wxHyperlinkCtrl(d, wxID_ANY, "Contact Info",
-		VERSION_CONTACT,
-		wxDefaultPosition, FromDIP(wxSize(-1, -1)));
-	right->Add(hyp, 0, wxEXPAND);
-	right->AddStretchSpacer();
-	//put together
-	main->Add(left, 0, wxEXPAND);
-	main->Add(right, 0, wxEXPAND);
-	d->SetSizer(main);
-	d->ShowModal();
-}
-
-std::wstring MainFrame::ScriptDialog(const std::wstring& title,
-	const std::wstring& wildcard, long style)
-{
-	glbin_moviemaker.Hold();
-	std::wstring result;
-	ModalDlg dlg(
-		this, title, "", "",
-		wildcard, style);
-	int rval = dlg.ShowModal();
-	if (rval == wxID_OK)
-		result = dlg.GetPath().ToStdWstring();
-	glbin_moviemaker.Resume();
-	return result;
+	AboutDlg dlg(this);
+	dlg.ShowModal();
 }
 
 void MainFrame::LayoutOutputAdjPanel()
@@ -1723,189 +1693,6 @@ void MainFrame::ResetLayout()
 		BestSize(FromDIP(wxSize(150, 800))).
 		FloatingSize(FromDIP(wxSize(150, 800))).
 		Right().Show().Dock().Layer(1);
-	LayoutRenderViewPanels(1);
-	LayoutOutputAdjPanel();
-	glbin_settings.m_layout.clear();
-	FluoUpdate({ gstMainToolbar, gstProjPanel, gstMoviePanel, gstPropertyPanel, gstOutAdjPanel, gstClipPlanePanel });
-}
-
-void MainFrame::FullScreen()
-{
-	if (IsFullScreen())
-	{
-		ShowFullScreen(false);
-		wxMenuItem* m = m_top_window->FindItem(ID_FullscreenMenu);
-		if (m)
-			m->SetBitmap(wxGetBitmap(full_screen_menu));
-	}
-	else
-	{
-		ShowFullScreen(true,
-			wxFULLSCREEN_NOBORDER |
-			wxFULLSCREEN_NOCAPTION);
-		wxMenuItem* m = m_top_window->FindItem(ID_FullscreenMenu);
-		if (m)
-			m->SetBitmap(wxGetBitmap(full_screen_back_menu));
-	}
-}
-
-void MainFrame::OpenVolume()
-{
-	ModalDlg fopendlg(
-		this, "Choose the volume data file", "", "",
-		"All Supported|*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jp2;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.dcm;*.dicom;*.nrrd;*.vvd;*.mp4;*.m4v;*.mov;*.avi;*.wmv|"\
-		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
-		"Png Files (*.png)|*.png|"\
-		"Jpeg Files (*.jpg, *.jpeg)|*.jpg;*.jpeg|"\
-		"Jpeg2000 Files (*.jp2)|*.jp2|"\
-		"Leica Image File Format (*.lif)|*.lif|"\
-		"Leica Microsystems Object File Format (*.lof)|*.lof|"\
-		"Nikon ND2 File Format (*.nd2)|*.nd2|"\
-		"Olympus Image Binary Files (*.oib)|*.oib|"\
-		"Olympus Original Imaging Format (*.oif)|*.oif|"\
-		"Bruker/Prairie View XML (*.xml)|*.xml|"\
-		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
-		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
-		"DICOM files (*.dcm, *.dicom)|*.dcm;*.dicom|"\
-		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
-		"Janelia Brick files (*.vvd)|*.vvd|"\
-		"Video files (*.mp4, *.m4v, *.mov, *.avi, *.wmv)|*.mp4;*.m4v;*.mov;*.avi;*.wmv",
-		wxFD_OPEN | wxFD_MULTIPLE);
-	fopendlg.SetExtraControlCreator(CreateExtraControlVolume);
-
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxArrayString paths;
-		fopendlg.GetPaths(paths);
-		std::vector<std::wstring> std_filenames;
-		std_filenames.reserve(paths.size());
-		for (const auto& filename : paths) {
-			std_filenames.push_back(filename.ToStdWstring());
-		}
-		glbin_data_manager.LoadVolumes(std_filenames, false);
-	}
-
-	glbin_settings.m_last_open_type = 0;
-	m_main_tb->SetToolBitmap(ID_LastOpen,
-		wxGetBitmap(icon_open_volume));
-	m_main_tb->SetToolLabel(ID_LastOpen, "Open Volume");
-	m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
-	m_main_tb->SetToolLongHelp(ID_LastOpen, "Open single or multiple volume data file(s)");
-}
-
-void MainFrame::ImportVolume()
-{
-	ModalDlg fopendlg(
-		this, "Choose the volume data file", "", "", "All Files|*.*",
-		wxFD_OPEN | wxFD_MULTIPLE);
-	fopendlg.SetExtraControlCreator(CreateExtraControlVolumeForImport);
-
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxArrayString paths;
-		fopendlg.GetPaths(paths);
-		std::vector<std::wstring> std_filenames;
-		std_filenames.reserve(paths.size());
-		for (const auto& filename : paths) {
-			std_filenames.push_back(filename.ToStdWstring());
-		}
-		glbin_data_manager.LoadVolumes(std_filenames, true);
-	}
-
-	glbin_settings.m_last_open_type = 2;
-	m_main_tb->SetToolBitmap(ID_LastOpen,
-		wxGetBitmap(icon_import));
-	m_main_tb->SetToolLabel(ID_LastOpen, "Import Volume");
-	m_main_tb->SetToolShortHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
-	m_main_tb->SetToolLongHelp(ID_LastOpen, "Import single or multiple volume data file(s) using ImageJ");
-}
-
-void MainFrame::OpenMesh()
-{
-	ModalDlg fopendlg(
-		this, "Choose the mesh data file",
-		"", "", "*.obj", wxFD_OPEN | wxFD_MULTIPLE);
-
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		wxArrayString files;
-		fopendlg.GetPaths(files);
-		std::vector<std::wstring> std_filenames;
-		std_filenames.reserve(files.size());
-		for (const auto& filename : files) {
-			std_filenames.push_back(filename.ToStdWstring());
-		}
-		glbin_data_manager.LoadMeshFiles(std_filenames);
-	}
-
-	glbin_settings.m_last_open_type = 1;
-	m_main_tb->SetToolBitmap(ID_LastOpen,
-		wxGetBitmap(icon_open_mesh));
-	m_main_tb->SetToolLabel(ID_LastOpen, "Open Mesh");
-	m_main_tb->SetToolShortHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
-	m_main_tb->SetToolLongHelp(ID_LastOpen, "Open single or multiple mesh file(s)");
-}
-
-void MainFrame::NewProject()
-{
-	glbin_project.Reset();
-	glbin_refresh_scheduler_manager.requestDraw(DrawRequest("New project refresh"));
-	UpdateProps({ gstListCtrl, gstTreeCtrl, gstParamList });
-}
-
-void MainFrame::OpenProject()
-{
-	ModalDlg fopendlg(
-		this, "Choose Project File",
-		"", "", "*.vrp", wxFD_OPEN);
-
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		std::wstring path = fopendlg.GetPath().ToStdWstring();
-		glbin_project.Open(path);
-		//FluoUpdate({ gstMainFrameTitle });
-	}
-}
-
-void MainFrame::SaveProject()
-{
-	std::wstring default_path = glbin_data_manager.GetProjectFile();
-	if (default_path.empty())
-	{
-		SaveAsProject();
-	}
-	else
-	{
-		bool inc = glbin_settings.m_prj_save_inc;
-		glbin_project.Save(default_path, inc);
-		FluoUpdate({ gstMainFrameTitle });
-	}
-}
-
-void MainFrame::SaveAsProject()
-{
-	std::wstring default_path = glbin_data_manager.GetProjectFile();
-	std::wstring path;
-	std::wstring filename;
-	bool default_valid = SEP_PATH_NAME(default_path, path, filename);
-
-	ModalDlg fopendlg(
-		this, "Save Project File",
-		default_valid ? path : L"", default_valid ? filename : L"",
-		"*.vrp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	fopendlg.SetExtraControlCreator(CreateExtraControlProjectSave);
-
-	int rval = fopendlg.ShowModal();
-	if (rval == wxID_OK)
-	{
-		filename = fopendlg.GetPath().ToStdWstring();
-		glbin_project.Save(filename, false);
-		FluoUpdate({ gstMainFrameTitle });
-	}
 }
 
 //toolbar menus
@@ -1956,38 +1743,39 @@ void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 //toolbar
 void MainFrame::OnMainMenu(wxCommandEvent& event)
 {
-	fluo::ValueCollection vc;
+	fluo::ValueCollection vc_data;
+	fluo::ValueCollection vc_ui;
 	int id = event.GetId();
 
 	switch (id)
 	{
 		//toolbar
 	case ID_LastOpen:
-		ToggleLastOpen();
+		vc_data.insert(gstLastOpen);
 		break;
 	case ID_OpenVolume:
-		OpenVolume();
+		vc_data.insert(gstOpenVolume);
 		break;
 	case ID_ImportVolume:
-		ImportVolume();
+		vc_data.insert(gstImportVolume);
 		break;
 	case ID_OpenMesh:
-		OpenMesh();
+		vc_data.insert(gstOpenMesh);
 		break;
 	case ID_OpenProject:
-		OpenProject();
+		vc_data.insert(gstOpenProject);
 		break;
 	case ID_SaveProject:
-		SaveProject();
+		vc_data.insert(gstSaveProject);
 		break;
 	case ID_ViewNew:
-		vc.insert(gstCreateRenderViewPanel);
+		vc_ui.insert(gstCreateRenderViewPanel);
 		break;
 	case ID_Panels:
-		ToggleAllPanels(true);
+		vc_ui.insert(gstToggleAllPanels);
 		break;
 	case ID_LastTool:
-		ToggleLastTool();
+		vc_ui.insert(gstLastTool);
 		break;
 	case ID_Undo:
 		glbin.undo();
@@ -1996,7 +1784,7 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		glbin.redo();
 		break;
 	case ID_Settings:
-		ShowSettingDlg();
+		vc_ui.insert(gstSettingDlg);
 		break;
 	case ID_CheckUpdates:
 		::wxLaunchDefaultBrowser(VERSION_UPDATES);
@@ -2008,79 +1796,79 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		::wxLaunchDefaultBrowser(TWITTER_URL);
 		break;
 	case ID_Info:
-		ShowInfo();
+		vc_ui.insert(gstAboutDlg);
 		break;
 		//toolbar menu items
 	case ID_ProjPanel:
-		ShowProjPanel();
+		vc_ui.insert(gstToggleProjPanel);
 		break;
 	case ID_MoviePanel:
-		ShowMoviePanel();
+		vc_ui.insert(gstToggleMoviePanel);
 		break;
 	case ID_OutAdjPanel:
-		ShowOutAdjPanel();
+		vc_ui.insert(gstToggleOutAdjPanel);
 		break;
 	case ID_ClipPlanePanel:
-		ShowClipPlanePanel();
+		vc_ui.insert(gstToggleClipPlanePanel);
 		break;
 	case ID_PropPanel:
-		ShowPropPanel();
+		vc_ui.insert(gstTogglePropertyPanel);
 		break;
 	case ID_BrushDlg:
-		ShowBrushDlg();
+		vc_ui.insert(gstBrushToolDlg);
 		break;
 	case ID_MeasureDlg:
-		ShowMeasureDlg();
+		vc_ui.insert(gstMeasureDlg);
 		break;
 	case ID_ComponentDlg:
-		ShowComponentDlg();
+		vc_ui.insert(gstComponentDlg);
 		break;
 	case ID_TrackDlg:
-		ShowTrackDlg();
+		vc_ui.insert(gstTrackDlg);
 		break;
 	case ID_CalcDlg:
-		ShowCalculationDlg();
+		vc_ui.insert(gstCalculationDlg);
 		break;
 	case ID_NoiseCancelDlg:
-		ShowNoiseCancellingDlg();
+		vc_ui.insert(gstNoiseCancellingDlg);
 		break;
 	case ID_CountDlg:
-		ShowCountingDlg();
+		vc_ui.insert(gstCountingDlg);
 		break;
 	case ID_ColocalDlg:
-		ShowColocalizationDlg();
+		vc_ui.insert(gstColocalizationDlg);
 		break;
 	case ID_ConvertDlg:
-		ShowConvertDlg();
+		vc_ui.insert(gstConvertDlg);
 		break;
 	case ID_OclDlg:
-		ShowOclDlg();
+		vc_ui.insert(gstOclDlg);
 		break;
 	case ID_MlDlg:
-		ShowMachineLearningDlg();
+		vc_ui.insert(gstMachineLearningDlg);
 		break;
 		//main menu items
 		//file
 	case ID_NewProjMenu:
-		NewProject();
+		vc_data.insert(gstNewProject);
 		break;
 	case ID_OpenVolumeMenu:
-		OpenVolume();
+		vc_data.insert(gstOpenVolume);
 		break;
 	case ID_ImportVolumeMenu:
-		ImportVolume();
+		vc_data.insert(gstImportVolume);
 		break;
 	case ID_OpenMeshMenu:
-		OpenMesh();
+		vc_data.insert(gstOpenMesh);
 		break;
 	case ID_OpenProjMenu:
-		OpenProject();
+		vc_data.insert(gstOpenProject);
 		break;
 	case ID_SaveProjMenu:
-		SaveProject();
+		vc_data.insert(gstSaveProject);
 		break;
 	case ID_SaveAsProjMenu:
-		SaveAsProject();
+		vc_data.insert(gstSaveAsProject);
 		break;
 	case ID_Exit:
 		Close(true);
@@ -2094,72 +1882,73 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		break;
 		//tools
 	case ID_BrushDlgMenu:
-		ShowBrushDlg();
+		vc_ui.insert(gstBrushToolDlg);
 		break;
 	case ID_MeasureDlgMenu:
-		ShowMeasureDlg();
+		vc_ui.insert(gstMeasureDlg);
 		break;
 	case ID_CompDlgMenu:
-		ShowComponentDlg();
+		vc_ui.insert(gstComponentDlg);
 		break;
 	case ID_TrackDlgMenu:
-		ShowTrackDlg();
+		vc_ui.insert(gstTrackDlg);
 		break;
 	case ID_CalcDlgMenu:
-		ShowCalculationDlg();
+		vc_ui.insert(gstCalculationDlg);
 		break;
 	case ID_NoiseCancelDlgMenu:
-		ShowNoiseCancellingDlg();
+		vc_ui.insert(gstNoiseCancellingDlg);
 		break;
 	case ID_CountDlgMenu:
-		ShowCountingDlg();
+		vc_ui.insert(gstCountingDlg);
 		break;
 	case ID_ColocalDlgMenu:
-		ShowColocalizationDlg();
+		vc_ui.insert(gstColocalizationDlg);
 		break;
 	case ID_ConvertDlgMenu:
-		ShowConvertDlg();
+		vc_ui.insert(gstConvertDlg);
 		break;
 	case ID_OclDlgMenu:
-		ShowOclDlg();
+		vc_ui.insert(gstOclDlg);
 		break;
 	case ID_MlDlgMenu:
-		ShowMachineLearningDlg();
+		vc_ui.insert(gstMachineLearningDlg);
 		break;
 		//window
 	case ID_ToolbarMenu:
-		vc.insert(gstToggleToolbar);
+		vc_ui.insert(gstToggleToolbar);
 		break;
 	case ID_PanelsMenu:
-		ToggleAllPanels(true);
+		vc_ui.insert(gstToggleAllPanels);
 		break;
 	case ID_ProjPanelMenu:
-		ShowProjPanel();
+		vc_ui.insert(gstToggleProjPanel);
 		break;
 	case ID_MoviePanelMenu:
-		ShowMoviePanel();
+		vc_ui.insert(gstToggleMoviePanel);
 		break;
 	case ID_OutAdjPanelMenu:
-		ShowOutAdjPanel();
+		vc_ui.insert(gstToggleOutAdjPanel);
 		break;
 	case ID_ClipPlanePanelMenu:
-		ShowClipPlanePanel();
+		vc_ui.insert(gstToggleClipPlanePanel);
 		break;
 	case ID_PropPanelMenu:
-		ShowPropPanel();
+		vc_ui.insert(gstTogglePropertyPanel);
 		break;
 	case ID_LayoutMenu:
-		LayoutRenderViewPanels(1);
-		LayoutOutputAdjPanel();
+		vc_ui.insert({
+			gstRenderViewPanelLayout,
+			gstOutAdjPanelLayout });
 		break;
 	case ID_ResetMenu:
-		ResetLayout();
+		vc_ui.insert(gstResetLayout);
 		break;
 	case ID_ViewNewMenu:
-		vc.insert(gstCreateRenderViewPanel);
+		vc_ui.insert(gstCreateRenderViewPanel);
 		break;
 	case ID_FullscreenMenu:
-		FullScreen();
+		vc_ui.insert(gstFullscreenFrame);
 		break;
 		//help
 	case ID_CheckUpdatesMenu:
@@ -2181,20 +1970,32 @@ void MainFrame::OnMainMenu(wxCommandEvent& event)
 		::wxLaunchDefaultBrowser(HELP_TUTORIAL);
 		break;
 	case ID_InfoMenu:
-		ShowInfo();
+		vc_ui.insert(gstAboutDlg);
 		break;
 	}
 
 	auto agent = m_agent->As<MainFrameAgent>();
 	if (agent)
-		agent->UpdateUIToData(vc);
+	{
+		if (!vc_data.empty())
+			agent->UpdateUIToData(vc_data);
+		if (!vc_ui.empty())
+			agent->UpdateDataToUI(vc_ui);
+	}
 	//event.StopPropagation();
 }
 
 //panes
 void MainFrame::OnPaneClose(wxAuiManagerEvent& event)
 {
-	FluoUpdate({ gstProjPanel, gstMoviePanel, gstPropertyPanel, gstOutAdjPanel, gstClipPlanePanel });
+	auto agent = m_agent->As<MainFrameAgent>();
+	if (agent)
+		agent->UpdateDataToUI({
+		gstProjPanel,
+		gstMoviePanel,
+		gstPropertyPanel,
+		gstOutAdjPanel,
+		gstClipPlanePanel });
 }
 
 void MainFrame::OnClose(wxCloseEvent& event)
@@ -2203,256 +2004,6 @@ void MainFrame::OnClose(wxCloseEvent& event)
 	if (agent)
 		agent->ShutdownAll();
 	event.Skip();
-}
-
-wxWindow* MainFrame::CreateExtraControlVolume(wxWindow* parent)
-{
-	wxPanel* panel = new wxPanel(parent);
-#ifdef _DARWIN
-	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
-#elifdef __linux__
-	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
-#endif
-	wxStaticText* st1, * st2;
-
-	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
-		wxVERTICAL, panel, "Additional Options");
-
-	//slice sequence check box
-	wxCheckBox* ch11 = new wxCheckBox(panel, ID_READ_ZSLICE,
-		"Read file# as Z sections");
-	ch11->Connect(ch11->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MainFrame::OnCh11Check), NULL, panel);
-	ch11->SetValue(glbin_settings.m_slice_sequence);
-
-	//slice sequence check box
-	wxCheckBox* ch12 = new wxCheckBox(panel, ID_READ_CHANN,
-		"Read file# as channels");
-	ch12->Connect(ch12->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MainFrame::OnCh12Check), NULL, panel);
-	ch12->SetValue(glbin_settings.m_chann_sequence);
-
-	//digit order
-	st1 = new wxStaticText(panel, 0,
-		"Digit order:");
-	wxComboBox* combo = new wxComboBox(panel, ID_DIGI_ORDER,
-		"Order", wxDefaultPosition, parent->FromDIP(wxSize(100, 20)), 0, NULL, wxCB_READONLY);
-	combo->Connect(combo->GetId(), wxEVT_COMMAND_COMBOBOX_SELECTED,
-		wxCommandEventHandler(MainFrame::OnCmbChange), NULL, panel);
-	std::vector<std::string> combo_list;
-	combo_list.push_back("Channel first");
-	combo_list.push_back("Z section first");
-	for (size_t i = 0; i < combo_list.size(); ++i)
-		combo->Append(combo_list[i]);
-	combo->SetSelection(glbin_settings.m_digit_order);
-
-	//series number
-	st2 = new wxStaticText(panel, 0,
-		"Serial:");
-	wxTextCtrl* txt2 = new wxTextCtrl(panel, ID_SER_NUM,
-		"", wxDefaultPosition, parent->FromDIP(wxSize(40, 20)), wxTE_RIGHT);
-	txt2->Connect(txt2->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(MainFrame::OnTxt2Change), NULL, panel);
-
-	wxBoxSizer* sizer1 = new wxBoxSizer(wxHORIZONTAL);
-	sizer1->Add(ch11);
-	sizer1->Add(10, 10);
-	sizer1->Add(ch12);
-	sizer1->Add(10, 10);
-	sizer1->Add(st1);
-	sizer1->Add(5, 5);
-	sizer1->Add(combo, 0, wxALIGN_TOP);
-	sizer1->Add(10, 10);
-	sizer1->Add(st2);
-	sizer1->Add(5, 5);
-	sizer1->Add(txt2, 0, wxALIGN_CENTER);
-
-	//compression
-	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
-		"Compress data (loading will take longer time and data are compressed in graphics memory)");
-	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MainFrame::OnCh2Check), NULL, panel);
-	ch2->SetValue(glbin_settings.m_realtime_compress);
-
-	//empty brick skipping
-	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
-		"Skip empty bricks during rendering (loading takes longer time)");
-	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MainFrame::OnCh3Check), NULL, panel);
-	ch3->SetValue(glbin_settings.m_skip_brick);
-
-	//time sequence identifier
-	wxBoxSizer* sizer2 = new wxBoxSizer(wxHORIZONTAL);
-	wxTextCtrl* txt1 = new wxTextCtrl(panel, ID_TSEQ_ID,
-		"", wxDefaultPosition, parent->FromDIP(wxSize(40, 20)));
-	txt1->ChangeValue(glbin_settings.m_time_id);
-	txt1->Connect(txt1->GetId(), wxEVT_COMMAND_TEXT_UPDATED,
-		wxCommandEventHandler(MainFrame::OnTxt1Change), NULL, panel);
-	st1 = new wxStaticText(panel, 0,
-		"Time sequence identifier (digits after the identifier in filenames are used as time index)\n");
-	sizer2->Add(txt1);
-	sizer2->Add(10, 10);
-	sizer2->Add(st1);
-
-	group1->Add(10, 10);
-	group1->Add(sizer1);
-	group1->Add(10, 10);
-	group1->Add(ch2);
-	group1->Add(10, 10);
-	group1->Add(ch3);
-	group1->Add(10, 10);
-	group1->Add(sizer2);
-	group1->Add(10, 10);
-
-	panel->SetSizerAndFit(group1);
-	panel->Layout();
-
-	return panel;
-}
-
-wxWindow* MainFrame::CreateExtraControlVolumeForImport(wxWindow* parent)
-{
-	wxPanel* panel = new wxPanel(parent);
-#ifdef _DARWIN
-	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
-#elifdef __linux__
-	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
-#endif
-	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
-		wxVERTICAL, panel, "Additional Options");
-
-	//compression
-	wxCheckBox* ch2 = new wxCheckBox(panel, ID_COMPRESS,
-		"Compress data (loading will take longer time and data are compressed in graphics memory)");
-	ch2->Connect(ch2->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MainFrame::OnCh2Check), NULL, panel);
-	ch2->SetValue(glbin_settings.m_realtime_compress);
-
-	//empty brick skipping
-	wxCheckBox* ch3 = new wxCheckBox(panel, ID_SKIP_BRICKS,
-		"Skip empty bricks during rendering (loading takes longer time)");
-	ch3->Connect(ch3->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MainFrame::OnCh3Check), NULL, panel);
-	ch3->SetValue(glbin_settings.m_skip_brick);
-
-	group1->Add(10, 10);
-	group1->Add(ch2);
-	group1->Add(10, 10);
-	group1->Add(ch3);
-	group1->Add(10, 10);
-
-	panel->SetSizerAndFit(group1);
-	panel->Layout();
-
-	return panel;
-}
-
-wxWindow* MainFrame::CreateExtraControlProjectSave(wxWindow* parent)
-{
-	wxPanel* panel = new wxPanel(parent);
-#ifdef _DARWIN
-	panel->SetWindowVariant(wxWINDOW_VARIANT_SMALL);
-#elifdef __linux__
-	panel->SetWindowVariant(wxWINDOW_VARIANT_MINI);
-#endif
-	wxStaticBoxSizer* group1 = new wxStaticBoxSizer(
-		wxVERTICAL, panel, "Additional Options");
-
-	//copy all files check box
-	wxCheckBox* ch_embed = new wxCheckBox(panel, ID_EMBED_FILES,
-		"Embed all files in the project folder");
-	ch_embed->Connect(ch_embed->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MainFrame::OnChEmbedCheck), NULL, panel);
-	ch_embed->SetValue(glbin_settings.m_vrp_embed);
-
-	//compressed
-	wxCheckBox* ch_cmp = new wxCheckBox(panel, ID_LZW_COMP,
-		"Lempel-Ziv-Welch Compression");
-	ch_cmp->Connect(ch_cmp->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-		wxCommandEventHandler(MainFrame::OnChSaveCmpCheck), NULL, panel);
-	if (ch_cmp)
-		ch_cmp->SetValue(glbin_settings.m_save_compress);
-
-	//group
-	group1->Add(10, 10);
-	group1->Add(ch_embed);
-	group1->Add(10, 10);
-	group1->Add(ch_cmp);
-	group1->Add(10, 10);
-
-	panel->SetSizerAndFit(group1);
-	panel->Layout();
-
-	return panel;
-}
-
-//open dialog options
-void MainFrame::OnCh11Check(wxCommandEvent& event)
-{
-	wxCheckBox* ch11 = (wxCheckBox*)event.GetEventObject();
-	if (ch11)
-		glbin_settings.m_slice_sequence = ch11->GetValue();
-}
-
-void MainFrame::OnCh12Check(wxCommandEvent& event)
-{
-	wxCheckBox* ch12 = (wxCheckBox*)event.GetEventObject();
-	if (ch12)
-		glbin_settings.m_chann_sequence = ch12->GetValue();
-}
-
-void MainFrame::OnCmbChange(wxCommandEvent& event)
-{
-	wxComboBox* combo = (wxComboBox*)event.GetEventObject();
-	if (combo)
-		glbin_settings.m_digit_order = combo->GetSelection();
-}
-
-void MainFrame::OnTxt1Change(wxCommandEvent& event)
-{
-	wxTextCtrl* txt1 = (wxTextCtrl*)event.GetEventObject();
-	if (txt1)
-		glbin_settings.m_time_id = txt1->GetValue();
-}
-
-void MainFrame::OnTxt2Change(wxCommandEvent& event)
-{
-	wxTextCtrl* txt2 = (wxTextCtrl*)event.GetEventObject();
-	if (txt2)
-	{
-		wxString str = txt2->GetValue();
-		long lval;
-		if (str.ToLong(&lval))
-			glbin_settings.m_ser_num = lval;
-	}
-}
-
-void MainFrame::OnCh2Check(wxCommandEvent& event)
-{
-	wxCheckBox* ch2 = (wxCheckBox*)event.GetEventObject();
-	if (ch2)
-		glbin_settings.m_realtime_compress = ch2->GetValue();
-}
-
-void MainFrame::OnCh3Check(wxCommandEvent& event)
-{
-	wxCheckBox* ch3 = (wxCheckBox*)event.GetEventObject();
-	if (ch3)
-		glbin_settings.m_skip_brick = ch3->GetValue();
-}
-
-void MainFrame::OnChEmbedCheck(wxCommandEvent& event)
-{
-	wxCheckBox* ch_embed = (wxCheckBox*)event.GetEventObject();
-	if (ch_embed)
-		glbin_settings.m_vrp_embed = ch_embed->GetValue();
-}
-
-void MainFrame::OnChSaveCmpCheck(wxCommandEvent& event)
-{
-	wxCheckBox* ch_cmp = (wxCheckBox*)event.GetEventObject();
-	if (ch_cmp)
-		glbin_settings.m_save_compress = ch_cmp->GetValue();
 }
 
 void MainFrame::OnSysColorChanged(wxSysColourChangedEvent& event)
@@ -2464,3 +2015,168 @@ void MainFrame::OnSysColorChanged(wxSysColourChangedEvent& event)
 	Refresh();
 	event.Skip(); // Allow default processing
 }
+
+void OpenVolumeHook::AddCustomControls(
+	wxFileDialogCustomize& customizer)
+{
+	// Read file# as Z sections
+	m_slice_chk =
+		customizer.AddCheckBox(
+			"Read file# as Z sections");
+
+	m_slice_chk->SetValue(
+		m_options.sliceSequence);
+
+	// Read file# as channels
+	m_channel_chk =
+		customizer.AddCheckBox(
+			"Read file# as channels");
+
+	m_channel_chk->SetValue(
+		m_options.channelSequence);
+
+	// Digit order
+	static const wxString kDigitOrderChoices[] =
+	{
+		"Channel first",
+		"Z section first"
+	};
+
+	m_digit_order_choice =
+		customizer.AddChoice(
+			WXSIZEOF(kDigitOrderChoices),
+			kDigitOrderChoices);
+
+	m_digit_order_choice->SetSelection(
+		m_options.digitOrder);
+
+	// Serial number
+	m_serial_txt =
+		customizer.AddTextCtrl(
+			"Serial:");
+
+	m_serial_txt->SetValue(
+		m_options.serialNumber);
+
+	// Compression
+	m_compress_chk =
+		customizer.AddCheckBox(
+			"Compress data");
+
+	m_compress_chk->SetValue(
+		m_options.compressData);
+
+	// Skip bricks
+	m_skip_bricks_chk =
+		customizer.AddCheckBox(
+			"Skip empty bricks during rendering");
+
+	m_skip_bricks_chk->SetValue(
+		m_options.skipEmptyBricks);
+
+	// Time sequence identifier
+	m_time_id_txt =
+		customizer.AddTextCtrl(
+			"Time sequence identifier:");
+
+	m_time_id_txt->SetValue(
+		m_options.timeSequenceIdentifier);
+}
+
+void OpenVolumeHook::TransferDataFromCustomControls()
+{
+	if (m_slice_chk)
+		m_options.sliceSequence =
+		m_slice_chk->GetValue();
+
+	if (m_channel_chk)
+		m_options.channelSequence =
+		m_channel_chk->GetValue();
+
+	if (m_digit_order_choice)
+		m_options.digitOrder =
+		m_digit_order_choice->GetSelection();
+
+	if (m_serial_txt)
+		m_options.serialNumber =
+		m_serial_txt->GetValue().ToStdString();
+
+	if (m_compress_chk)
+		m_options.compressData =
+		m_compress_chk->GetValue();
+
+	if (m_skip_bricks_chk)
+		m_options.skipEmptyBricks =
+		m_skip_bricks_chk->GetValue();
+
+	if (m_time_id_txt)
+		m_options.timeSequenceIdentifier =
+		m_time_id_txt->GetValue().ToStdWstring();
+}
+
+void ImportVolumeHook::AddCustomControls(
+	wxFileDialogCustomize& customizer)
+{
+	m_compress_chk =
+		customizer.AddCheckBox(
+			"Compress data (loading will take longer time and data are compressed in graphics memory)");
+
+	m_compress_chk->SetValue(
+		m_options.compressData);
+
+	m_skip_bricks_chk =
+		customizer.AddCheckBox(
+			"Skip empty bricks during rendering (loading takes longer time)");
+
+	m_skip_bricks_chk->SetValue(
+		m_options.skipEmptyBricks);
+}
+
+void ImportVolumeHook::TransferDataFromCustomControls()
+{
+	if (m_compress_chk)
+	{
+		m_options.compressData =
+			m_compress_chk->GetValue();
+	}
+
+	if (m_skip_bricks_chk)
+	{
+		m_options.skipEmptyBricks =
+			m_skip_bricks_chk->GetValue();
+	}
+}
+
+void SaveProjectHook::AddCustomControls(
+	wxFileDialogCustomize& customizer)
+{
+	m_embed_chk =
+		customizer.AddCheckBox(
+			"Embed all files in the project folder");
+
+	m_embed_chk->SetValue(
+		m_options.embedFiles);
+
+	m_compress_chk =
+		customizer.AddCheckBox(
+			"Lempel-Ziv-Welch Compression");
+
+	m_compress_chk->SetValue(
+		m_options.compressProject);
+}
+
+void SaveProjectHook::TransferDataFromCustomControls()
+{
+	if (m_embed_chk)
+	{
+		m_options.embedFiles =
+			m_embed_chk->GetValue();
+	}
+
+	if (m_compress_chk)
+	{
+		m_options.compressProject =
+			m_compress_chk->GetValue();
+	}
+}
+

@@ -49,6 +49,9 @@ DEALINGS IN THE SOFTWARE.
 #include <MovieMaker.h>
 #include <KernelProgram.h>
 #include <TextureRenderer.h>
+#include <ModalDlg.h>
+#include <Project.h>
+#include <compatibility.h>
 
 MainFrameAgent::MainFrameAgent(
 	MainFrame* frame) :
@@ -106,11 +109,17 @@ void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 	{
 		frame->PopMainStatusbarText();
 	}
+	if (update_all || request.HasValue(gstFullscreenMenu))
+	{
+		frame->UpdateFullscreenMenu();
+	}
 
 	if (request.HasValue(gstCreateRenderViewPanel))
 		CreateRenderViewPanel();
 	if (request.HasValue(gstRenderViewPanelLayout))
 		LayoutRenderViewPanels();
+	if (request.HasValue(gstOutAdjPanelLayout))
+		LayoutOutAdjPanel();
 	if (request.HasValue(gstRenderViewPanel))
 		SyncRenderViewPanels();
 	if (request.HasValue(gstScriptBreakDlg))
@@ -134,13 +143,63 @@ void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 	if (request.HasValue(gstTogglePropertyPanel))
 		TogglePropertyPanel();
 
+	if (request.HasValue(gstLastTool))
+		LastTool();
+	if (request.HasValue(gstBrushToolDlg))
+		ShowBrushDlg();
+	if (request.HasValue(gstCalculationDlg))
+		ShowCalculationDlg();
+	if (request.HasValue(gstColocalizationDlg))
+		ShowColocalizationDlg();
+	if (request.HasValue(gstComponentDlg))
+		ShowComponentDlg();
+	if (request.HasValue(gstConvertDlg))
+		ShowConvertDlg();
+	if (request.HasValue(gstCountingDlg))
+		ShowCountingDlg();
 	if (request.HasValue(gstMachineLearningDlg))
 		ShowMachineLearningDlg();
+	if (request.HasValue(gstMeasureDlg))
+		ShowMeasureDlg();
+	if (request.HasValue(gstNoiseCancellingDlg))
+		ShowNoiseCancellingDlg();
+	if (request.HasValue(gstOclDlg))
+		ShowOclDlg();
+	if (request.HasValue(gstSettingDlg))
+		ShowSettingDlg();
+	if (request.HasValue(gstTrackDlg))
+		ShowTrackDlg();
+
+	if (request.HasValue(gstAboutDlg))
+		ShowAboutDlg();
+	if (request.HasValue(gstScriptProcFileDlg))
+		ShowScriptProcFileDlg();
+
+	if (request.HasValue(gstResetLayout))
+		ResetLayout();
+
+	if (request.HasValue(gstFullscreenFrame))
+		ToggleFullscreen();
 }
 
 void MainFrameAgent::UpdateData(const UpdateRequest& request)
 {
-
+	if (request.HasValue(gstLastOpen))
+		LastOpen();
+	if (request.HasValue(gstOpenVolume))
+		OpenVolume();
+	if (request.HasValue(gstImportVolume))
+		ImportVolume();
+	if (request.HasValue(gstOpenMesh))
+		OpenMesh();
+	if (request.HasValue(gstNewProject))
+		NewProject();
+	if (request.HasValue(gstOpenProject))
+		OpenProject();
+	if (request.HasValue(gstSaveProject))
+		SaveProject();
+	if (request.HasValue(gstSaveAsProject))
+		SaveAsProject();
 }
 
 MainFrame* MainFrameAgent::GetMainFrame() const
@@ -522,9 +581,416 @@ void MainFrameAgent::TogglePropertyPanel()
 	}
 }
 
+void MainFrameAgent::ShowBrushDlg()
+{
+	glbin_settings.m_last_tool = TOOL_PAINT_BRUSH;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowBrushDlg();
+		frame->UpdateLastTool(MainFrame::ID_BrushDlg);
+	}
+}
+
+void MainFrameAgent::ShowCalculationDlg()
+{
+	glbin_settings.m_last_tool = TOOL_CALCULATIONS;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowCalculationDlg();
+		frame->UpdateLastTool(MainFrame::ID_CalcDlg);
+	}
+}
+
+void MainFrameAgent::ShowColocalizationDlg()
+{
+	glbin_settings.m_last_tool = TOOL_COLOCALIZATION;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowColocalizationDlg();
+		frame->UpdateLastTool(MainFrame::ID_ColocalDlg);
+	}
+}
+
+void MainFrameAgent::ShowComponentDlg()
+{
+	glbin_settings.m_last_tool = TOOL_COMPONENT;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowComponentDlg();
+		frame->UpdateLastTool(MainFrame::ID_ComponentDlg);
+	}
+}
+
+void MainFrameAgent::ShowConvertDlg()
+{
+	glbin_settings.m_last_tool = TOOL_CONVERT;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowConvertDlg();
+		frame->UpdateLastTool(MainFrame::ID_ConvertDlg);
+	}
+}
+
+void MainFrameAgent::ShowCountingDlg()
+{
+	glbin_settings.m_last_tool = TOOL_VOLUME_SIZE;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowCountingDlg();
+		frame->UpdateLastTool(MainFrame::ID_CountDlg);
+	}
+}
 
 void MainFrameAgent::ShowMachineLearningDlg()
 {
+	glbin_settings.m_last_tool = TOOL_MACHINE_LEARNING;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowMachineLearningDlg();
+		frame->UpdateLastTool(MainFrame::ID_MlDlg);
+	}
+}
 
+void MainFrameAgent::ShowMeasureDlg()
+{
+	glbin_settings.m_last_tool = TOOL_MEASUREMENT;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowMeasureDlg();
+		frame->UpdateLastTool(MainFrame::ID_MeasureDlg);
+	}
+}
+
+void MainFrameAgent::ShowNoiseCancellingDlg()
+{
+	glbin_settings.m_last_tool = TOOL_NOISE_REDUCTION;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowNoiseCancellingDlg();
+		frame->UpdateLastTool(MainFrame::ID_NoiseCancelDlg);
+	}
+}
+
+void MainFrameAgent::ShowOclDlg()
+{
+	glbin_settings.m_last_tool = TOOL_OPENCL;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowOclDlg();
+		frame->UpdateLastTool(MainFrame::ID_OclDlg);
+	}
+}
+
+void MainFrameAgent::ShowSettingDlg()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowSettingDlg();
+	}
+}
+
+void MainFrameAgent::ShowTrackDlg()
+{
+	glbin_settings.m_last_tool = TOOL_TRACKING;
+	auto frame = GetMainFrame();
+	if (frame)
+	{
+		frame->ShowTrackDlg();
+		frame->UpdateLastTool(MainFrame::ID_TrackDlg);
+	}
+}
+
+void MainFrameAgent::ShowAboutDlg()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+		frame->ShowAboutDlg();
+}
+
+void MainFrameAgent::ShowScriptProcFileDlg()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	auto info = glbin_script_proc.GetScriptDlgInfo();
+
+	glbin_moviemaker.Hold();
+	ModalDlg dlg(
+		frame,
+		info.title,
+		"", "",
+		info.wildcard,
+		info.style);
+	int rval = dlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		info.valid = true;
+		info.result = dlg.GetPath().ToStdWstring();
+		glbin_script_proc.SetScriptDlgInfo(info);
+	}
+
+	glbin_moviemaker.Resume();
+}
+
+void MainFrameAgent::LayoutOutAdjPanel()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+		frame->LayoutOutputAdjPanel();
+}
+
+void MainFrameAgent::ResetLayout()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	frame->ResetLayout();
+	glbin_settings.m_layout.clear();
+	UpdateDataToUI({
+		gstMainToolbar,
+		gstProjPanel,
+		gstMoviePanel,
+		gstPropertyPanel,
+		gstOutAdjPanel,
+		gstClipPlanePanel,
+		gstRenderViewPanelLayout,
+		gstOutAdjPanelLayout });
+}
+
+void MainFrameAgent::ToggleFullscreen()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	if (frame->IsFullScreen())
+		frame->ShowFullScreen(false);
+	else
+		frame->ShowFullScreen(true,
+			wxFULLSCREEN_NOBORDER |
+			wxFULLSCREEN_NOCAPTION);
+
+	UpdateDataToUI({ gstFullscreenMenu });
+}
+
+void MainFrameAgent::OpenVolume()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	OpenVolumeOptions initial_options;
+	initial_options.sliceSequence = glbin_settings.m_slice_sequence;
+	initial_options.channelSequence = glbin_settings.m_chann_sequence;
+	initial_options.digitOrder = glbin_settings.m_digit_order;
+	initial_options.serialNumber = std::to_string(glbin_settings.m_ser_num);
+	initial_options.compressData = glbin_settings.m_realtime_compress;
+	initial_options.skipEmptyBricks = glbin_settings.m_skip_brick;
+	initial_options.timeSequenceIdentifier = glbin_settings.m_time_id;
+	OpenVolumeHook hook(initial_options);
+
+	ModalDlg fopendlg(
+		frame, "Choose the volume data file", "", "",
+		"All Supported|*.tif;*.tiff;*.png;*.jpg;*.jpeg;*.jp2;*.lif;*.lof;*.nd2;*.oib;*.oif;*.xml;*.lsm;*.czi;*.dcm;*.dicom;*.nrrd;*.vvd;*.mp4;*.m4v;*.mov;*.avi;*.wmv|"\
+		"Tiff Files (*.tif, *.tiff)|*.tif;*.tiff|"\
+		"Png Files (*.png)|*.png|"\
+		"Jpeg Files (*.jpg, *.jpeg)|*.jpg;*.jpeg|"\
+		"Jpeg2000 Files (*.jp2)|*.jp2|"\
+		"Leica Image File Format (*.lif)|*.lif|"\
+		"Leica Microsystems Object File Format (*.lof)|*.lof|"\
+		"Nikon ND2 File Format (*.nd2)|*.nd2|"\
+		"Olympus Image Binary Files (*.oib)|*.oib|"\
+		"Olympus Original Imaging Format (*.oif)|*.oif|"\
+		"Bruker/Prairie View XML (*.xml)|*.xml|"\
+		"Zeiss Laser Scanning Microscope (*.lsm)|*.lsm|"\
+		"Zeiss ZISRAW File Format (*.czi)|*.czi|"\
+		"DICOM files (*.dcm, *.dicom)|*.dcm;*.dicom|"\
+		"Utah Nrrd files (*.nrrd)|*.nrrd|"\
+		"Janelia Brick files (*.vvd)|*.vvd|"\
+		"Video files (*.mp4, *.m4v, *.mov, *.avi, *.wmv)|*.mp4;*.m4v;*.mov;*.avi;*.wmv",
+		wxFD_OPEN | wxFD_MULTIPLE);
+	fopendlg.SetCustomizeHook(hook);
+
+	int rval = fopendlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		const OpenVolumeOptions& selected_options = hook.GetOptions();
+		glbin_settings.m_slice_sequence = selected_options.sliceSequence;
+		glbin_settings.m_chann_sequence = selected_options.channelSequence;
+		glbin_settings.m_digit_order = selected_options.digitOrder;
+		int ival = 0;
+		if (TryToInt(selected_options.serialNumber, ival))
+			glbin_settings.m_ser_num = ival;
+		glbin_settings.m_realtime_compress = selected_options.compressData;
+		glbin_settings.m_skip_brick = selected_options.skipEmptyBricks;
+		glbin_settings.m_time_id = selected_options.timeSequenceIdentifier;
+
+		wxArrayString paths;
+		fopendlg.GetPaths(paths);
+		std::vector<std::wstring> std_filenames;
+		std_filenames.reserve(paths.size());
+		for (const auto& filename : paths) {
+			std_filenames.push_back(filename.ToStdWstring());
+		}
+		glbin_data_manager.LoadVolumes(std_filenames, false);
+	}
+
+	glbin_settings.m_last_open_type = 0;
+	frame->UpdateLastOpen(MainFrame::ID_OpenVolume);
+}
+
+void MainFrameAgent::ImportVolume()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	ImportVolumeOptions options;
+	options.compressData = glbin_settings.m_realtime_compress;
+	options.skipEmptyBricks = glbin_settings.m_skip_brick;
+	ImportVolumeHook hook(options);
+
+	ModalDlg fopendlg(
+		frame, "Choose the volume data file", "", "", "All Files|*.*",
+		wxFD_OPEN | wxFD_MULTIPLE);
+	fopendlg.SetCustomizeHook(hook);
+
+	int rval = fopendlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		const auto& opts = hook.GetOptions();
+		glbin_settings.m_realtime_compress =
+			opts.compressData;
+		glbin_settings.m_skip_brick =
+			opts.skipEmptyBricks;
+
+		wxArrayString paths;
+		fopendlg.GetPaths(paths);
+		std::vector<std::wstring> std_filenames;
+		std_filenames.reserve(paths.size());
+		for (const auto& filename : paths) {
+			std_filenames.push_back(filename.ToStdWstring());
+		}
+		glbin_data_manager.LoadVolumes(std_filenames, true);
+	}
+
+	glbin_settings.m_last_open_type = 2;
+	frame->UpdateLastOpen(MainFrame::ID_ImportVolume);
+}
+
+void MainFrameAgent::OpenMesh()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	ModalDlg fopendlg(
+		frame, "Choose the mesh data file",
+		"", "", "*.obj", wxFD_OPEN | wxFD_MULTIPLE);
+
+	int rval = fopendlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		wxArrayString files;
+		fopendlg.GetPaths(files);
+		std::vector<std::wstring> std_filenames;
+		std_filenames.reserve(files.size());
+		for (const auto& filename : files) {
+			std_filenames.push_back(filename.ToStdWstring());
+		}
+		glbin_data_manager.LoadMeshFiles(std_filenames);
+	}
+
+	glbin_settings.m_last_open_type = 1;
+	frame->UpdateLastOpen(MainFrame::ID_OpenMesh);
+}
+
+void MainFrameAgent::NewProject()
+{
+	glbin_project.Reset();
+	NotifyViewUpdate({ gstListCtrl, gstTreeCtrl, gstParamList });
+}
+
+void MainFrameAgent::OpenProject()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	ModalDlg fopendlg(
+		frame, "Choose Project File",
+		"", "", "*.vrp", wxFD_OPEN);
+
+	int rval = fopendlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		std::wstring path = fopendlg.GetPath().ToStdWstring();
+		glbin_project.Open(path);
+		UpdateDataToUI({ gstMainFrameTitle });
+	}
+}
+
+void MainFrameAgent::SaveProject()
+{
+	std::wstring default_path = glbin_data_manager.GetProjectFile();
+	if (default_path.empty())
+	{
+		SaveAsProject();
+	}
+	else
+	{
+		bool inc = glbin_settings.m_prj_save_inc;
+		glbin_project.Save(default_path, inc);
+		UpdateDataToUI({ gstMainFrameTitle });
+	}
+}
+
+void MainFrameAgent::SaveAsProject()
+{
+	auto frame = GetMainFrame();
+	if (!frame)
+		return;
+
+	std::wstring default_path = glbin_data_manager.GetProjectFile();
+	std::wstring path;
+	std::wstring filename;
+	bool default_valid = SEP_PATH_NAME(default_path, path, filename);
+	SaveProjectOptions options;
+	options.embedFiles = glbin_settings.m_vrp_embed;
+	options.compressProject = glbin_settings.m_save_compress;
+	SaveProjectHook hook(options);
+
+	ModalDlg fopendlg(
+		frame, "Save Project File",
+		default_valid ? path : L"", default_valid ? filename : L"",
+		"*.vrp", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	fopendlg.SetCustomizeHook(hook);
+
+	int rval = fopendlg.ShowModal();
+	if (rval == wxID_OK)
+	{
+		const auto& opts = hook.GetOptions();
+		glbin_settings.m_vrp_embed =
+			opts.embedFiles;
+		glbin_settings.m_save_compress =
+			opts.compressProject;
+
+		filename = fopendlg.GetPath().ToStdWstring();
+		glbin_project.Save(filename, false);
+		UpdateDataToUI({ gstMainFrameTitle });
+	}
 }
 

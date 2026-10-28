@@ -29,6 +29,7 @@ DEALINGS IN THE SOFTWARE.
 #ifndef PanelsAndDialogs_h
 #define PanelsAndDialogs_h
 
+#include <AboutDlg.h>
 #include <AnnotatPropPanel.h>
 #include <BrushToolDlg.h>
 #include <CalculationDlg.h>

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Group.hpp>
 #include <vector>
 #include <memory>
+#include <string>
 
 class MainFrame;
 class RenderView;
@@ -39,6 +40,14 @@ class BaseTreeFile;
 namespace flrd
 {
 	class CelpList;
+	struct ScriptDlgInfo
+	{
+		std::wstring title;
+		std::wstring wildcard;
+		long style = 0;
+		bool valid = false;
+		std::wstring result;
+	};
 	class ScriptProc
 	{
 	public:
@@ -80,6 +89,9 @@ namespace flrd
 
 		void ClearResults() { m_output->removeAllChildren(); }
 
+		void SetScriptDlgInfo(const ScriptDlgInfo& info) { m_script_dlg_info = info; }
+		ScriptDlgInfo& GetScriptDlgInfo() { return m_script_dlg_info; }
+
 	private:
 		MainFrame* m_frame;
 		std::weak_ptr<RenderView> m_view;
@@ -101,6 +113,9 @@ namespace flrd
 		//bacg_stat(group)--single_node(node)--mean(value), etc
 		//comp_analysis(group)--comp_id(node)--size(value), pos(value), etc
 		fluo::ref_ptr<fluo::Group> m_output;
+
+		//script dialog info
+		ScriptDlgInfo m_script_dlg_info;
 
 	private:
 		bool TimeCondition();

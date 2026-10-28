@@ -29,7 +29,9 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <Tokens.h>
 #include <MainSettings.h>
-#include <MainFrame.h>
+#include <Coordinator.h>
+#include <MainFrameAgent.h>
+
 #include <TrackDlg.h>
 #include <NoiseCancellingDlg.h>
 #include <ComponentDlg.h>
@@ -450,12 +452,21 @@ std::wstring ScriptProc::GetSavePath(const std::wstring& str, const std::wstring
 	if (temp.empty() ||
 		temp == L"FILE_DLG")
 	{
-		//file dialog
-		path = m_frame->ScriptDialog(
+		m_script_dlg_info = {
 			L"Save Results",
 			L"Output file(*." + ext + L")|*." + ext,
-			2);
-		if (path.empty())
+			2,
+			false,
+			L"" };
+		auto agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+		if (agent)
+			agent->UpdateDataToUI({ gstScriptProcFileDlg });
+		if (m_script_dlg_info.valid &&
+			!m_script_dlg_info.result.empty())
+		{
+			path = m_script_dlg_info.result;
+		}
+		else
 			path = GetDataDir(ext);
 	}
 	else if (temp == L"DATA_DIR")
@@ -530,10 +541,18 @@ std::wstring ScriptProc::GetConfigFile(
 	long style = 1 | 16;
 	if (mode == 1)
 		style = 2 | 4;
-	return m_frame->ScriptDialog(
+	m_script_dlg_info = {
 		L"Choose " + type + L" file",
 		type + L" file(*." + ext + L")|*." + ext,
-		style);
+		style,
+		false,
+		L"" };
+	auto agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (agent)
+		agent->UpdateDataToUI({ gstScriptProcFileDlg });
+	if (m_script_dlg_info.valid &&
+		!m_script_dlg_info.result.empty())
+		return m_script_dlg_info.result;
 }
 
 int ScriptProc::GetItems(const std::wstring& str, std::vector<std::wstring>& items)

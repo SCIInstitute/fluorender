@@ -38,10 +38,128 @@ DEALINGS IN THE SOFTWARE.
 #include <wx/aui/aui.h>
 #include <wx/aui/auibook.h>
 #include <wx/aui/auibar.h>
+#include <wx/filedlgcustomize.h>
 #include <vector>
 #include <memory>
 #include <array>
 
+struct OpenVolumeOptions
+{
+	bool sliceSequence = false;
+	bool channelSequence = false;
+	int digitOrder = 0; // 0=Channel first, 1=Z section first
+
+	std::string serialNumber;
+
+	bool compressData = false;
+	bool skipEmptyBricks = false;
+
+	std::wstring timeSequenceIdentifier;
+};
+
+class OpenVolumeHook :
+	public wxFileDialogCustomizeHook
+{
+public:
+	OpenVolumeHook(
+		const OpenVolumeOptions& options) :
+		m_options(options)
+	{
+	}
+
+	void AddCustomControls(
+		wxFileDialogCustomize& customizer) override;
+
+	void TransferDataFromCustomControls() override;
+
+	const OpenVolumeOptions& GetOptions() const
+	{
+		return m_options;
+	}
+
+private:
+	OpenVolumeOptions m_options;
+
+	wxFileDialogCheckBox* m_slice_chk = nullptr;
+	wxFileDialogCheckBox* m_channel_chk = nullptr;
+
+	wxFileDialogChoice* m_digit_order_choice = nullptr;
+
+	wxFileDialogTextCtrl* m_serial_txt = nullptr;
+
+	wxFileDialogCheckBox* m_compress_chk = nullptr;
+	wxFileDialogCheckBox* m_skip_bricks_chk = nullptr;
+
+	wxFileDialogTextCtrl* m_time_id_txt = nullptr;
+};
+
+struct ImportVolumeOptions
+{
+	bool compressData = false;
+	bool skipEmptyBricks = false;
+};
+
+class ImportVolumeHook :
+	public wxFileDialogCustomizeHook
+{
+public:
+	ImportVolumeHook(
+		const ImportVolumeOptions& options) :
+		m_options(options)
+	{
+	}
+
+	void AddCustomControls(
+		wxFileDialogCustomize& customizer) override;
+
+	void TransferDataFromCustomControls() override;
+
+	const ImportVolumeOptions& GetOptions() const
+	{
+		return m_options;
+	}
+
+private:
+	ImportVolumeOptions m_options;
+
+	wxFileDialogCheckBox* m_compress_chk = nullptr;
+	wxFileDialogCheckBox* m_skip_bricks_chk = nullptr;
+};
+
+struct SaveProjectOptions
+{
+	bool embedFiles = false;
+	bool compressProject = false;
+};
+
+class SaveProjectHook :
+	public wxFileDialogCustomizeHook
+{
+public:
+	SaveProjectHook(
+		const SaveProjectOptions& options) :
+		m_options(options)
+	{
+	}
+
+	void AddCustomControls(
+		wxFileDialogCustomize& customizer) override;
+
+	void TransferDataFromCustomControls() override;
+
+	const SaveProjectOptions& GetOptions() const
+	{
+		return m_options;
+	}
+
+private:
+	SaveProjectOptions m_options;
+
+	wxFileDialogCheckBox* m_embed_chk = nullptr;
+	wxFileDialogCheckBox* m_compress_chk = nullptr;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 class ProjectPanel;
 class TreePanel;
 class ListPanel;
@@ -82,6 +200,7 @@ class wxBasisSlider;
 
 class MainFrame : public wxFrame, public AgentOwner
 {
+public:
 	enum
 	{
 		//toolbar
@@ -179,7 +298,6 @@ class MainFrame : public wxFrame, public AgentOwner
 		ID_LZW_COMP
 	};
 
-public:
 	MainFrame(
 		const wxString& title,
 		int x, int y,
@@ -197,6 +315,8 @@ public:
 	std::string SavePerspective();
 
 	//update
+	void UpdateLastTool(int id);
+	void UpdateLastOpen(int id);
 	void UpdateProjPanel();
 	void UpdateMoviePanel();
 	void UpdatePropertyPanel();
@@ -208,6 +328,7 @@ public:
 	void PushMainStatusbarText(const std::string& text);
 	void PopMainStatusbarText();
 	void UpdateProgress(int val, const std::string& str);
+	void UpdateFullscreenMenu();
 
 	RenderViewPanel* CreateRenderViewPanel();
 	void LayoutRenderViewPanels(RenderViewLayout layout);
@@ -239,6 +360,25 @@ public:
 	void ShowOutAdjPanel(bool bval);
 	void ShowClipPlanePanel(bool bval);
 	void ShowPropertyPanel(bool bval);
+
+	void ShowBrushDlg();
+	void ShowCalculationDlg();
+	void ShowColocalizationDlg();
+	void ShowComponentDlg();
+	void ShowConvertDlg();
+	void ShowCountingDlg();
+	void ShowMachineLearningDlg();
+	void ShowMeasureDlg();
+	void ShowNoiseCancellingDlg();
+	void ShowOclDlg();
+	void ShowSettingDlg();
+	void ShowTrackDlg();
+
+	void ShowAboutDlg();
+
+	void LayoutOutputAdjPanel();
+	void ResetLayout();
+
 
 private:
 	//cmd settings
@@ -310,21 +450,6 @@ private:
 	void OnPaneClose(wxAuiManagerEvent& event);
 	//close
 	void OnClose(wxCloseEvent& event);
-
-	//extra controls in dialogs
-	static wxWindow* CreateExtraControlVolume(wxWindow* parent);
-	static wxWindow* CreateExtraControlVolumeForImport(wxWindow* parent);
-	static wxWindow* CreateExtraControlProjectSave(wxWindow* parent);
-	//open dialog options
-	void OnCh11Check(wxCommandEvent& event);
-	void OnCh12Check(wxCommandEvent& event);
-	void OnCmbChange(wxCommandEvent& event);
-	void OnTxt1Change(wxCommandEvent& event);
-	void OnTxt2Change(wxCommandEvent& event);
-	void OnCh2Check(wxCommandEvent& event);
-	void OnCh3Check(wxCommandEvent& event);
-	void OnChEmbedCheck(wxCommandEvent& event);
-	void OnChSaveCmpCheck(wxCommandEvent& event);
 	void OnSysColorChanged(wxSysColourChangedEvent& event);
 };
 

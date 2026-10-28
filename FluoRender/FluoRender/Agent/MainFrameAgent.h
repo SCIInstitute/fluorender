@@ -80,19 +80,41 @@ private:
 	void CreateRenderViewPanel();
 	void LayoutRenderViewPanels();
 	void SyncRenderViewPanels();
+	void LayoutOutAdjPanel();
 	void ToggleScriptBreakDlg();
 	void LastOpen();
 	void LastTool();
 
 	void ToggleToolbar();
 
+	//panels
 	void ToggleProjPanel();
 	void ToggleMoviePanel();
 	void ToggleOutAdjPanel();
 	void ToggleClipPlanePanel();
 	void TogglePropertyPanel();
 
+	//dialogs
+	void ShowBrushDlg();
+	void ShowCalculationDlg();
+	void ShowColocalizationDlg();
+	void ShowComponentDlg();
+	void ShowConvertDlg();
+	void ShowCountingDlg();
 	void ShowMachineLearningDlg();
+	void ShowMeasureDlg();
+	void ShowNoiseCancellingDlg();
+	void ShowOclDlg();
+	void ShowSettingDlg();
+	void ShowTrackDlg();
+
+	void ShowAboutDlg();
+	void ShowScriptProcFileDlg();
+
+	//reset layout
+	void ResetLayout();
+	//fullscreen
+	void ToggleFullscreen();
 
 	//volume
 	void OpenVolume();
@@ -104,31 +126,6 @@ private:
 	void OpenProject();
 	void SaveProject();
 	void SaveAsProject();
-
-
-	//panels
-	//dialogs
-	void ShowSettingDlg();
-	void ShowBrushDlg();
-	void ShowMeasureDlg();
-	void ShowComponentDlg();
-	void ShowTrackDlg();
-	void ShowCalculationDlg();
-	void ShowNoiseCancellingDlg();
-	void ShowCountingDlg();
-	void ShowColocalizationDlg();
-	void ShowConvertDlg();
-	void ShowOclDlg();
-	void ShowScriptBreakDlg(bool show = true);
-	void ShowInfo();
-	std::wstring ScriptDialog(const std::wstring& title,
-		const std::wstring& wildcard, long style);
-	void LayoutOutputAdjPanel();
-	//reset layout
-	void ResetLayout();
-	//fullscreen
-	void FullScreen();
-
 };
 
 #endif // MainFrameAgent_h
