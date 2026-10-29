@@ -58,6 +58,7 @@ public:
 	}
 
 	Agent* FindRenderCanvasAgent(const std::shared_ptr<RenderView>& view);
+	Agent* FindRenderViewPanelAgent(const std::shared_ptr<RenderView>& view);
 
 private:
 	std::set<Agent*> agents_;

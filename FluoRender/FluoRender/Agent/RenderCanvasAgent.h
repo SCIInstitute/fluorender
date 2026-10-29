@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 class RenderCanvas;
 class RenderView;
+class wxWindow;
 
 struct UpdateRequest;
 
@@ -53,6 +54,10 @@ public:
 	virtual void Update(
 		const UpdateRequest& request) override;
 
+	virtual void ApplySettings() override;
+
+	virtual void PreShutdown() override;
+
 	void RequestDraw();
 
 	void PerformDraw();
@@ -68,6 +73,8 @@ public:
 	{
 		return m_view.lock();
 	}
+
+	bool GetRequestMore() { return request_more_; }
 
 protected:
 	std::span < const std::string_view>
@@ -89,6 +96,10 @@ private:
 	void InitViewAll();
 	void InitViewBoundsCenter();
 
+	void Resize();
+	void Move();
+	void Idle();
+
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
@@ -98,6 +109,9 @@ private:
 	std::weak_ptr<RenderView> m_view;
 
 	bool draw_pending_ = false;
+	bool request_more_ = false;
+	//previous focus before brush
+	wxWindow* m_prev_focus{ nullptr };
 };
 
 #endif // RenderCanvasAgent_h

@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentOwner.h>
 #include <RenderCanvasAgent.h>
 #include <RenderView.h>
+#include <RenderViewPanelAgent.h>
 #include <MainFrameAgent.h>
 
 void Coordinator::Register(Agent* agent)
@@ -132,6 +133,20 @@ Agent* Coordinator::FindRenderCanvasAgent(const std::shared_ptr<RenderView>& vie
 	for (auto agent : agents_)
 	{
 		if (auto result = dynamic_cast<RenderCanvasAgent*>(agent))
+		{
+			auto result_view = result->GetView();
+			if (result_view && view == result_view)
+				return result;
+		}
+	}
+	return nullptr;
+}
+
+Agent* Coordinator::FindRenderViewPanelAgent(const std::shared_ptr<RenderView>& view)
+{
+	for (auto agent : agents_)
+	{
+		if (auto result = dynamic_cast<RenderViewPanelAgent*>(agent))
 		{
 			auto result_view = result->GetView();
 			if (result_view && view == result_view)

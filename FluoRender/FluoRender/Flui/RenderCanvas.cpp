@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <VolumeSelector.h>
 #include <RenderView.h>
 #include <StopWatch.hpp>
-#include <State.h>
 #include <MovieMaker.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
@@ -103,8 +102,7 @@ RenderCanvas::RenderCanvas(
 	const wxSize& size,
 	long style) :
 	wxGLCanvas(parent, GLAttribProvider::CanvasAttribs(), wxID_ANY, pos, size, style),
-	//previous focus
-	m_prev_focus(0),
+	m_glRC(sharedContext),
 	//timer for fullscreen
 	m_exit_fscreen_trigger(this, 0),
 	m_enable_touch(false),
@@ -117,33 +115,6 @@ RenderCanvas::RenderCanvas(
 
 RenderCanvas::~RenderCanvas()
 {
-	if (glbin_states.m_benchmark)
-	{
-		unsigned long long msec =
-			(unsigned long long)(glbin.getStopWatch(gstStopWatch)->total_time() * 1000.0);
-		unsigned long long count =
-			glbin.getStopWatch(gstStopWatch)->count();
-		double fps = glbin.getStopWatch(gstStopWatch)->total_fps();
-		wxString string = wxString("FluoRender has finished benchmarking.\n") +
-			wxString("Results:\n") +
-			wxString("Render size: ") + wxString::Format("%d X %d\n", GetSize().x, GetSize().y) +
-			wxString("Time: ") + wxString::Format("%llu msec\n", msec) +
-			wxString("Frames: ") + wxString::Format("%llu\n", count) +
-			wxString("FPS: ") + wxString::Format("%.2f", fps);
-		wxMessageDialog* diag = new wxMessageDialog(this, string, "Benchmark Results",
-			wxOK | wxICON_INFORMATION);
-		diag->ShowModal();
-	}
-
-	if (auto view = GetRenderView())
-	{
-		view->SetRenderViewPanel(0);
-		Root* root = glbin_data_manager.GetRoot();
-		if (root)
-			root->DeleteView(view.get());
-	}
-
-
 #ifdef _WIN32
 	//tablet
 	if (m_hTab)
@@ -159,16 +130,16 @@ RenderCanvas::~RenderCanvas()
 
 	if (m_full_screen)
 	{
-		m_full_screen = false;
-		m_renderview_panel->SetFullFrame(0);
-		if (auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>())
-		{
-			if (auto frame = frame_agent->GetMainFrame())
-			{
-				//m_frame->EraseAllCanvases();
-				frame->Close();
-			}
-		}
+		//m_full_screen = false;
+		//m_renderview_panel->SetFullFrame(0);
+		//if (auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>())
+		//{
+		//	if (auto frame = frame_agent->GetMainFrame())
+		//	{
+		//		//m_frame->EraseAllCanvases();
+		//		frame->Close();
+		//	}
+		//}
 	}
 
 	if (!m_sharedRC)
@@ -177,13 +148,9 @@ RenderCanvas::~RenderCanvas()
 
 void RenderCanvas::CreateUI()
 {
-	m_sharedRC = (sharedContext != nullptr);
+	m_sharedRC = (m_glRC != nullptr);
 
-	if (m_sharedRC)
-	{
-		m_glRC = sharedContext;
-	}
-	else
+	if (!m_sharedRC)
 	{
 		wxGLContextAttrs ctxAttrs = GLAttribProvider::MakeContextAttrs();
 		m_glRC = new wxGLContext(this, nullptr, &ctxAttrs);
@@ -212,32 +179,10 @@ void RenderCanvas::CreateUI()
 	}
 
 #ifdef _DEBUG
-	//example Pixel format descriptor detailing each part
-	//PIXELFORMATDESCRIPTOR pfd = {
-	// sizeof(PIXELFORMATDESCRIPTOR),  //  size of this pfd
-	// 1,                     // version number
-	// PFD_DRAW_TO_WINDOW |   // support window
-	// PFD_SUPPORT_OPENGL |   // support OpenGL
-	// PFD_DOUBLEBUFFER,      // double buffered
-	// PFD_TYPE_RGBA,         // RGBA type
-	// 24,                    // 24-bit color depth
-	// 0, 0, 0, 0, 0, 0,      // color bits ignored
-	// 0,                     // no alpha buffer
-	// 0,                     // shift bit ignored
-	// 0,                     // no accumulation buffer
-	// 0, 0, 0, 0,            // accum bits ignored
-	// 32,                    // 32-bit z-buffer
-	// 0,                     // no stencil buffer
-	// 0,                     // no auxiliary buffer
-	// PFD_MAIN_PLANE,        // main layer
-	// 0,                     // reserved
-	// 0, 0, 0                // layer masks ignored
-	// };
 	PIXELFORMATDESCRIPTOR  pfd;
 	//check ret. this is an error code when the pixel format is invalid.
 	int ret = GetPixelFormat(&pfd);
 #endif
-
 
 #ifdef _WIN32
 	//tablet initialization
@@ -280,12 +225,9 @@ void RenderCanvas::CreateUI()
 	Bind(wxEVT_TIMER, &RenderCanvas::OnQuitFscreen, this);
 }
 
-void RenderCanvas::DestroyUI()
-{
-}
-
 #ifdef _WIN32
-int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR* pfd) {
+int RenderCanvas::GetPixelFormat(PIXELFORMATDESCRIPTOR* pfd)
+{
 	int pixelFormat = ::GetPixelFormat(m_hDC);
 	if (pixelFormat == 0) return GetLastError();
 	pixelFormat = DescribePixelFormat(m_hDC, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), pfd);
@@ -299,22 +241,6 @@ RenderCanvasAgent* RenderCanvas::GetRenderCanvasAgent() const
 	return dynamic_cast<RenderCanvasAgent*>(m_agent.get());
 }
 
-inline fluo::Point RenderCanvas::GetMousePos(wxMouseEvent& e)
-{
-	double dval = 1;
-#ifdef _DARWIN
-	dval = GetDPIScaleFactor();
-#endif
-	fluo::Point pnt(e.GetPosition().x, e.GetPosition().y, 0);
-	pnt *= dval;
-	if (auto view = GetRenderView())
-	{
-		if (view->GetEnlarge())
-			pnt = pnt * view->GetEnlargeScale();
-	}
-	return pnt;
-}
-
 void RenderCanvas::SetFocusedSlider(wxBasisSlider* slider)
 {
 	if (m_focused_slider)
@@ -324,38 +250,19 @@ void RenderCanvas::SetFocusedSlider(wxBasisSlider* slider)
 		m_focused_slider->SetIndicatorFocused(true);
 }
 
-void RenderCanvas::Draw()
+void RenderCanvas::ExitFullscreen()
 {
-	wxPaintDC dc(this);
-	SetCurrent(*m_glRC);
-
-#ifdef __APPLE__
-
-#else
-	static bool glad_init = false;
-	if (!glad_init)
-	{
-		int result = gladLoadGL(MyGLGetProcAddress);
-		glad_init = result > 0;
-	}
-#endif
-
-	auto view = GetRenderView();
-	assert(view);
-	bool initialized = view->Init();
-	auto agent = GetRenderCanvasAgent();
-	if (agent)
-		agent->PerformDraw();
-
-	if (initialized)
-		m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
+	if (m_full_screen)
+		m_exit_fscreen_trigger.Start(10);
 }
 
-void RenderCanvas::Init()
+double RenderCanvas::GetDpiScale()
 {
-	if (auto view = GetRenderView())
-		view->Init();
-	m_renderview_panel->FluoRefresh(0, { gstMaxTextureSize, gstDeviceTree }, { -1 });
+#ifdef _DARWIN
+	return GetDPIScaleFactor(); // Logical->physical scale
+#else
+	return 1.0;
+#endif
 }
 
 #ifdef _WIN32
@@ -458,119 +365,28 @@ HCTX RenderCanvas::TabletInit(HWND hWnd, HINSTANCE hInst)
 
 void RenderCanvas::OnResize(wxSizeEvent& event)
 {
-#ifdef _DARWIN
-	const double dpi_scale = GetDPIScaleFactor(); // Logical->physical scale
-#else
-	const double dpi_scale = 1.0;
-#endif
-
-	if (auto view = GetRenderView())
-	{
-		// Tell the renderer about DPI so it can set GL viewport in physical pixels
-		view->SetDpiFactor(dpi_scale);
-
-		// Use the client area (logical units) for layout
-		int cw, ch;
-		GetClientSize(&cw, &ch);
-		// Avoid SetSize() here—let sizers manage this control
-		view->SetSize(cw, ch);           // logical width/height for UI logic
-		view->SetClient(0, 0, cw, ch);   // origin is typically 0,0 for client
-
-		auto agent = GetRenderCanvasAgent();
-		if (agent)
-			agent->RequestDraw();
-	}
-
-	// Make sure this doesn't call SetSize() or change min/best size in a DPI-dependent way.
-	m_renderview_panel->FluoUpdate({ gstScaleFactor });
-
+	auto agent = GetRenderCanvasAgent();
+	if (agent)
+		agent->UpdateUIToData({ gstResize });
 	// Always process the event so the framework can continue its layout pass.
 	event.Skip();
 }
 
 void RenderCanvas::OnMove(wxMoveEvent& event)
 {
-	wxRect rect = GetClientRect();
-	if (auto view = GetRenderView())
-		view->SetClient(rect.x, rect.y, rect.width, rect.height);
+	auto agent = GetRenderCanvasAgent();
+	if (agent)
+		agent->UpdateUIToData({ gstCanvasMove });
 }
 
 void RenderCanvas::OnIdle(wxIdleEvent& event)
 {
-	IdleState state;
-	auto view = GetRenderView();
-
-	state.m_movie_maker_render_canvas = view && (glbin_moviemaker.GetView() == view);
-	//mouse state
-	wxPoint mps = wxGetMousePosition();
-	state.m_mouse_over = wxFindWindowAtPoint(mps) == this &&
-		!glbin_states.m_modal_shown;
-	state.m_mouse_left = wxGetMouseState().LeftIsDown();
-	//key state
-	state.m_key_paint = wxGetKeyState(WXK_SHIFT);
-	state.m_key_erase = wxGetKeyState(wxKeyCode('x'));
-	state.m_key_diff = wxGetKeyState(wxKeyCode('z'));
-	state.m_key_ctrl = wxGetKeyState(WXK_CONTROL);
-	state.m_key_refresh = wxGetKeyState(WXK_F5);
-	state.m_key_main_mode = wxGetKeyState(wxKeyCode('v'));
-	state.m_key_mask_mode = wxGetKeyState(wxKeyCode('b'));
-	state.m_key_left = wxGetKeyState(WXK_LEFT);
-	state.m_key_right = wxGetKeyState(WXK_RIGHT);
-	state.m_key_up = wxGetKeyState(WXK_UP);
-	state.m_key_down = wxGetKeyState(WXK_DOWN);
-	state.m_key_mov_forward = wxGetKeyState(wxKeyCode('d'));
-	state.m_key_mov_backward = wxGetKeyState(wxKeyCode('a'));
-	state.m_key_mov_play = wxGetKeyState(WXK_SPACE);
-	state.m_key_clip_up = wxGetKeyState(wxKeyCode('s'));
-	state.m_key_clip_down = wxGetKeyState(wxKeyCode('w'));
-	state.m_key_cell_full = wxGetKeyState(wxKeyCode('f'));
-	state.m_key_cell_link = wxGetKeyState(wxKeyCode('l'));
-	state.m_key_cell_new_id = wxGetKeyState(wxKeyCode('n'));
-	state.m_key_cell_clear = wxGetKeyState(wxKeyCode('c'));
-	state.m_key_cell_include = wxGetKeyState(WXK_RETURN);
-	state.m_key_cell_exclude = wxGetKeyState(wxKeyCode('\\'));
-	state.m_key_save_mask = wxGetKeyState(wxKeyCode('m'));
-	state.m_key_exit_fullscreen = wxGetKeyState(WXK_ESCAPE);
-	state.m_key_fullscreen = wxGetKeyState(WXK_F11);
-	state.m_key_brush_size_down = wxGetKeyState(wxKeyCode('['));
-	state.m_key_brush_size_up = wxGetKeyState(wxKeyCode(']'));
-	state.m_key_ruler_relax = wxGetKeyState(wxKeyCode('r'));
-
-	m_prev_focus = FindFocus();
-
-	if (view)
-		view->ProcessIdle(state);
-
-	event.RequestMore(state.m_request_more);
-
-	//full screen
-	if (state.m_fullscreen)
-		m_renderview_panel->SetFullScreen();
-	if (state.m_exit_fullscreen)
-		m_exit_fscreen_trigger.Start(10);
-
-	if (state.m_refresh)
+	auto agent = GetRenderCanvasAgent();
+	if (agent)
 	{
-		auto view = GetRenderView();
-		int id = view ? view->Id() : -1;
-		m_renderview_panel->FluoRefresh(0, state.m_value_collection, { id });
+		agent->UpdateUIToData({ gstCanvasIdle });
+		event.RequestMore(agent->GetRequestMore());
 	}
-	if (state.m_set_focus)
-		SetFocus();
-	if (glbin_states.m_benchmark)
-	{
-		wxString title = wxString(fluo::AppTitle) +
-			" " + wxString(fluo::VersionString) +
-			" Benchmarking... FPS = " +
-			wxString::Format("%.2f", state.m_benchmark_fps);
-		m_frame->SetTitle(title);
-	}
-
-	if (state.m_set_cur_focus)
-		SetFocus();
-
-	if (state.m_set_previous_focus && m_prev_focus)
-		m_prev_focus->SetFocus();
 }
 
 void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
@@ -618,18 +434,30 @@ void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 
 void RenderCanvas::OnClose(wxCloseEvent& event)
 {
-	if (m_full_screen)
-	{
-		m_exit_fscreen_trigger.Start(10);
-		event.Veto();
-	}
+	ExitFullscreen();
+	event.Veto();
 }
 
 //draw
 void RenderCanvas::OnDraw(wxPaintEvent& event)
 {
-	//DBGPRINT(L"OnDraw\n");
-	Draw();
+	wxPaintDC dc(this);
+	SetCurrent(*m_glRC);
+
+#ifdef __APPLE__
+
+#else
+	static bool glad_init = false;
+	if (!glad_init)
+	{
+		int result = gladLoadGL(MyGLGetProcAddress);
+		glad_init = result > 0;
+	}
+#endif
+
+	auto agent = m_agent->As<RenderCanvasAgent>();
+	if (agent)
+		agent->NotifyViewUpdate({}, UpdateMode::SenderOnly, "RenderCanvas::OnDraw()");
 }
 
 #ifdef _WIN32

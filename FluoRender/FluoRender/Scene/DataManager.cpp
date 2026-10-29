@@ -394,7 +394,7 @@ void DataManager::StartupLoad(const std::vector<std::wstring>& files, bool run_m
 		if (suffix == L".vrp")
 		{
 			glbin_project.Open(files[0]);
-			m_frame->FluoUpdate({ gstMainFrameTitle });
+			m_frame->FluoUpdate({ gstProjectTitle });
 		}
 		else if (suffix == L".nrrd" ||
 			suffix == L".msk" ||

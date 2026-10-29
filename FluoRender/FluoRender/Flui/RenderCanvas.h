@@ -66,34 +66,29 @@ public:
 
 	RenderCanvasAgent* GetRenderCanvasAgent() const;
 
-	//get view info for external ops
-	//get size, considering enlargement
-	inline fluo::Point GetMousePos(wxMouseEvent& e);
-
 	void SetFocusedSlider(wxBasisSlider* slider);
 
-	void Draw();
+	void ExitFullscreen();
+
+	//get
+	double GetDpiScale();
 
 private:
 	wxGLContext* m_glRC;
 	bool m_sharedRC;
-	//previous focus before brush
-	wxWindow* m_prev_focus;
 
 	//timer for exit full screen
 	wxTimer m_exit_fscreen_trigger;
 
-	//wacom support
 #ifdef _WIN32
+	//wacom support
 	static HCTX m_hTab;
 	static LOGCONTEXTA m_lc;
+	decltype(GetPointerInfo)* GetPI;
 #endif
 
 	//touch pointer ids
 	bool m_enable_touch;
-#ifdef _WIN32
-	decltype(GetPointerInfo)* GetPI;
-#endif
 	int m_ptr_id1;
 	int m_ptr1_x;
 	int m_ptr1_y;
@@ -112,10 +107,10 @@ private:
 	wxBasisSlider* m_focused_slider;
 
 private:
-	void Init();
 #ifdef _WIN32
 	//wacom tablet
 	HCTX TabletInit(HWND hWnd, HINSTANCE hInst);
+	WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
 #endif
 
 	//system call
@@ -126,11 +121,6 @@ private:
 	void OnIdle(wxIdleEvent& event);
 	void OnQuitFscreen(wxTimerEvent& event);
 	void OnClose(wxCloseEvent& event);
-#ifdef _WIN32
-	WXLRESULT MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM lParam);
-#endif
-
-	friend class RenderViewPanel;
 };
 
 #endif//_RENDERCANVAS_H_

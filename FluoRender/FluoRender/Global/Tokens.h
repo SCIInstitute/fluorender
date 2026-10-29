@@ -123,7 +123,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstOutAdjPanel "out adj panel"
 #define gstClipPlanePanel "clip plane panel"
 #define gstMainToolbar "main toolbar"
-#define gstMainFrameTitle "main frame title"
+#define gstProjectTitle "project title"
+#define gstBenchmarkTitle "benchmark title"
 #define gstMainStatusbarText "main statusbar text"
 #define gstMainStatusbarPush "main statusbar push"
 #define gstMainStatusbarPop "main statusbar pop"
@@ -559,7 +560,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstAdaptive "adaptive"//drawing quality is adaptive to speed
 #define gstClearBuffer "clear buffer"
 #define gstGrowEnable "grow enable"//flag for grow is currently on for idle events
-#define gstResize "resize"//request to resize
 #define gstDrawBrush "draw brush"//brush settings
 #define gstPaintEnable "paint enable"
 #define gstPaintDisplay "paint display"
@@ -1490,5 +1490,7 @@ DEALINGS IN THE SOFTWARE.
 //render canvas
 #define gstInitViewAll "init view all"
 #define gstInitViewBoundsCenter "init view bounds center"
+#define gstCanvasMove "canvas move"
+#define gstCanvasIdle "canvas idle"
 
 #endif//NAMES_HPP

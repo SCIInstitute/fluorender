@@ -52,6 +52,10 @@ public:
 	void ShutdownAll();
 
 	void SetFocusVRenderViews(wxBasisSlider* slider);
+	void SetBenchmarkString(const std::string& str)
+	{
+		m_benchmark_str = str;
+	}
 
 	void AddRenderView(RenderViewPanelAgent* agent);
 	void RemoveRenderView(RenderViewPanelAgent* agent);
@@ -75,6 +79,8 @@ private:
 	};
 
 	std::set<RenderViewPanelAgent*> renderview_agent_list_;
+
+	std::string m_benchmark_str;
 
 private:
 	void CreateRenderViewPanel();

@@ -92,10 +92,14 @@ void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 	{
 		frame->UpdateMainToolbar();
 	}
-	if (update_all || request.HasValue(gstMainFrameTitle))
+	if (update_all || request.HasValue(gstProjectTitle))
 	{
 		auto str = glbin_data_manager.GetProjectFile();
 		frame->UpdateMainFrameTitle(str);
+	}
+	if (update_all || request.HasValue(gstBenchmarkTitle))
+	{
+		frame->UpdateMainFrameTitle(m_benchmark_str);
 	}
 	if (update_all || request.HasValue(gstMainStatusbarText))
 	{
@@ -939,7 +943,7 @@ void MainFrameAgent::OpenProject()
 	{
 		std::wstring path = fopendlg.GetPath().ToStdWstring();
 		glbin_project.Open(path);
-		UpdateDataToUI({ gstMainFrameTitle });
+		UpdateDataToUI({ gstProjectTitle });
 	}
 }
 
@@ -954,7 +958,7 @@ void MainFrameAgent::SaveProject()
 	{
 		bool inc = glbin_settings.m_prj_save_inc;
 		glbin_project.Save(default_path, inc);
-		UpdateDataToUI({ gstMainFrameTitle });
+		UpdateDataToUI({ gstProjectTitle });
 	}
 }
 
@@ -990,7 +994,7 @@ void MainFrameAgent::SaveAsProject()
 
 		filename = fopendlg.GetPath().ToStdWstring();
 		glbin_project.Save(filename, false);
-		UpdateDataToUI({ gstMainFrameTitle });
+		UpdateDataToUI({ gstProjectTitle });
 	}
 }
 
