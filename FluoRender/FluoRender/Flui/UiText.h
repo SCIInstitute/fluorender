@@ -29,6 +29,8 @@ DEALINGS IN THE SOFTWARE.
 #ifndef UiText_h
 #define UiText_h
 
+#include <Version.h>
+
 inline const std::string VERSION_CONTACT =
 "https://sciinstitute.github.io/fluorender/";
 
