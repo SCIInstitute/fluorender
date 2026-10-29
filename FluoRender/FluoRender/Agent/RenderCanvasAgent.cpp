@@ -51,59 +51,12 @@ RenderCanvasAgent::RenderCanvasAgent(
 {
 }
 
-bool RenderCanvasAgent::Accept(
-	const UpdateRequest& request) const
-{
-	return
-		request.HasValue(gstRotations) ||
-		request.HasValue(gstCamera) ||
-		request.HasValue(gstRenderView);
-}
-
 RenderCanvasAgent*
 RenderCanvasAgent::GetRenderSender(
 	const UpdateRequest& request) const
 {
 	return dynamic_cast<RenderCanvasAgent*>(
 		request.sender);
-}
-
-void RenderCanvasAgent::SyncRotations(
-	RenderCanvasAgent* sender)
-{
-	if (!sender)
-		return;
-
-	auto src_view = sender->GetView();
-	auto dst_view = GetView();
-
-	if (!src_view || !dst_view)
-		return;
-
-	if (src_view == dst_view)
-		return;
-
-	dst_view->SetRotations(
-		src_view->GetRotations(),
-		true);
-}
-
-void RenderCanvasAgent::SyncCamera(
-	RenderCanvasAgent* sender)
-{
-	if (!sender)
-		return;
-
-	auto src_view = sender->GetView();
-	auto dst_view = GetView();
-
-	if (!src_view || !dst_view)
-		return;
-
-	if (src_view == dst_view)
-		return;
-
-	dst_view->CopyCamera(src_view);
 }
 
 void RenderCanvasAgent::Update(
@@ -142,7 +95,8 @@ void RenderCanvasAgent::Update(
 	if (request.HasValue(gstCanvasIdle))
 		Idle();
 
-	RequestDraw();
+	if (request.HasValue(gstCanvasMouse))
+		Mouse();
 }
 
 void RenderCanvasAgent::ApplySettings()
@@ -231,11 +185,55 @@ RenderCanvas* RenderCanvasAgent::GetCanvas() const
 	return static_cast<RenderCanvas*>(GetOwner());
 }
 
+void RenderCanvasAgent::SyncRotations(
+	RenderCanvasAgent* sender)
+{
+	if (!sender)
+		return;
+
+	auto src_view = sender->GetView();
+	auto dst_view = GetView();
+
+	if (!src_view || !dst_view)
+		return;
+
+	if (src_view == dst_view)
+		return;
+
+	dst_view->SetRotations(
+		src_view->GetRotations(),
+		true);
+
+	RequestDraw();
+}
+
+void RenderCanvasAgent::SyncCamera(
+	RenderCanvasAgent* sender)
+{
+	if (!sender)
+		return;
+
+	auto src_view = sender->GetView();
+	auto dst_view = GetView();
+
+	if (!src_view || !dst_view)
+		return;
+
+	if (src_view == dst_view)
+		return;
+
+	dst_view->CopyCamera(src_view);
+
+	RequestDraw();
+}
+
 void RenderCanvasAgent::InitViewAll()
 {
 	auto view = m_view.lock();
 	if (view)
 		view->InitView(-1);
+
+	RequestDraw();
 }
 
 void RenderCanvasAgent::InitViewBoundsCenter()
@@ -243,6 +241,8 @@ void RenderCanvasAgent::InitViewBoundsCenter()
 	auto view = m_view.lock();
 	if (view)
 		view->InitView(INIT_BOUNDS | INIT_CENTER);
+
+	RequestDraw();
 }
 
 void RenderCanvasAgent::Resize()
@@ -266,8 +266,7 @@ void RenderCanvasAgent::Resize()
 	view->SetSize(cw, ch);           // logical width/height for UI logic
 	view->SetClient(0, 0, cw, ch);   // origin is typically 0,0 for client
 
-	RequestDraw();
-	NotifyDataToUI({ gstScaleFactor });
+	NotifyViewUpdate({ gstScaleFactor });
 }
 
 void RenderCanvasAgent::Move()
@@ -281,6 +280,8 @@ void RenderCanvasAgent::Move()
 
 	wxRect rect = canvas->GetClientRect();
 	view->SetClient(rect.x, rect.y, rect.width, rect.height);
+
+	//RequestDraw();
 }
 
 void RenderCanvasAgent::Idle()
@@ -348,7 +349,7 @@ void RenderCanvasAgent::Idle()
 
 	if (state.m_refresh)
 	{
-		UpdateUIToData(state.m_value_collection);
+		NotifyViewUpdate(state.m_value_collection);
 	}
 	if (state.m_set_focus)
 		canvas->SetFocus();
@@ -371,4 +372,29 @@ void RenderCanvasAgent::Idle()
 
 	if (state.m_set_previous_focus && m_prev_focus)
 		m_prev_focus->SetFocus();
+}
+
+void RenderCanvasAgent::Mouse()
+{
+	auto canvas = GetCanvas();
+	if (!canvas)
+		return;
+	auto view = GetView();
+	if (!view)
+		return;
+
+	auto& state = canvas->GetMouseState();
+
+	view->SetMousePos(state.m_pos_x, state.m_pos_y);
+
+	view->ProcessMouse(state);
+
+	if (state.m_reset_focus_slider)
+		canvas->SetFocusedSlider(nullptr);
+	if (state.m_scroll_focus_slider &&
+		canvas->GetValidFocusedSlider())
+	{
+		int value = state.m_mouse_wheel_rotate / state.m_mouse_wheel_delta;
+		canvas->ScrollFocusedSlider(value);
+	}
 }

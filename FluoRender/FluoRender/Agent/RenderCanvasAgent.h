@@ -48,9 +48,6 @@ public:
 	virtual ~RenderCanvasAgent() = default;
 
 	// Agent interface
-	virtual bool Accept(
-		const UpdateRequest& request) const override;
-
 	virtual void Update(
 		const UpdateRequest& request) override;
 
@@ -99,11 +96,19 @@ private:
 	void Resize();
 	void Move();
 	void Idle();
+	void Mouse();
 
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
-		gstCurrentSelect,
+		gstRenderView,
+		gstRotations,
+		gstCamera,
+		gstInitViewAll,
+		gstInitViewBoundsCenter,
+		gstResize,
+		gstCanvasMove,
+		gstCanvasMouse
 	};
 
 	std::weak_ptr<RenderView> m_view;

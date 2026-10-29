@@ -379,6 +379,7 @@ public:
 	void LayoutOutputAdjPanel();
 	void ResetLayout();
 
+	void QuitCanvasFullscreen();
 
 private:
 	//cmd settings

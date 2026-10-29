@@ -99,7 +99,7 @@ void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 	}
 	if (update_all || request.HasValue(gstBenchmarkTitle))
 	{
-		frame->UpdateMainFrameTitle(m_benchmark_str);
+		frame->UpdateMainFrameTitle(s2ws(m_benchmark_str));
 	}
 	if (update_all || request.HasValue(gstMainStatusbarText))
 	{
@@ -184,6 +184,12 @@ void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 
 	if (request.HasValue(gstFullscreenFrame))
 		ToggleFullscreen();
+
+	if (request.HasValue(gstQuitCanvasFullscreen))
+		QuitCanvasFullscreen();
+
+	if (request.HasValue(gstMainFrameClose))
+		Close();
 }
 
 void MainFrameAgent::UpdateData(const UpdateRequest& request)
@@ -788,6 +794,20 @@ void MainFrameAgent::ToggleFullscreen()
 			wxFULLSCREEN_NOCAPTION);
 
 	UpdateDataToUI({ gstFullscreenMenu });
+}
+
+void MainFrameAgent::QuitCanvasFullscreen()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+		frame->QuitCanvasFullscreen();
+}
+
+void MainFrameAgent::Close()
+{
+	auto frame = GetMainFrame();
+	if (frame)
+		frame->Close();
 }
 
 void MainFrameAgent::OpenVolume()

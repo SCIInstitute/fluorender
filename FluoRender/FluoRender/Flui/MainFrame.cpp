@@ -1695,6 +1695,18 @@ void MainFrame::ResetLayout()
 		Right().Show().Dock().Layer(1);
 }
 
+void MainFrame::QuitCanvasFullscreen()
+{
+#ifdef _WIN32
+	if (glbin_settings.m_show_cursor)
+		ShowCursor(true);
+#endif
+	Iconize(false);
+	SetFocus();
+	Raise();
+	Show();
+}
+
 //toolbar menus
 void MainFrame::OnToolbarMenu(wxAuiToolBarEvent& event)
 {

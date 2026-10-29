@@ -28,25 +28,16 @@ DEALINGS IN THE SOFTWARE.
 
 #include <fl_gl.h>
 #include <RenderCanvas.h>
+#include <RenderCanvasAgent.h>
 #include <GLAttribProvider.h>
 #include <Global.h>
-#include <Tokens.h>
-#include <MainFrame.h>
-#include <RenderViewPanel.h>
-#include <VolumeSelector.h>
-#include <RenderView.h>
-#include <StopWatch.hpp>
-#include <MovieMaker.h>
 #include <GlobalStates.h>
 #include <MainSettings.h>
-#include <CurrentObjects.h>
-#include <Root.h>
-#include <DataManager.h>
-#include <LookingGlassRenderer.h>
-#include <FramebufferStateTracker.h>
-#include <RenderCanvasAgent.h>
+#include <VolumeSelector.h>
 #include <Coordinator.h>
-#include <Debug.h>
+#include <RenderViewPanel.h>
+#include <RenderViewPanelAgent.h>
+#include <MainFrameAgent.h>
 #ifdef _WIN32
 //wacom support
 #include <wx/msw/private.h>
@@ -250,6 +241,12 @@ void RenderCanvas::SetFocusedSlider(wxBasisSlider* slider)
 		m_focused_slider->SetIndicatorFocused(true);
 }
 
+void RenderCanvas::ScrollFocusedSlider(int ival)
+{
+	if (GetValidFocusedSlider())
+		m_focused_slider->Scroll(ival);
+}
+
 void RenderCanvas::ExitFullscreen()
 {
 	if (m_full_screen)
@@ -391,44 +388,46 @@ void RenderCanvas::OnIdle(wxIdleEvent& event)
 
 void RenderCanvas::OnQuitFscreen(wxTimerEvent& event)
 {
-	m_exit_fscreen_trigger.Stop();
-	if (!m_frame || !m_renderview_panel)
+	auto agent = GetRenderCanvasAgent();
+	if (!agent)
 		return;
 
+	m_exit_fscreen_trigger.Stop();
 	m_full_screen = false;
-	wxFrame* full_frame = m_renderview_panel->GetFullFrame();
+
+	auto render_panel_agent =
+		glbin_coordinator.FindRenderViewPanelAgent(
+			agent->GetView());
+	if (!render_panel_agent)
+		return;
+	auto mainframe_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (!mainframe_agent)
+		return;
+
 	if (glbin_states.m_benchmark)
 	{
-		if (full_frame)
-			full_frame->Hide();
-		if (m_frame)
-			m_frame->Close();
+		render_panel_agent->UpdateDataToUI({ gstHideFullFrame });
+		mainframe_agent->UpdateDataToUI({ gstMainFrameClose });
 	}
-	else if (GetParent() == full_frame)
+	else
 	{
-		Reparent(m_renderview_panel);
-		wxBoxSizer* view_sizer = m_renderview_panel->GetViewSizer();
-		if (view_sizer)
+		auto* renderview_panel = render_panel_agent->As<RenderViewPanelAgent>()->GetPanel();
+		auto full_frame = renderview_panel->GetFullFrame();
+		if (GetParent() == full_frame)
 		{
-			view_sizer->Clear();
-			view_sizer->Add(this, 1, wxEXPAND);
+			Reparent(renderview_panel);
+			wxBoxSizer* view_sizer = renderview_panel->GetViewSizer();
+			if (view_sizer)
+			{
+				view_sizer->Clear();
+				view_sizer->Add(this, 1, wxEXPAND);
+			}
+			renderview_panel->Layout();
+			full_frame->Hide();
+
+			mainframe_agent->UpdateDataToUI({ gstQuitCanvasFullscreen });
+			agent->RequestDraw();
 		}
-		m_renderview_panel->Layout();
-		full_frame->Hide();
-		if (m_frame)
-		{
-#ifdef _WIN32
-			if (glbin_settings.m_show_cursor)
-				ShowCursor(true);
-#endif
-			m_frame->Iconize(false);
-			m_frame->SetFocus();
-			m_frame->Raise();
-			m_frame->Show();
-		}
-		if (auto view = GetRenderView())
-			if (auto agent = GetRenderCanvasAgent())
-				agent->RequestDraw();
 	}
 }
 
@@ -582,53 +581,43 @@ WXLRESULT RenderCanvas::MSWWindowProc(WXUINT message, WXWPARAM wParam, WXLPARAM 
 
 void RenderCanvas::OnMouse(wxMouseEvent& event)
 {
-	MouseState state;
+	auto agent = m_agent->As<RenderCanvasAgent>();
+	if (!agent)
+		return;
 
-	state.m_valid_focus_slider = m_focused_slider != nullptr;
+	m_mouse_state.m_valid_focus_slider = m_focused_slider != nullptr;
 	//mouse
-	state.m_mouse_left_down = event.LeftDown();
-	state.m_mouse_right_down = event.RightDown();
-	state.m_mouse_middle_down = event.MiddleDown();
-	state.m_mouse_left_up = event.LeftUp();
-	state.m_mouse_right_up = event.RightUp();
-	state.m_mouse_middle_up = event.MiddleUp();
-	state.m_mouse_left_is_down = event.LeftIsDown();
-	state.m_mouse_right_is_down = event.RightIsDown();
-	state.m_mouse_middle_is_down = event.MiddleIsDown();
-	state.m_mouse_drag = event.Dragging();
-	state.m_mouse_wheel_rotate = event.GetWheelRotation();
-	state.m_mouse_wheel_delta = event.GetWheelDelta();
+	m_mouse_state.m_mouse_left_down = event.LeftDown();
+	m_mouse_state.m_mouse_right_down = event.RightDown();
+	m_mouse_state.m_mouse_middle_down = event.MiddleDown();
+	m_mouse_state.m_mouse_left_up = event.LeftUp();
+	m_mouse_state.m_mouse_right_up = event.RightUp();
+	m_mouse_state.m_mouse_middle_up = event.MiddleUp();
+	m_mouse_state.m_mouse_left_is_down = event.LeftIsDown();
+	m_mouse_state.m_mouse_right_is_down = event.RightIsDown();
+	m_mouse_state.m_mouse_middle_is_down = event.MiddleIsDown();
+	m_mouse_state.m_mouse_drag = event.Dragging();
+	m_mouse_state.m_mouse_wheel_rotate = event.GetWheelRotation();
+	m_mouse_state.m_mouse_wheel_delta = event.GetWheelDelta();
 	//key
-	state.m_key_alt = event.AltDown();
-	state.m_key_ctrl = event.ControlDown();
+	m_mouse_state.m_key_alt = event.AltDown();
+	m_mouse_state.m_key_ctrl = event.ControlDown();
+	//coordinates
+	m_mouse_state.m_pos_x = event.GetPosition().x;
+	m_mouse_state.m_pos_y = event.GetPosition().y;
 
 	wxWindow* window = wxWindow::FindFocus();
 	if (window &&
-		(state.m_mouse_left_down ||
-			state.m_mouse_right_down ||
-			state.m_mouse_middle_down ||
-			state.m_mouse_left_up ||
-			state.m_mouse_right_up ||
-			state.m_mouse_middle_up ||
-			state.m_mouse_drag ||
-			state.m_mouse_wheel_rotate != 0))
+		(m_mouse_state.m_mouse_left_down ||
+			m_mouse_state.m_mouse_right_down ||
+			m_mouse_state.m_mouse_middle_down ||
+			m_mouse_state.m_mouse_left_up ||
+			m_mouse_state.m_mouse_right_up ||
+			m_mouse_state.m_mouse_middle_up ||
+			m_mouse_state.m_mouse_drag ||
+			m_mouse_state.m_mouse_wheel_rotate != 0))
 		SetFocus();
 
-	if (auto view = GetRenderView())
-	{
-		view->SetMousePos(event.GetPosition().x, event.GetPosition().y);
-
-		view->ProcessMouse(state);
-	}
-
-	if (state.m_reset_focus_slider)
-		SetFocusedSlider(nullptr);
-	if (state.m_scroll_focus_slider &&
-		m_focused_slider &&
-		m_focused_slider->IsEnabled())
-	{
-		int value = state.m_mouse_wheel_rotate / state.m_mouse_wheel_delta;
-		m_focused_slider->Scroll(value);
-	}
+	agent->UpdateUIToData({ gstCanvasMouse });
 }
 

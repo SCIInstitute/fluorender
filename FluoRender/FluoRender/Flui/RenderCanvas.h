@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <AgentOwner.h>
 #include <Size.h>
 #include <Point.h>
+#include <State.h>
 #include <wxBasisSlider.h>
 #ifdef _WIN32
 #include <wintab.h>
@@ -67,11 +68,17 @@ public:
 	RenderCanvasAgent* GetRenderCanvasAgent() const;
 
 	void SetFocusedSlider(wxBasisSlider* slider);
+	void ScrollFocusedSlider(int ival);
+	void SetFullscreen(bool bval) { m_full_screen = bval; }
 
 	void ExitFullscreen();
 
 	//get
+	wxGLContext* GetGLContext() { return m_glRC; }
 	double GetDpiScale();
+	bool GetFullscreen() { return m_full_screen; }
+	bool GetValidFocusedSlider() { return m_focused_slider != nullptr && m_focused_slider->IsEnabled(); }
+	MouseState& GetMouseState() { return m_mouse_state; }
 
 private:
 	wxGLContext* m_glRC;
@@ -105,6 +112,9 @@ private:
 
 	//focused slider
 	wxBasisSlider* m_focused_slider;
+
+	//mouse state for agent
+	MouseState m_mouse_state;
 
 private:
 #ifdef _WIN32

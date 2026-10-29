@@ -939,7 +939,7 @@ void RenderViewPanel::UpdateCamRotation(const fluo::Vector& val, int ival)
 wxGLContext* RenderViewPanel::GetContext()
 {
 	if (m_canvas)
-		return m_canvas->m_glRC/*GetContext()*/;
+		return m_canvas->GetGLContext();
 	else
 		return 0;
 }
@@ -979,7 +979,7 @@ bool RenderViewPanel::SetFullScreen()
 		m_full_frame->Iconize(false);
 		m_full_frame->Raise();
 		m_full_frame->Show();
-		m_canvas->m_full_screen = true;
+		m_canvas->SetFullscreen(true);
 		m_canvas->SetFocus();
 		return true;
 	}
@@ -988,7 +988,13 @@ bool RenderViewPanel::SetFullScreen()
 	return false;
 }
 
-void RenderViewPanel::CloseFullScreen()
+void RenderViewPanel::HideFullFrame()
+{
+	if (m_full_frame)
+		m_full_frame->Hide();
+}
+
+void RenderViewPanel::CloseCanvas()
 {
 	if (m_canvas->GetParent() == m_full_frame)
 		m_canvas->Close();

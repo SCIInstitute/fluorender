@@ -121,6 +121,8 @@ private:
 	void ResetLayout();
 	//fullscreen
 	void ToggleFullscreen();
+	void QuitCanvasFullscreen();
+	void Close();
 
 	//volume
 	void OpenVolume();

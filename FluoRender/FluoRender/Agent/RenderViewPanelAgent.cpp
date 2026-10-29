@@ -79,7 +79,7 @@ void RenderViewPanelAgent::PreShutdown()
 	//close full screen
 	auto panel = GetPanel();
 	if (panel)
-		panel->CloseFullScreen();
+		panel->CloseCanvas();
 	//save default
 	auto view = GetView();
 	auto cur_view = glbin_current.render_view.lock();
@@ -354,8 +354,10 @@ void RenderViewPanelAgent::UpdateData(const UpdateRequest& request)
 		SetHolography();
 	if (request.HasValue(gstFullScreen))
 		m_fullscreen_trigger.start(10);
-	if (request.HasValue(gstCloseFullScreen))
-		CloseFullScreen();
+	if (request.HasValue(gstCloseCanvas))
+		CloseCanvas();
+	if (request.HasValue(gstHideFullFrame))
+		HideFullFrame();
 	if (request.HasValue(gstDepthAtten))
 		SetDepthAttenEnable();
 	if (request.HasValue(gstDaInt))
@@ -893,11 +895,18 @@ void RenderViewPanelAgent::SetFullScreen()
 	}
 }
 
-void RenderViewPanelAgent::CloseFullScreen()
+void RenderViewPanelAgent::CloseCanvas()
 {
 	auto panel = GetPanel();
 	if (panel)
-		panel->CloseFullScreen();
+		panel->CloseCanvas();
+}
+
+void RenderViewPanelAgent::HideFullFrame()
+{
+	auto panel = GetPanel();
+	if (panel)
+		panel->HideFullFrame();
 }
 
 void RenderViewPanelAgent::SetDepthAttenEnable()

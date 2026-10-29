@@ -1268,7 +1268,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstSaveViewDefault "save view default"
 #define gstStereography "stereography"
 #define gstHolography "holography"
-#define gstCloseFullScreen "close full screen"
+#define gstCloseCanvas "close canvas"
 #define gstDepthAttenReset "depth atten reset"
 #define gstViewPin "view pin"
 #define gstClickCenter "click center"
@@ -1278,6 +1278,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstOrthoView "ortho view"
 #define gstZeroRotations "zero rotations"
 #define gstRotationsReset "rotations reset"
+#define gstHideFullFrame "hide full frame"
 
 //script break dialog
 #define gstScriptHold "script hold"
@@ -1478,6 +1479,8 @@ DEALINGS IN THE SOFTWARE.
 #define gstSaveAsProject "save as project"
 #define gstLastOpen "last open"
 #define gstSettingDlg "setting dlg"
+#define gstQuitCanvasFullscreen "quit canvas fullscreen"
+#define gstMainFrameClose "mainframe close"
 
 //proptery panel
 #define gstPropertyPageCreate "property page create"
@@ -1492,5 +1495,6 @@ DEALINGS IN THE SOFTWARE.
 #define gstInitViewBoundsCenter "init view bounds center"
 #define gstCanvasMove "canvas move"
 #define gstCanvasIdle "canvas idle"
+#define gstCanvasMouse "canvas mouse"
 
 #endif//NAMES_HPP

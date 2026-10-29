@@ -190,7 +190,8 @@ public:
 	wxGLContext* GetContext();
 
 	bool SetFullScreen();
-	void CloseFullScreen();
+	void HideFullFrame();
+	void CloseCanvas();
 	void FocusCanvas();
 
 	//get

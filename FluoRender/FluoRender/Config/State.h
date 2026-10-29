@@ -65,6 +65,9 @@ public:
 	int m_mouse_wheel_delta = 0;
 	//key state
 	bool m_key_alt = false;//alt
+	//coordinates
+	int m_pos_x = 0;
+	int m_pos_y = 0;
 };
 
 class IdleState : public BaseState

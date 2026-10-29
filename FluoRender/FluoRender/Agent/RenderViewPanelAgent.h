@@ -117,7 +117,7 @@ private:
 		gstStereography,
 		gstHolography,
 		gstFullScreen,
-		gstCloseFullScreen,
+		gstCloseCanvas,
 		gstDepthAttenReset,
 		gstViewPin,
 		gstCenter,
@@ -171,7 +171,8 @@ private:
 	void SetStereography();
 	void SetHolography();
 	void SetFullScreen();
-	void CloseFullScreen();
+	void CloseCanvas();
+	void HideFullFrame();
 
 	void SetDepthAttenEnable();
 	void SetDepthAtten();
