@@ -1332,13 +1332,12 @@ std::array<int, 4> MainFrame::GetMainFrameRect()
 			r.right - r.left,
 			r.bottom - r.top };
 	}
-#else
+#endif
 	// fallback (non-Windows)
 	wxRect r = GetScreenRect();
 
 	return { r.x, r.y,
 		r.width, r.height };
-#endif
 }
 
 double MainFrame::GetMainMemorySizeInMB()
