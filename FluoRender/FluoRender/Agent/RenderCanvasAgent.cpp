@@ -62,10 +62,6 @@ RenderCanvasAgent::GetRenderSender(
 void RenderCanvasAgent::Update(
 	const UpdateRequest& request)
 {
-	auto view = m_view.lock();
-	if (!view)
-		return;
-
 	auto sender = GetRenderSender(request);
 
 	// linked rotation
@@ -92,11 +88,13 @@ void RenderCanvasAgent::Update(
 	if (request.HasValue(gstCanvasMove))
 		Move();
 
-	if (request.HasValue(gstCanvasIdle))
-		Idle();
-
 	if (request.HasValue(gstCanvasMouse))
 		Mouse();
+
+	if (request.HasValue(gstCanvasIdle))
+		Idle();
+	else if (request.HasValue(gstRenderView))
+		RequestDraw();
 }
 
 void RenderCanvasAgent::ApplySettings()
@@ -132,6 +130,7 @@ void RenderCanvasAgent::PreShutdown()
 		Root* root = glbin_data_manager.GetRoot();
 		if (root)
 			root->DeleteView(view.get());
+		view.reset();
 	}
 
 }
@@ -203,8 +202,6 @@ void RenderCanvasAgent::SyncRotations(
 	dst_view->SetRotations(
 		src_view->GetRotations(),
 		true);
-
-	RequestDraw();
 }
 
 void RenderCanvasAgent::SyncCamera(
@@ -223,8 +220,6 @@ void RenderCanvasAgent::SyncCamera(
 		return;
 
 	dst_view->CopyCamera(src_view);
-
-	RequestDraw();
 }
 
 void RenderCanvasAgent::InitViewAll()
@@ -232,8 +227,6 @@ void RenderCanvasAgent::InitViewAll()
 	auto view = m_view.lock();
 	if (view)
 		view->InitView(-1);
-
-	RequestDraw();
 }
 
 void RenderCanvasAgent::InitViewBoundsCenter()
@@ -241,8 +234,6 @@ void RenderCanvasAgent::InitViewBoundsCenter()
 	auto view = m_view.lock();
 	if (view)
 		view->InitView(INIT_BOUNDS | INIT_CENTER);
-
-	RequestDraw();
 }
 
 void RenderCanvasAgent::Resize()
@@ -266,7 +257,7 @@ void RenderCanvasAgent::Resize()
 	view->SetSize(cw, ch);           // logical width/height for UI logic
 	view->SetClient(0, 0, cw, ch);   // origin is typically 0,0 for client
 
-	NotifyViewUpdate({ gstScaleFactor });
+	NotifyDataToUI({ gstScaleFactor });
 }
 
 void RenderCanvasAgent::Move()
@@ -280,8 +271,6 @@ void RenderCanvasAgent::Move()
 
 	wxRect rect = canvas->GetClientRect();
 	view->SetClient(rect.x, rect.y, rect.width, rect.height);
-
-	//RequestDraw();
 }
 
 void RenderCanvasAgent::Idle()

@@ -108,7 +108,8 @@ private:
 		gstInitViewBoundsCenter,
 		gstResize,
 		gstCanvasMove,
-		gstCanvasMouse
+		gstCanvasMouse,
+		gstCanvasIdle
 	};
 
 	std::weak_ptr<RenderView> m_view;
