@@ -46,7 +46,10 @@ BrushToolDlgAgent::BrushToolDlgAgent(
 	BrushToolDlg* dlg) :
 	Agent(dlg)
 {
-
+	m_segment_timer.setFunc([this]()
+		{
+			TimerSegment();
+		});
 }
 
 void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
@@ -252,124 +255,83 @@ void BrushToolDlgAgent::UpdateUI(const UpdateRequest& request)
 			dlg->UpdateGrid(griddata);
 		}
 	}
+
+	if (request.HasValue(gstTimerSegment))
+		m_segment_timer.start(100);
+
 }
 
 void BrushToolDlgAgent::UpdateData(const UpdateRequest& request)
 {
-	fluo::ValueCollection vc = request.values;
 	if (request.HasValue(gstSelUndo))
-	{
-		glbin_vol_selector.UndoMask();
-	}
+		SelUndo();
 	if (request.HasValue(gstSelRedo))
-	{
-		glbin_vol_selector.RedoMask();
-	}
+		SelRedo();
 	if (request.HasValue(gstBrushGrow))
-	{
-		glbin_states.ToggleBrushMode(flrd::SelectMode::Grow);
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
-	}
+		BrushGrow();
 	if (request.HasValue(gstBrushAppend))
-	{
-		glbin_states.ToggleBrushMode(flrd::SelectMode::Append);
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
-	}
+		BrushAppend();
 	if (request.HasValue(gstBrushComp))
-	{
-		glbin_states.ToggleBrushMode(flrd::SelectMode::Segment);
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
-	}
+		BrushComp();
 	if (request.HasValue(gstBrushMesh))
-	{
-		glbin_states.ToggleBrushMode(flrd::SelectMode::Mesh);
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
-	}
+		BrushMesh();
 	if (request.HasValue(gstBrushSingle))
-	{
-		glbin_states.ToggleBrushMode(flrd::SelectMode::SingleSelect);
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
-	}
+		BrushSingle();
 	if (request.HasValue(gstBrushDiffuse))
-	{
-		glbin_states.ToggleBrushMode(flrd::SelectMode::Diffuse);
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
-	}
+		BrushDiffuse();
 	if (request.HasValue(gstBrushSolid))
-	{
-		glbin_states.ToggleBrushMode(flrd::SelectMode::Solid);
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
-	}
+		BrushSolid();
 	if (request.HasValue(gstBrushUnsel))
-	{
-		glbin_states.ToggleBrushMode(flrd::SelectMode::Eraser);
-		vc.insert({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
-	}
+		BrushUnsel();
 	if (request.HasValue(gstBrushClear))
-	{
-		glbin_vol_selector.Clear();
-		vc.insert({ gstNull });
-	}
+		BrushClear();
 	if (request.HasValue(gstBrushExtract))
-	{
-		glbin_vol_selector.Extract();
-		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
-	}
+		BrushExtract();
 	if (request.HasValue(gstBrushDelete))
-	{
-		glbin_vol_selector.Erase();
-		vc.insert({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
-	}
+		BrushDelete();
 	if (request.HasValue(gstMaskCopy))
-	{
-		glbin_vol_selector.CopyMask(false);
-		vc.insert({ gstSelMask });
-	}
+		MaskCopy();
 	if (request.HasValue(gstMaskCopyData))
-	{
-		glbin_vol_selector.CopyMask(true);
-		vc.insert({ gstSelMask });
-	}
+		MaskCopyData();
 	if (request.HasValue(gstMaskPaste))
-	{
-		glbin_vol_selector.PasteMask(0);
-		vc.insert({ gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-	}
+		MaskPaste(0);
 	if (request.HasValue(gstMaskMerge))
-	{
-		glbin_vol_selector.PasteMask(1);
-		vc.insert({ gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-	}
+		MaskPaste(1);
 	if (request.HasValue(gstMaskExclude))
-	{
-		glbin_vol_selector.PasteMask(2);
-		vc.insert({ gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-	}
+		MaskPaste(2);
 	if (request.HasValue(gstMaskIntersect))
-	{
-		glbin_vol_selector.PasteMask(3);
-		vc.insert({ gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-	}
+		MaskPaste(3);
 	if (request.HasValue(gstAlignPca))
-	{
-		auto vd = glbin_current.vol_data.lock();
-		if (!vd)
-			return;
-		glbin_aligner.SetVolumeData(vd);
-		glbin_aligner.SetView(glbin_current.render_view.lock());
-		glbin_aligner.AlignPca(false);
-		vc.insert({ gstNull });
-	}
-	if (request.HasValue(gstTimerSegment))
-	{
-		if (glbin_vol_selector.GetThUpdate())
-			vc.insert(gstBrushThreshold);
-		glbin_vol_selector.PopMask();
-		glbin_vol_selector.Segment(true, false);
-		vc.insert({ gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
-	}
+		AlignPca();
 
-	NotifyViewUpdate(vc);
+	if (request.HasValue(gstBrushThreshold))
+		SetBrushSclTranslate();
+	if (request.HasValue(gstBrushGmFalloff))
+		SetBrushGmFalloff();
+	if (request.HasValue(gstBrush2dInf))
+		SetW2d();
+	if (request.HasValue(gstEdgeDetect))
+		SetEdgeDetect();
+	if (request.HasValue(gstHiddenRemoval))
+		SetHiddenRemoval();
+	if (request.HasValue(gstSelectGroup))
+		SetSelectGroup();
+	if (request.HasValue(gstUpdateOrder))
+		SetUpdateOrder();
+	if (request.HasValue(gstBrushSize1))
+		SetBrushSize1();
+	if (request.HasValue(gstBrushSize2Enable))
+		SetBrushSize2Enable();
+	if (request.HasValue(gstBrushSize2))
+		SetBrushSize2();
+	if (request.HasValue(gstBrushIter))
+		SetBrushIteration();
+	if (request.HasValue(gstBrushSizeRel))
+		SetBrushSizeData();
+	if (request.HasValue(gstAlignCenter))
+		SetAlignCenter();
+	if (request.HasValue(gstAlignAxis))
+		SetAlignAxis();
 }
 
 BrushToolDlg* BrushToolDlgAgent::GetDialog() const
@@ -391,85 +353,251 @@ void BrushToolDlgAgent::PreShutdown()
 		glbin_settings.m_layout_brush = dialog->SavePerspective();
 }
 
-void BrushToolDlgAgent::SetBrushSclTranslate(double dval)
+void BrushToolDlgAgent::SelUndo()
 {
-	//set translate
-	glbin_vol_selector.SetBrushSclTranslate(dval / m_max_value);
-}
-
-void BrushToolDlgAgent::SetBrushGmFalloff(double dval)
-{
-	//set gm falloffd
-	glbin_vol_selector.SetBrushGmFalloff(GM_2_ESTR(dval));
-}
-
-void BrushToolDlgAgent::SetW2d(double dval)
-{
-	//set 2d weight
-	glbin_vol_selector.SetW2d(dval);
-}
-
-void BrushToolDlgAgent::SetEdgeDetect(bool bval)
-{
-	//set edge detect
-	glbin_vol_selector.SetEdgeDetect(bval);
-}
-
-void BrushToolDlgAgent::SetHiddenRemoval(bool bval)
-{
-	//set hidden removal
-	glbin_vol_selector.SetHiddenRemoval(bval);
-}
-
-void BrushToolDlgAgent::SetSelectGroup(bool bval)
-{
-	//set select group
-	glbin_vol_selector.SetSelectGroup(bval);
-}
-
-void BrushToolDlgAgent::SetUpdateOrder(bool bval)
-{
-	glbin_vol_selector.SetUpdateOrder(bval);
-}
-
-void BrushToolDlgAgent::SetBrushSize1(double dval)
-{
-	//set size1
-	glbin_vol_selector.SetBrushSize(dval, -1.0);
+	glbin_vol_selector.UndoMask();
 	NotifyViewUpdate({ gstNull });
 }
 
-void BrushToolDlgAgent::SetBrushSize2Enable(bool bval, double dval1, double dval2)
+void BrushToolDlgAgent::SelRedo()
 {
+	glbin_vol_selector.RedoMask();
+	NotifyViewUpdate({ gstNull });
+}
+
+void BrushToolDlgAgent::BrushGrow()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Grow);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void BrushToolDlgAgent::BrushAppend()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Append);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void BrushToolDlgAgent::BrushComp()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Segment);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void BrushToolDlgAgent::BrushMesh()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Mesh);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void BrushToolDlgAgent::BrushSingle()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::SingleSelect);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void BrushToolDlgAgent::BrushDiffuse()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Diffuse);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void BrushToolDlgAgent::BrushSolid()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Solid);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void BrushToolDlgAgent::BrushUnsel()
+{
+	glbin_states.ToggleBrushMode(flrd::SelectMode::Eraser);
+	NotifyDataToUI({ gstFreehandToolState, gstBrushSize1, gstBrushSize2, gstBrushIter });
+}
+
+void BrushToolDlgAgent::BrushClear()
+{
+	glbin_vol_selector.Clear();
+	NotifyViewUpdate({ gstNull });
+}
+
+void BrushToolDlgAgent::BrushExtract()
+{
+	glbin_vol_selector.Extract();
+	NotifyViewUpdate({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
+}
+
+void BrushToolDlgAgent::BrushDelete()
+{
+	glbin_vol_selector.Erase();
+	NotifyViewUpdate({ gstListCtrl, gstTreeCtrl, gstUpdateSync, gstCurrentSelect, gstVolumePropPanel });
+}
+
+void BrushToolDlgAgent::MaskCopy()
+{
+	glbin_vol_selector.CopyMask(false);
+	UpdateDataToUI({ gstSelMask });
+}
+
+void BrushToolDlgAgent::MaskCopyData()
+{
+	glbin_vol_selector.CopyMask(true);
+	UpdateDataToUI({ gstSelMask });
+}
+
+void BrushToolDlgAgent::MaskPaste(int mode)
+{
+	glbin_vol_selector.PasteMask(mode);
+	NotifyViewUpdate({ gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
+}
+
+void BrushToolDlgAgent::AlignPca()
+{
+	auto vd = glbin_current.vol_data.lock();
+	if (!vd)
+		return;
+	glbin_aligner.SetVolumeData(vd);
+	glbin_aligner.SetView(glbin_current.render_view.lock());
+	glbin_aligner.AlignPca(false);
+	NotifyViewUpdate({ gstNull });
+}
+
+void BrushToolDlgAgent::TimerSegment()
+{
+	fluo::ValueCollection vc;
+
+	m_segment_timer.stop();
+	if (glbin_vol_selector.GetThUpdate())
+		vc.insert(gstBrushThreshold);
+	glbin_vol_selector.PopMask();
+	glbin_vol_selector.Segment(true, false);
+	vc.insert({ gstSelUndo, gstBrushCountAutoUpdate, gstColocalAutoUpdate });
+	NotifyViewUpdate(vc);
+}
+
+void BrushToolDlgAgent::SetBrushSclTranslate()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetBrushSclTranslate(
+			dialog->GetBrushSclTranslate() / m_max_value);
+	UpdateDataToUI({ gstBrushThreshold, gstTimerSegment });
+}
+
+void BrushToolDlgAgent::SetBrushGmFalloff()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetBrushGmFalloff(
+			GM_2_ESTR(dialog->GetBrushGmFalloff()));
+	UpdateDataToUI({ gstBrushGmFalloff, gstTimerSegment });
+}
+
+void BrushToolDlgAgent::SetW2d()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetW2d(
+			dialog->GetW2d());
+	UpdateDataToUI({ gstBrush2dInf, gstTimerSegment });
+}
+
+void BrushToolDlgAgent::SetEdgeDetect()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetEdgeDetect(
+			dialog->GetEdgeDetect());
+	UpdateDataToUI({ gstSelOptions, gstTimerSegment });
+}
+
+void BrushToolDlgAgent::SetHiddenRemoval()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetHiddenRemoval(
+			dialog->GetHiddenRemoval());
+	UpdateDataToUI({ gstTimerSegment });
+}
+
+void BrushToolDlgAgent::SetSelectGroup()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetSelectGroup(
+			dialog->GetSelectGroup());
+	UpdateDataToUI({ gstTimerSegment });
+}
+
+void BrushToolDlgAgent::SetUpdateOrder()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetUpdateOrder(
+			dialog->GetUpdateOrder());
+	UpdateDataToUI({ gstTimerSegment });
+}
+
+void BrushToolDlgAgent::SetBrushSize1()
+{
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetBrushSize(
+			dialog->GetBrushSize1(), -1.0);
+	NotifyViewUpdate({ gstBrushSize1 });
+}
+
+void BrushToolDlgAgent::SetBrushSize2Enable()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetBrushSize2Enable();
+	double dval1 = dialog->GetBrushSize1();
+	double dval2 = dialog->GetBrushSize2();
 	glbin_vol_selector.SetUseBrushSize2(bval);
 	glbin_vol_selector.SetBrushSize(dval1, dval2);
-	NotifyViewUpdate({ gstNull });
+	NotifyViewUpdate({ gstBrushSize2 });
 }
 
-void BrushToolDlgAgent::SetBrushSize2(double dval)
+void BrushToolDlgAgent::SetBrushSize2()
 {
-	//set size2
-	glbin_vol_selector.SetBrushSize(-1.0, dval);
-	NotifyViewUpdate({ gstNull });
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetBrushSize(-1.0,
+			dialog->GetBrushSize2());
+	NotifyViewUpdate({ gstBrushSize2 });
 }
 
-void BrushToolDlgAgent::SetBrushIteration(int ival)
+void BrushToolDlgAgent::SetBrushIteration()
 {
-	glbin_vol_selector.SetBrushIteration(ival);
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetBrushIteration(
+			dialog->GetBrushIteration());
+	UpdateDataToUI({ gstTimerSegment });
 }
 
-void BrushToolDlgAgent::SetBrushSizeData(bool bval)
+void BrushToolDlgAgent::SetBrushSizeData()
 {
-	glbin_vol_selector.SetBrushSizeData(bval);
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_vol_selector.SetBrushSizeData(
+			dialog->GetBrushSizeData());
+	UpdateDataToUI({ gstTimerSegment });
 }
 
-void BrushToolDlgAgent::SetAlignCenter(bool bval)
+void BrushToolDlgAgent::SetAlignCenter()
 {
-	glbin_aligner.SetAlignCenter(bval);
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_aligner.SetAlignCenter(
+			dialog->GetAlignCenter());
 	NotifyViewUpdate({ gstAlignCenter });
 }
 
-void BrushToolDlgAgent::SetAlignAxis(int ival)
+void BrushToolDlgAgent::SetAlignAxis()
 {
-	glbin_aligner.SetAxisType(ival);
+	auto dialog = GetDialog();
+	if (dialog)
+		glbin_aligner.SetAxisType(
+			dialog->GetAlignAxis());
 }

@@ -44,8 +44,7 @@ BrushToolDlg::BrushToolDlg(
 		wxDefaultPosition,
 		parent->FromDIP(wxSize(500, 620)),
 		0, "BrushToolDlg"),
-	m_hold_history(false),
-	m_auto_update_timer(this)
+	m_hold_history(false)
 {
 }
 
@@ -66,7 +65,6 @@ void BrushToolDlg::CreateUI()
 	m_notebook->AddPage(CreateAlignPage(m_notebook), "Align");
 
 	Bind(wxEVT_SIZE, &BrushToolDlg::OnSize, this);
-	Bind(wxEVT_TIMER, &BrushToolDlg::OnAutoUpdateTimer, this);
 
 	//vertical sizer
 	wxBoxSizer* sizer_v = new wxBoxSizer(wxVERTICAL);
@@ -615,6 +613,102 @@ void BrushToolDlg::UpdateGrid(const GridData& data)
 	m_output_grid->ClearSelection();
 }
 
+double BrushToolDlg::GetBrushSclTranslate()
+{
+	wxString str = m_brush_scl_translate_text->GetValue();
+	double val;
+	if (str.ToDouble(&val))
+		return val;
+	return 0.0;
+}
+
+double BrushToolDlg::GetBrushGmFalloff()
+{
+	wxString str = m_brush_gm_falloff_text->GetValue();
+	double val;
+	if (str.ToDouble(&val))
+		return val;
+	return 0.0;
+}
+
+double BrushToolDlg::GetW2d()
+{
+	wxString str = m_brush_2dinfl_text->GetValue();
+	double val;
+	if (str.ToDouble(&val))
+		return val;
+	return 0.0;
+}
+
+bool BrushToolDlg::GetEdgeDetect()
+{
+	return m_edge_detect_chk->GetValue();
+}
+
+bool BrushToolDlg::GetHiddenRemoval()
+{
+	return m_hidden_removal_chk->GetValue();
+}
+
+bool BrushToolDlg::GetSelectGroup()
+{
+	return m_select_group_chk->GetValue();
+}
+
+bool BrushToolDlg::GetUpdateOrder()
+{
+	return m_accurate_bricks_chk->GetValue();
+}
+
+double BrushToolDlg::GetBrushSize1()
+{
+	wxString str = m_brush_size1_text->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+		return dval;
+	return 0.0;
+}
+
+bool BrushToolDlg::GetBrushSize2Enable()
+{
+	return m_brush_size2_chk->GetValue();
+}
+
+double BrushToolDlg::GetBrushSize2()
+{
+	wxString str = m_brush_size2_text->GetValue();
+	double dval;
+	if (str.ToDouble(&dval))
+		return dval;
+	return 0.0;
+}
+
+int BrushToolDlg::GetBrushIteration()
+{
+	wxString str = m_brush_iter_text->GetValue();
+	long ival;
+	if (str.ToLong(&ival))
+		return static_cast<int>(ival);
+	return 0;
+}
+
+bool BrushToolDlg::GetBrushSizeData()
+{
+	bool bval1 = m_brush_size_data_rb->GetValue();
+	bool bval2 = m_brush_size_screen_rb->GetValue();
+	return bval1 == bval2 ? true : bval1;
+}
+
+bool BrushToolDlg::GetAlignCenter()
+{
+	return m_align_center_chk->GetValue();
+}
+
+int BrushToolDlg::GetAlignAxis()
+{
+	return m_align_pca_axis;
+}
+
 //brush commands
 void BrushToolDlg::OnToolBar(wxCommandEvent& event)
 {
@@ -700,16 +794,9 @@ void BrushToolDlg::OnBrushSclTranslateChange(wxScrollEvent& event)
 
 void BrushToolDlg::OnBrushSclTranslateText(wxCommandEvent& event)
 {
-	wxString str = m_brush_scl_translate_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_brush_scl_translate_sldr->ChangeValue(std::round(val*10.0));
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetBrushSclTranslate(val);
-
-	LaunchAutoUpdateTimer();
+		agent->UpdateUIToData({ gstBrushThreshold });
 }
 
 //gm falloff
@@ -724,16 +811,9 @@ void BrushToolDlg::OnBrushGmFalloffChange(wxScrollEvent& event)
 
 void BrushToolDlg::OnBrushGmFalloffText(wxCommandEvent& event)
 {
-	wxString str = m_brush_gm_falloff_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_brush_gm_falloff_sldr->ChangeValue(std::round(val*1000.0));
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetBrushGmFalloff(val);
-
-	LaunchAutoUpdateTimer();
+		agent->UpdateUIToData({ gstBrushGmFalloff });
 }
 
 //2d influence
@@ -748,63 +828,41 @@ void BrushToolDlg::OnBrush2dinflChange(wxScrollEvent& event)
 
 void BrushToolDlg::OnBrush2dinflText(wxCommandEvent& event)
 {
-	wxString str = m_brush_2dinfl_text->GetValue();
-	double val;
-	str.ToDouble(&val);
-	m_brush_2dinfl_sldr->ChangeValue(std::round(val*100.0));
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetW2d(val);
-
-	LaunchAutoUpdateTimer();
+		agent->UpdateUIToData({ gstBrush2dInf });
 }
 
 //edge detect
 void BrushToolDlg::OnBrushEdgeDetectChk(wxCommandEvent& event)
 {
-	bool bval = m_edge_detect_chk->GetValue();
-
-	m_brush_gm_falloff_sldr->Enable(bval);
-	m_brush_gm_falloff_text->Enable(bval);
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetEdgeDetect(bval);
-
-	LaunchAutoUpdateTimer();
+		agent->UpdateUIToData({ gstEdgeDetect });
 }
 
 //hidden removal
 void BrushToolDlg::OnBrushHiddenRemovalChk(wxCommandEvent& event)
 {
-	bool bval = m_hidden_removal_chk->GetValue();
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetHiddenRemoval(bval);
+		agent->UpdateUIToData({ gstHiddenRemoval });
 }
 
 //select group
 void BrushToolDlg::OnBrushSelectGroupChk(wxCommandEvent& event)
 {
-	bool bval = m_select_group_chk->GetValue();
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetSelectGroup(bval);
-
-	LaunchAutoUpdateTimer();
+		agent->UpdateUIToData({ gstSelectGroup });
 }
 
 //brick accuracy
 void BrushToolDlg::OnAccurateBricksCheck(wxCommandEvent& event)
 {
-	bool bval = m_accurate_bricks_chk->GetValue();
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetUpdateOrder(bval);
+		agent->UpdateUIToData({ gstUpdateOrder });
 }
 
 //brush size 1
@@ -818,33 +876,17 @@ void BrushToolDlg::OnBrushSize1Change(wxScrollEvent& event)
 
 void BrushToolDlg::OnBrushSize1Text(wxCommandEvent& event)
 {
-	wxString str = m_brush_size1_text->GetValue();
-	double dval;
-	str.ToDouble(&dval);
-	m_brush_size1_sldr->ChangeValue(std::round(dval));
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetBrushSize1(dval);
+		agent->UpdateUIToData({ gstBrushSize1 });
 }
 
 //brush size 2
 void BrushToolDlg::OnBrushSize2Chk(wxCommandEvent& event)
 {
-	wxString str = m_brush_size1_text->GetValue();
-	double dval1;
-	str.ToDouble(&dval1);
-	str = m_brush_size2_text->GetValue();
-	double dval2;
-	str.ToDouble(&dval2);
-
-	bool bval = m_brush_size2_chk->GetValue();
-	m_brush_size2_sldr->Enable(bval);
-	m_brush_size2_text->Enable(bval);
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetBrushSize2Enable(bval, dval1, dval2);
+		agent->UpdateUIToData({ gstBrushSize2Enable });
 }
 
 void BrushToolDlg::OnBrushSize2Change(wxScrollEvent& event)
@@ -857,14 +899,9 @@ void BrushToolDlg::OnBrushSize2Change(wxScrollEvent& event)
 
 void BrushToolDlg::OnBrushSize2Text(wxCommandEvent& event)
 {
-	wxString str = m_brush_size2_text->GetValue();
-	double dval;
-	str.ToDouble(&dval);
-	m_brush_size2_sldr->ChangeValue(std::round(dval));
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetBrushSize2(dval);
+		agent->UpdateUIToData({ gstBrushSize2 });
 }
 
 //brush iterations
@@ -878,49 +915,33 @@ void BrushToolDlg::OnBrushIterChange(wxScrollEvent& event)
 
 void BrushToolDlg::OnBrushIterText(wxCommandEvent& event)
 {
-	wxString str = m_brush_iter_text->GetValue();
-	long ival;
-	str.ToLong(&ival);
-	m_brush_iter_sldr->ChangeValue(ival);
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetBrushIteration(ival);
-
-	LaunchAutoUpdateTimer();
+		agent->UpdateUIToData({ gstBrushIter });
 }
 
 //brush size relation
 void BrushToolDlg::OnBrushSizeRelationCheck(wxCommandEvent& event)
 {
-	bool bval1 = m_brush_size_data_rb->GetValue();
-	bool bval2 = m_brush_size_screen_rb->GetValue();
-	bool bval = bval1 == bval2 ? true : bval1;
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetBrushSizeData(bval);
+		agent->UpdateUIToData({ gstBrushSizeRel });
 }
 
 //align
 void BrushToolDlg::OnAlignCenterCheck(wxCommandEvent& event)
 {
-	bool bval = m_align_center_chk->GetValue();
-
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-		agent->SetAlignCenter(bval);
+		agent->UpdateUIToData({ gstAlignCenter });
 }
 
 void BrushToolDlg::OnAlignPca(wxCommandEvent& event)
 {
-	int ival = event.GetId();
+	m_align_pca_axis = event.GetId();
 	auto agent = m_agent->As<BrushToolDlgAgent>();
 	if (agent)
-	{
-		agent->SetAlignAxis(ival);
 		agent->UpdateUIToData({ gstAlignPca });
-	}
 }
 
 void BrushToolDlg::OnUpdateBtn(wxCommandEvent& event)
@@ -978,20 +999,5 @@ void BrushToolDlg::OnSize(wxSizeEvent& event)
 		size.y = height;
 	size.x -= 15;
 	m_output_grid->SetMaxSize(size);
-}
-
-//auto update
-void BrushToolDlg::LaunchAutoUpdateTimer()
-{
-	m_auto_update_timer.Start(100);
-}
-
-void BrushToolDlg::OnAutoUpdateTimer(wxTimerEvent& event)
-{
-	m_auto_update_timer.Stop();
-
-	auto agent = m_agent->As<BrushToolDlgAgent>();
-	if (agent)
-		agent->UpdateUIToData({ gstTimerSegment });
 }
 

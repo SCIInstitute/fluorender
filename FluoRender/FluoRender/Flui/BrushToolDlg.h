@@ -114,9 +114,26 @@ public:
 	void CopyData();
 	void UpdateGrid(const GridData& data);
 
+	//get
+	double GetBrushSclTranslate();
+	double GetBrushGmFalloff();
+	double GetW2d();
+	bool GetEdgeDetect();
+	bool GetHiddenRemoval();
+	bool GetSelectGroup();
+	bool GetUpdateOrder();
+	double GetBrushSize1();
+	bool GetBrushSize2Enable();
+	double GetBrushSize2();
+	int GetBrushIteration();
+	bool GetBrushSizeData();
+	bool GetAlignCenter();
+	int GetAlignAxis();
+
 private:
 	//output
 	bool m_hold_history;
+	int m_align_pca_axis{ 0 };
 
 	//paint tools
 	//toolbar
@@ -170,9 +187,6 @@ private:
 	wxButton* m_clear_hist_btn;
 	wxGrid *m_output_grid;
 
-	//auto update
-	wxTimer m_auto_update_timer;
-
 private:
 	wxWindow* CreateToolPage(wxWindow* parent);
 	wxWindow* CreateListPage(wxWindow* parent);
@@ -225,9 +239,6 @@ private:
 	void OnSelectCell(wxGridEvent& event);
 	//resize
 	void OnSize(wxSizeEvent& event);
-	//auto update
-	void LaunchAutoUpdateTimer();
-	void OnAutoUpdateTimer(wxTimerEvent& event);
 };
 
 #endif//_BRUSHTOOLDLG_H_

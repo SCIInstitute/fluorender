@@ -1102,6 +1102,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstMaskIntersect "mask intersect"
 #define gstAlignPca "align pca"
 #define gstTimerSegment "timer segment"
+#define gstEdgeDetect "edge detect"
+#define gstHiddenRemoval "hidden removal"
+#define gstSelectGroup "select group"
+#define gstBrushSize2Enable "brush size2 enable"
+#define gstAlignAxis "align axis"
 
 //calculation dialog agent
 #define gstLoadVolumeA "load volume a"

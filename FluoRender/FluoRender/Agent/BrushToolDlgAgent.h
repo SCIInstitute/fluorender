@@ -30,6 +30,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <Agent.h>
 #include <Tokens.h>
+#include <AsyncTimer.hpp>
 
 class BrushToolDlg;
 
@@ -45,22 +46,6 @@ public:
 
 	virtual void ApplySettings() override;
 	virtual void PreShutdown() override;
-
-	//settings
-	void SetBrushSclTranslate(double dval);
-	void SetBrushGmFalloff(double dval);
-	void SetW2d(double dval);
-	void SetEdgeDetect(bool bval);
-	void SetHiddenRemoval(bool bval);
-	void SetSelectGroup(bool bval);
-	void SetUpdateOrder(bool bval);
-	void SetBrushSize1(double dval);
-	void SetBrushSize2Enable(bool bval, double dval1, double dval2);
-	void SetBrushSize2(double dval);
-	void SetBrushIteration(int ival);
-	void SetBrushSizeData(bool bval);
-	void SetAlignCenter(bool bval);
-	void SetAlignAxis(int ival);
 
 protected:
 	std::span < const std::string_view>
@@ -120,6 +105,45 @@ private:
 
 	//max volume value
 	double m_max_value{ 255.0 };
+
+	fluo::AsyncTimer m_segment_timer;
+
+private:
+	void SelUndo();
+	void SelRedo();
+
+	void BrushGrow();
+	void BrushAppend();
+	void BrushComp();
+	void BrushMesh();
+	void BrushSingle();
+	void BrushDiffuse();
+	void BrushSolid();
+	void BrushUnsel();
+	void BrushClear();
+	void BrushExtract();
+	void BrushDelete();
+
+	void MaskCopy();
+	void MaskCopyData();
+	void MaskPaste(int mode);
+	void AlignPca();
+	void TimerSegment();
+
+	void SetBrushSclTranslate();
+	void SetBrushGmFalloff();
+	void SetW2d();
+	void SetEdgeDetect();
+	void SetHiddenRemoval();
+	void SetSelectGroup();
+	void SetUpdateOrder();
+	void SetBrushSize1();
+	void SetBrushSize2Enable();
+	void SetBrushSize2();
+	void SetBrushIteration();
+	void SetBrushSizeData();
+	void SetAlignCenter();
+	void SetAlignAxis();
 
 };
 
