@@ -80,6 +80,8 @@ private:
 		gstBrushCountResult,
 		gstBrushCountAutoUpdate,
 		gstBrushSpeedResult,
+		//timer
+		gstTimerSegment
 		//data
 		gstBrushGrow,
 		gstBrushAppend,
@@ -99,8 +101,12 @@ private:
 		gstMaskExclude,
 		gstMaskIntersect,
 		gstAlignPca,
-		//timer
-		gstTimerSegment
+		gstEdgeDetect,
+		gstHiddenRemoval,
+		gstSelectGroup,
+		gstUpdateOrder,
+		gstBrushSize2Enable,
+		gstAlignAxis
 	};
 
 	//max volume value
