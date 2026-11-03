@@ -328,16 +328,50 @@ void ComponentDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void ComponentDlgAgent::UpdateData(const UpdateRequest& request)
 {
-	if (request.HasValue(gstCompGenerate))
-		m_comp_gen_timer.start(100);
-	if (request.HasValue(gstCompCluster))
-		CompCluster();
-	if (request.HasValue(gstCompAnalyze))
-		CompAnalyze();
+	if (request.HasValue(gstIteration))
+		SetIter();
+	if (request.HasValue(gstCompThreshold))
+		SetThresh();
+	if (request.HasValue(gstUseDistField))
+		SetUseDistField();
+	if (request.HasValue(gstDistFieldStrength))
+		SetDistStrength();
+	if (request.HasValue(gstDistFieldFilterSize))
+		SetDistFilterSize();
+	if (request.HasValue(gstMaxDist))
+		SetMaxDist();
+	if (request.HasValue(gstDistFieldThresh))
+		SetDistThresh();
+	if (request.HasValue(gstUseDiffusion))
+		SetUseDiff();
+	if (request.HasValue(gstDiffusionFalloff))
+		SetFalloff();
+	if (request.HasValue(gstUseDensityField))
+		SetUseDensity();
+	if (request.HasValue(gstDensityFieldThresh))
+		SetDensity();
+	if (request.HasValue(gstDensityVarThresh))
+		SetVarth();
+	if (request.HasValue(gstDensityWindowSize))
+		SetDensityWindowSize();
+	if (request.HasValue(gstDensityStatsSize))
+		SetDensityStatsSize();
+	if (request.HasValue(gstFixateEnable))
+		SetFixate();
 	if (request.HasValue(gstFixUpdate))
 		FixUpdate();
+	if (request.HasValue(gstFixateSize))
+		SetFixSize();
+	if (request.HasValue(gstCleanEnable))
+		SetClean();
 	if (request.HasValue(gstCleanUpdate))
 		CleanUpdate();
+	if (request.HasValue(gstCleanIteration))
+		SetCleanIter();
+	if (request.HasValue(gstCleanSize))
+		SetCleanLimit();
+	if (request.HasValue(gstRecordCmd))
+		SetRecord();
 	if (request.HasValue(gstPlayCmd))
 		PlayCmdUpdate();
 	if (request.HasValue(gstResetCmd))
@@ -346,6 +380,31 @@ void ComponentDlgAgent::UpdateData(const UpdateRequest& request)
 		LoadCmdUpdate();
 	if (request.HasValue(gstSaveCmd))
 		SaveCmdUpdate();
+
+	if (request.HasValue(gstClusterMethod))
+		SetClusterMethod();
+	if (request.HasValue(gstClusterNum))
+		SetClusterClnum();
+	if (request.HasValue(gstClusterMaxIter))
+		SetClusterMaxiter();
+	if (request.HasValue(gstClusterTol))
+		SetClusterTol();
+	if (request.HasValue(gstClusterSize))
+		SetClusterSize();
+	if (request.HasValue(gstClusterEps))
+		SetClustereps();
+
+	if (request.HasValue(gstCompId))
+		SetCompId();
+	if (request.HasValue(gstUseMin))
+		SetUseMin();
+	if (request.HasValue(gstMinValue))
+		SetMin();
+	if (request.HasValue(gstUseMax))
+		SetUseMax();
+	if (request.HasValue(gstMaxValue))
+		SetMax();
+
 	if (request.HasValue(gstCompFull))
 		CompFull();
 	if (request.HasValue(gstCompExclusive))
@@ -368,10 +427,53 @@ void ComponentDlgAgent::UpdateData(const UpdateRequest& request)
 		CompCleanBkg();
 	if (request.HasValue(gstCompCombine))
 		CompCombine();
+
+	if (request.HasValue(gstConsistentSize))
+		SetConSize();
+	if (request.HasValue(gstCompConsistent))
+		SetConsistent();
+	if (request.HasValue(gstCompColocal))
+		SetColocal();
+	if (request.HasValue(gstCompOutputType))
+		SetOutputType();
+	if (request.HasValue(gstCompOutputChannels))
+		SetOutputChannels();
+	if (request.HasValue(gstCompOutputAnnotData))
+		SetOutputAnnotData();
 	if (request.HasValue(gstCompOutputMesh))
 		CompOutputMesh();
+	if (request.HasValue(gstDistNeighbor))
+		SetUseDistNeighbor();
+	if (request.HasValue(gstDistAllChan))
+		SetDistAllChan();
+	if (request.HasValue(gstDistNeighborValue))
+		SetDistNeighbor();
 	if (request.HasValue(gstCompOutputDist))
 		OutputDistance();
+
+	if (request.HasValue(gstAlignCenter))
+		SetAlignCenter();
+	if (request.HasValue(gstAlignPca))
+		SetAlignPca();
+
+	if (request.HasValue(gstUseSelection))
+		SetUseSel();
+	if (request.HasValue(gstUseMachineLearning))
+		SetUseMl();
+
+	if (request.HasValue(gstIncludeComps))
+		IncludeComps();
+	if (request.HasValue(gstExcludeComps))
+		ExcludeComps();
+	if (request.HasValue(gstCompSelectionChanged))
+		GridSelectionChanged();
+
+	if (request.HasValue(gstCompGenerate))
+		m_comp_gen_timer.start(100);
+	if (request.HasValue(gstCompCluster))
+		CompCluster();
+	if (request.HasValue(gstCompAnalyze))
+		CompAnalyze();
 }
 
 ComponentDlg* ComponentDlgAgent::GetDialog() const
@@ -393,144 +495,180 @@ void ComponentDlgAgent::PreShutdown()
 		glbin_settings.m_layout_component = dialog->SavePerspective();
 }
 
-void ComponentDlgAgent::SetIter(int ival)
+void ComponentDlgAgent::SetIter()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetIter();
 	glbin_comp_generator.SetIter(ival);
 	UpdateDataToUI({ gstIteration, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetThresh(double dval)
+void ComponentDlgAgent::SetThresh()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	double dval = dialog->GetThresh();
 	glbin_comp_generator.SetThresh(dval);
 	UpdateDataToUI({ gstCompThreshold, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetUseDistField(bool bval)
+void ComponentDlgAgent::SetUseDistField()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseDistField();
 	glbin_comp_generator.SetUseDistField(bval);
 	UpdateDataToUI({ gstUseDistField, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetDistStrength(double dval)
+void ComponentDlgAgent::SetDistStrength()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	double dval = dialog->GetDistStrength();
 	glbin_comp_generator.SetDistStrength(dval);
 	UpdateDataToUI({ gstDistFieldStrength, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetDistFilterSize(int ival)
+void ComponentDlgAgent::SetDistFilterSize()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetDistFilterSize();
 	glbin_comp_generator.SetDistFilterSize(ival);
 	UpdateDataToUI({ gstDistFieldFilterSize, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetMaxDist(int ival)
+void ComponentDlgAgent::SetMaxDist()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetMaxDist();
 	glbin_comp_generator.SetMaxDist(ival);
 	UpdateDataToUI({ gstMaxDist, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetDistThresh(double dval)
+void ComponentDlgAgent::SetDistThresh()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	double dval = dialog->GetDistThresh();
 	glbin_comp_generator.SetDistThresh(dval);
 	UpdateDataToUI({ gstDistFieldThresh, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetUseDiff(bool bval)
+void ComponentDlgAgent::SetUseDiff()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseDiff();
 	glbin_comp_generator.SetDiffusion(bval);
 	UpdateDataToUI({ gstUseDiffusion, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetFalloff(double dval)
+void ComponentDlgAgent::SetFalloff()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	double dval = dialog->GetFalloff();
 	glbin_comp_generator.SetFalloff(dval);
 	UpdateDataToUI({ gstDiffusionFalloff, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetUseDensity(bool bval)
+void ComponentDlgAgent::SetUseDensity()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseDensity();
 	glbin_comp_generator.SetDensity(bval);
 	UpdateDataToUI({ gstUseDensityField, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetDensity(double dval)
+void ComponentDlgAgent::SetDensity()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	double dval = dialog->GetDensity();
 	glbin_comp_generator.SetDensityThresh(dval);
 	UpdateDataToUI({ gstDensityFieldThresh, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetVarth(double dval)
+void ComponentDlgAgent::SetVarth()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	double dval = dialog->GetDensityVarThresh();
 	glbin_comp_generator.SetVarThresh(dval);
 	UpdateDataToUI({ gstDensityVarThresh, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetDensityWindowSize(int ival)
+void ComponentDlgAgent::SetDensityWindowSize()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetDensityWindowSize();
 	glbin_comp_generator.SetDensityWinSize(ival);
 	UpdateDataToUI({ gstDensityWindowSize, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetDensityStatsSize(int ival)
+void ComponentDlgAgent::SetDensityStatsSize()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetDensityStatsSize();
 	glbin_comp_generator.SetDensityStatSize(ival);
 	UpdateDataToUI({ gstDensityStatsSize, gstRecordCmd });
 	if (glbin_comp_generator.GetAutoCompGen())
 		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::SetFixSize(int ival)
+void ComponentDlgAgent::SetFixate()
 {
-	glbin_comp_generator.SetFixSize(ival);
-	UpdateDataToUI({ gstFixateSize, gstRecordCmd });
-	if (glbin_comp_generator.GetAutoCompGen())
-		UpdateUIToData({ gstCompGenerate });
-}
-
-void ComponentDlgAgent::SetCleanIter(int ival)
-{
-	glbin_comp_generator.SetCleanIter(ival);
-	UpdateDataToUI({ gstCleanIteration, gstRecordCmd });
-	if (glbin_comp_generator.GetAutoCompGen())
-		UpdateUIToData({ gstCompGenerate });
-}
-
-void ComponentDlgAgent::SetCleanLimit(int ival)
-{
-	glbin_comp_generator.SetCleanSize(ival);
-	UpdateDataToUI({ gstCleanSize, gstRecordCmd });
-	if (glbin_comp_generator.GetAutoCompGen())
-		UpdateUIToData({ gstCompGenerate });
-}
-
-void ComponentDlgAgent::SetFixate(bool bval)
-{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetFixateEnable();
 	glbin_comp_generator.SetFixate(bval);
 
 	if (bval)
@@ -548,315 +686,6 @@ void ComponentDlgAgent::SetFixate(bool bval)
 		UpdateDataToUI({ gstFixateEnable });
 }
 
-void ComponentDlgAgent::SetClean(bool bval)
-{
-	glbin_comp_generator.SetClean(bval);
-	UpdateDataToUI({ gstCleanEnable, gstRecordCmd });
-	if (glbin_comp_generator.GetAutoCompGen())
-		UpdateUIToData({ gstCompGenerate });
-}
-
-void ComponentDlgAgent::SetRecord(bool bval)
-{
-	glbin_comp_generator.SetRecordCmd(bval);
-}
-
-void ComponentDlgAgent::SetClusterMethod(int ival)
-{
-	glbin_clusterizer.SetMethod(ival);
-	UpdateDataToUI({ gstClusterMethod });
-}
-
-void ComponentDlgAgent::SetClusterClnum(int ival)
-{
-	glbin_clusterizer.SetNum(ival);
-}
-
-void ComponentDlgAgent::SetClusterMaxiter(int ival)
-{
-	glbin_clusterizer.SetMaxIter(ival);
-}
-
-void ComponentDlgAgent::SetClusterTol(double dval)
-{
-	glbin_clusterizer.SetTol(static_cast<float>(dval));
-}
-
-void ComponentDlgAgent::SetClusterSize(int ival)
-{
-	glbin_clusterizer.SetSize(ival);
-}
-
-void ComponentDlgAgent::SetClustereps(double dval)
-{
-	glbin_clusterizer.SetEps(dval);
-}
-
-void ComponentDlgAgent::SetCompId(const std::string& str)
-{
-	glbin_comp_selector.SetId(str);
-	unsigned long id = 0;
-	if (TryToULong(str, id))
-		glbin_comp_editor.SetId(id, false);
-	else
-		glbin_comp_editor.SetId(0, true);
-	UpdateDataToUI({ gstCompIdColor });
-}
-
-void ComponentDlgAgent::SetUseMin(bool bval)
-{
-	glbin_comp_selector.SetUseMin(bval);
-	glbin_comp_analyzer.SetUseMin(bval);
-	UpdateDataToUI({ gstUseMin });
-}
-
-void ComponentDlgAgent::SetMin(int ival)
-{
-	glbin_comp_selector.SetMinNum(ival);
-	glbin_comp_analyzer.SetMinNum(ival);
-}
-
-void ComponentDlgAgent::SetUseMax(bool bval)
-{
-	glbin_comp_selector.SetUseMax(bval);
-	glbin_comp_analyzer.SetUseMax(bval);
-	UpdateDataToUI({ gstUseMax });
-}
-
-void ComponentDlgAgent::SetMax(int ival)
-{
-	glbin_comp_selector.SetMaxNum(ival);
-	glbin_comp_analyzer.SetMaxNum(ival);
-}
-
-void ComponentDlgAgent::SetConSize(int ival)
-{
-	glbin_comp_analyzer.SetSizeLimit(ival);
-}
-
-void ComponentDlgAgent::SetConsistent(bool bval)
-{
-	glbin_comp_analyzer.SetConsistent(bval);
-}
-
-void ComponentDlgAgent::SetColocal(bool bval)
-{
-	glbin_comp_analyzer.SetColocal(bval);
-}
-
-void ComponentDlgAgent::SetOutputType(int ival)
-{
-	glbin_comp_analyzer.SetChannelType(ival);
-}
-
-void ComponentDlgAgent::SetOutputChannels(int ival)
-{
-	glbin_comp_analyzer.SetColorType(ival);
-	glbin_comp_analyzer.OutputChannels();
-	NotifyViewUpdate({ gstListCtrl, gstTreeCtrl });
-}
-
-void ComponentDlgAgent::SetOutputAnnotData(int ival)
-{
-	glbin_comp_analyzer.SetAnnotType(ival);
-	glbin_comp_analyzer.OutputAnnotData();
-	NotifyViewUpdate({ gstListCtrl, gstTreeCtrl });
-}
-
-void ComponentDlgAgent::SetUseDistNeighbor(bool bval)
-{
-	glbin_comp_analyzer.SetUseDistNeighbor(bval);
-	UpdateDataToUI({ gstDistNeighbor });
-}
-
-void ComponentDlgAgent::SetDistAllChan(bool bval)
-{
-	glbin_comp_analyzer.SetUseDistAllchan(bval);
-}
-
-void ComponentDlgAgent::SetDistNeighbor(int ival)
-{
-	glbin_comp_analyzer.SetDistNeighborNum(ival);
-}
-
-void ComponentDlgAgent::SetAlignCenter(bool bval)
-{
-	glbin_aligner.SetAlignCenter(bval);
-	NotifyViewUpdate({ gstAlignCenter });
-}
-
-void ComponentDlgAgent::SetAlignPca(int ival)
-{
-	flrd::RulerList list;
-	glbin_comp_analyzer.GetRulerListFromCelp(list);
-	glbin_aligner.SetRulerList(list);
-	glbin_aligner.SetAxisType(ival);
-	glbin_aligner.SetView(glbin_current.render_view.lock());
-	glbin_aligner.AlignPca(true);
-	NotifyViewUpdate({ gstNull },
-		{ glbin_coordinator.FindRenderCanvasAgent(glbin_current.render_view.lock()) });
-}
-
-void ComponentDlgAgent::SetUseSel(bool bval)
-{
-	glbin_comp_generator.SetUseSel(bval);
-	glbin_comp_analyzer.SetUseSel(bval);
-}
-
-void ComponentDlgAgent::SetUseMl(bool bval)
-{
-	glbin_comp_generator.SetUseMl(bval);
-}
-
-void ComponentDlgAgent::IncludeComps(
-	const GridSelection& selection)
-{
-	auto dlg = GetDialog();
-	if (!dlg)
-		return;
-
-	bool sel_all = !selection.rows.empty() &&
-		selection.rows.size() >=
-		static_cast<size_t>(dlg->GetRowCount());
-
-	flrd::CelpList cl;
-
-	if (!sel_all)
-	{
-		std::vector<unsigned int> ids;
-		std::vector<unsigned int> bids;
-
-		int bn =
-			glbin_comp_analyzer.GetBrickNum();
-
-		for (int row : selection.rows)
-		{
-			unsigned long value;
-
-			if (dlg->GetCellULong(row, 0, value))
-				ids.push_back(
-					static_cast<unsigned int>(value));
-
-			if (bn > 1 &&
-				dlg->GetCellULong(row, 1, value))
-			{
-				bids.push_back(
-					static_cast<unsigned int>(value));
-			}
-		}
-
-		glbin_comp_analyzer.SetSelectedIds(
-			ids, bids);
-
-		glbin_comp_analyzer.GetSelectedCelp(
-			cl, true);
-	}
-	else
-	{
-		glbin_comp_analyzer.GetAllCelp(
-			cl, true);
-	}
-
-	glbin_comp_selector.SetList(cl);
-	glbin_comp_selector.SelectList();
-
-	NotifyViewUpdate(
-		{ gstCompAnalysisResult });
-}
-
-void ComponentDlgAgent::ExcludeComps(
-	const GridSelection& selection)
-{
-	auto dlg = GetDialog();
-	if (!dlg)
-		return;
-
-	bool sel_all = !selection.rows.empty() &&
-		selection.rows.size() >=
-		static_cast<size_t>(dlg->GetRowCount());
-
-	flrd::CelpList cl;
-
-	if (!sel_all)
-	{
-		std::vector<unsigned int> ids;
-		std::vector<unsigned int> bids;
-
-		int bn =
-			glbin_comp_analyzer.GetBrickNum();
-
-		for (int row : selection.rows)
-		{
-			unsigned long value;
-
-			if (dlg->GetCellULong(row, 0, value))
-				ids.push_back(
-					static_cast<unsigned int>(value));
-
-			if (bn > 1 &&
-				dlg->GetCellULong(row, 1, value))
-			{
-				bids.push_back(
-					static_cast<unsigned int>(value));
-			}
-		}
-
-		glbin_comp_analyzer.SetSelectedIds(
-			ids, bids);
-
-		glbin_comp_analyzer.GetSelectedCelp(
-			cl, true);
-	}
-	else
-	{
-		glbin_comp_analyzer.GetAllCelp(
-			cl, true);
-	}
-
-	glbin_comp_selector.SetList(cl);
-	glbin_comp_selector.EraseList();
-
-	NotifyViewUpdate(
-		{ gstCompAnalysisResult });
-}
-
-void ComponentDlgAgent::GridSelectionChanged(
-	const GridSelection& selection)
-{
-	UpdateSelectionData(selection);
-	NotifyViewUpdate({ gstNull });
-}
-
-void ComponentDlgAgent::TimerGenerateComps()
-{
-	if (glbin_comp_generator.IsBusy())
-	{
-		m_comp_gen_timer.restart(100);
-		return;
-	}
-	m_comp_gen_timer.stop();
-	fluo::ValueCollection vc;
-	//bool bval = m_use_sel_gen_chk->GetValue();
-	//glbin_comp_generator.SetUseSel(bval);
-	if (glbin_comp_generator.GetAutoThreshold())
-		vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
-	glbin_comp_generator.GenerateComp();
-	vc.insert({ gstCompGenOutput, gstMaskMode });
-	NotifyViewUpdate(vc);
-}
-
-void ComponentDlgAgent::CompCluster()
-{
-	glbin_clusterizer.Compute();
-	NotifyViewUpdate({ gstNull });
-}
-
-void ComponentDlgAgent::CompAnalyze()
-{
-	glbin_comp_analyzer.Analyze();
-	NotifyViewUpdate({ gstCompAnalysisResult });
-}
-
 void ComponentDlgAgent::FixUpdate()
 {
 	glbin_comp_generator.Fixate();
@@ -871,58 +700,179 @@ void ComponentDlgAgent::FixUpdate()
 	}
 }
 
+void ComponentDlgAgent::SetFixSize()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetFixateSize();
+	glbin_comp_generator.SetFixSize(ival);
+	UpdateDataToUI({ gstFixateSize, gstRecordCmd });
+	if (glbin_comp_generator.GetAutoCompGen())
+		UpdateUIToData({ gstCompGenerate });
+}
+
+void ComponentDlgAgent::SetClean()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetCleanEnable();
+	glbin_comp_generator.SetClean(bval);
+	UpdateDataToUI({ gstCleanEnable, gstRecordCmd });
+	if (glbin_comp_generator.GetAutoCompGen())
+		UpdateUIToData({ gstCompGenerate });
+}
+
 void ComponentDlgAgent::CleanUpdate()
 {
 	glbin_comp_generator.Clean();
 	NotifyViewUpdate({ gstNull });
 }
 
-void ComponentDlgAgent::PlayCmdUpdate()
+void ComponentDlgAgent::SetCleanIter()
 {
-	glbin_comp_generator.PlayCmd(1.0);
-	NotifyViewUpdate({ gstNull });
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetCleanIteration();
+	glbin_comp_generator.SetCleanIter(ival);
+	UpdateDataToUI({ gstCleanIteration, gstRecordCmd });
+	if (glbin_comp_generator.GetAutoCompGen())
+		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::ResetCmdUpdate()
+void ComponentDlgAgent::SetCleanLimit()
 {
-	glbin_comp_generator.ResetCmd();
-	NotifyViewUpdate({ gstRecordCmd });
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetCleanLimit();
+	glbin_comp_generator.SetCleanSize(ival);
+	UpdateDataToUI({ gstCleanSize, gstRecordCmd });
+	if (glbin_comp_generator.GetAutoCompGen())
+		UpdateUIToData({ gstCompGenerate });
 }
 
-void ComponentDlgAgent::LoadCmdUpdate()
+void ComponentDlgAgent::SetRecord()
 {
-	auto dlg = GetDialog();
-	if (!dlg)
+	auto dialog = GetDialog();
+	if (!dialog)
 		return;
-
-	ModalDlg fopendlg(
-		dlg, "Choose a FluoRender component generator macro command",
-		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-	int rval = fopendlg.ShowModal();
-	if (rval != wxID_OK)
-		return;
-	std::wstring filename = fopendlg.GetPath().ToStdWstring();
-
-	glbin_comp_generator.LoadCmd(filename);
-	UpdateDataToUI({ gstRecordCmd });
+	bool bval = dialog->GetRecordCmd();
+	glbin_comp_generator.SetRecordCmd(bval);
 }
 
-void ComponentDlgAgent::SaveCmdUpdate()
+void ComponentDlgAgent::SetClusterMethod()
 {
-	auto dlg = GetDialog();
-	if (!dlg)
+	auto dialog = GetDialog();
+	if (!dialog)
 		return;
+	int ival = dialog->GetClusterMethod();
+	glbin_clusterizer.SetMethod(ival);
+	UpdateDataToUI({ gstClusterMethod });
+}
 
-	ModalDlg fopendlg(
-		dlg, "Save a FluoRender component generator macro command",
-		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-	int rval = fopendlg.ShowModal();
-	if (rval != wxID_OK)
+void ComponentDlgAgent::SetClusterClnum()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
 		return;
+	int ival = dialog->GetClusterClnum();
+	glbin_clusterizer.SetNum(ival);
+}
 
-	std::wstring filename = fopendlg.GetPath().ToStdWstring();
+void ComponentDlgAgent::SetClusterMaxiter()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetClusterMaxiter();
+	glbin_clusterizer.SetMaxIter(ival);
+}
 
-	glbin_comp_generator.SaveCmd(filename);
+void ComponentDlgAgent::SetClusterTol()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	double dval = dialog->GetClusterTol();
+	glbin_clusterizer.SetTol(static_cast<float>(dval));
+}
+
+void ComponentDlgAgent::SetClusterSize()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetClusterSize();
+	glbin_clusterizer.SetSize(ival);
+}
+
+void ComponentDlgAgent::SetClustereps()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	double dval = dialog->GetClusterEps();
+	glbin_clusterizer.SetEps(dval);
+}
+
+void ComponentDlgAgent::SetCompId()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	std::string str = dialog->GetCompId();
+	glbin_comp_selector.SetId(str);
+	unsigned long id = 0;
+	if (TryToULong(str, id))
+		glbin_comp_editor.SetId(id, false);
+	else
+		glbin_comp_editor.SetId(0, true);
+	UpdateDataToUI({ gstCompIdColor });
+}
+
+void ComponentDlgAgent::SetUseMin()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseMin();
+	glbin_comp_selector.SetUseMin(bval);
+	glbin_comp_analyzer.SetUseMin(bval);
+	UpdateDataToUI({ gstUseMin });
+}
+
+void ComponentDlgAgent::SetMin()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetAnalysisMin();
+	glbin_comp_selector.SetMinNum(ival);
+	glbin_comp_analyzer.SetMinNum(ival);
+}
+
+void ComponentDlgAgent::SetUseMax()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseMax();
+	glbin_comp_selector.SetUseMax(bval);
+	glbin_comp_analyzer.SetUseMax(bval);
+	UpdateDataToUI({ gstUseMax });
+}
+
+void ComponentDlgAgent::SetMax()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetAnalysisMax();
+	glbin_comp_selector.SetMaxNum(ival);
+	glbin_comp_analyzer.SetMaxNum(ival);
 }
 
 void ComponentDlgAgent::CompFull()
@@ -1004,6 +954,64 @@ void ComponentDlgAgent::CompCombine()
 	NotifyViewUpdate({ gstNull });
 }
 
+void ComponentDlgAgent::SetConSize()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetConSize();
+	glbin_comp_analyzer.SetSizeLimit(ival);
+}
+
+void ComponentDlgAgent::SetConsistent()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetConsistent();
+	glbin_comp_analyzer.SetConsistent(bval);
+}
+
+void ComponentDlgAgent::SetColocal()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetColocal();
+	glbin_comp_analyzer.SetColocal(bval);
+}
+
+void ComponentDlgAgent::SetOutputType()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetOutputType();
+	glbin_comp_analyzer.SetChannelType(ival);
+}
+
+void ComponentDlgAgent::SetOutputChannels()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetOutputChannels();
+	glbin_comp_analyzer.SetColorType(ival);
+	glbin_comp_analyzer.OutputChannels();
+	NotifyViewUpdate({ gstListCtrl, gstTreeCtrl });
+}
+
+void ComponentDlgAgent::SetOutputAnnotData()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetOutputAnnotData();
+	glbin_comp_analyzer.SetAnnotType(ival);
+	glbin_comp_analyzer.OutputAnnotData();
+	NotifyViewUpdate({ gstListCtrl, gstTreeCtrl });
+}
+
 void ComponentDlgAgent::CompOutputMesh()
 {
 	auto vd = glbin_current.vol_data.lock();
@@ -1024,6 +1032,306 @@ void ComponentDlgAgent::CompOutputMesh()
 	}
 	NotifyViewUpdate({ gstVolMeshThresh, gstVolMeshInfo, gstListCtrl, gstTreeCtrl },
 		{ glbin_coordinator.FindRenderCanvasAgent(view) });
+}
+
+void ComponentDlgAgent::SetUseDistNeighbor()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseDistNeighbor();
+	glbin_comp_analyzer.SetUseDistNeighbor(bval);
+	UpdateDataToUI({ gstDistNeighbor });
+}
+
+void ComponentDlgAgent::SetDistAllChan()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseDistAllchan();
+	glbin_comp_analyzer.SetUseDistAllchan(bval);
+}
+
+void ComponentDlgAgent::SetDistNeighbor()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetDistNeighbor();
+	glbin_comp_analyzer.SetDistNeighborNum(ival);
+}
+
+void ComponentDlgAgent::SetAlignCenter()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetAlignCenter();
+	glbin_aligner.SetAlignCenter(bval);
+	NotifyViewUpdate({ gstAlignCenter });
+}
+
+void ComponentDlgAgent::SetAlignPca()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetAlignPca();
+	flrd::RulerList list;
+	glbin_comp_analyzer.GetRulerListFromCelp(list);
+	glbin_aligner.SetRulerList(list);
+	glbin_aligner.SetAxisType(ival);
+	glbin_aligner.SetView(glbin_current.render_view.lock());
+	glbin_aligner.AlignPca(true);
+	NotifyViewUpdate({ gstNull },
+		{ glbin_coordinator.FindRenderCanvasAgent(glbin_current.render_view.lock()) });
+}
+
+void ComponentDlgAgent::SetUseSel()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseSel();
+	glbin_comp_generator.SetUseSel(bval);
+	glbin_comp_analyzer.SetUseSel(bval);
+}
+
+void ComponentDlgAgent::SetUseMl()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseMl();
+	glbin_comp_generator.SetUseMl(bval);
+}
+
+void ComponentDlgAgent::IncludeComps()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+
+	auto sel = dialog->GetSelection();
+	IncludeComps(sel);
+}
+
+void ComponentDlgAgent::IncludeComps(
+	const GridSelection& selection)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	bool sel_all = !selection.rows.empty() &&
+		selection.rows.size() >=
+		static_cast<size_t>(dlg->GetRowCount());
+
+	flrd::CelpList cl;
+
+	if (!sel_all)
+	{
+		std::vector<unsigned int> ids;
+		std::vector<unsigned int> bids;
+
+		int bn =
+			glbin_comp_analyzer.GetBrickNum();
+
+		for (int row : selection.rows)
+		{
+			unsigned long value;
+
+			if (dlg->GetCellULong(row, 0, value))
+				ids.push_back(
+					static_cast<unsigned int>(value));
+
+			if (bn > 1 &&
+				dlg->GetCellULong(row, 1, value))
+			{
+				bids.push_back(
+					static_cast<unsigned int>(value));
+			}
+		}
+
+		glbin_comp_analyzer.SetSelectedIds(
+			ids, bids);
+
+		glbin_comp_analyzer.GetSelectedCelp(
+			cl, true);
+	}
+	else
+	{
+		glbin_comp_analyzer.GetAllCelp(
+			cl, true);
+	}
+
+	glbin_comp_selector.SetList(cl);
+	glbin_comp_selector.SelectList();
+
+	NotifyViewUpdate(
+		{ gstCompAnalysisResult });
+}
+
+void ComponentDlgAgent::ExcludeComps()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+
+	auto sel = dialog->GetSelection();
+	ExcludeComps(sel);
+}
+
+void ComponentDlgAgent::ExcludeComps(
+	const GridSelection& selection)
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	bool sel_all = !selection.rows.empty() &&
+		selection.rows.size() >=
+		static_cast<size_t>(dlg->GetRowCount());
+
+	flrd::CelpList cl;
+
+	if (!sel_all)
+	{
+		std::vector<unsigned int> ids;
+		std::vector<unsigned int> bids;
+
+		int bn =
+			glbin_comp_analyzer.GetBrickNum();
+
+		for (int row : selection.rows)
+		{
+			unsigned long value;
+
+			if (dlg->GetCellULong(row, 0, value))
+				ids.push_back(
+					static_cast<unsigned int>(value));
+
+			if (bn > 1 &&
+				dlg->GetCellULong(row, 1, value))
+			{
+				bids.push_back(
+					static_cast<unsigned int>(value));
+			}
+		}
+
+		glbin_comp_analyzer.SetSelectedIds(
+			ids, bids);
+
+		glbin_comp_analyzer.GetSelectedCelp(
+			cl, true);
+	}
+	else
+	{
+		glbin_comp_analyzer.GetAllCelp(
+			cl, true);
+	}
+
+	glbin_comp_selector.SetList(cl);
+	glbin_comp_selector.EraseList();
+
+	NotifyViewUpdate(
+		{ gstCompAnalysisResult });
+}
+
+void ComponentDlgAgent::GridSelectionChanged()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+
+	auto sel = dialog->GetSelection();
+	GridSelectionChanged(sel);
+}
+
+void ComponentDlgAgent::GridSelectionChanged(
+	const GridSelection& selection)
+{
+	UpdateSelectionData(selection);
+	NotifyViewUpdate({ gstNull });
+}
+
+void ComponentDlgAgent::TimerGenerateComps()
+{
+	if (glbin_comp_generator.IsBusy())
+	{
+		m_comp_gen_timer.restart(100);
+		return;
+	}
+	m_comp_gen_timer.stop();
+	fluo::ValueCollection vc;
+	//bool bval = m_use_sel_gen_chk->GetValue();
+	//glbin_comp_generator.SetUseSel(bval);
+	if (glbin_comp_generator.GetAutoThreshold())
+		vc.insert({ gstBrushThreshold, gstCompThreshold, gstVolMeshThresh });
+	glbin_comp_generator.GenerateComp();
+	vc.insert({ gstCompGenOutput, gstMaskMode });
+	NotifyViewUpdate(vc);
+}
+
+void ComponentDlgAgent::CompCluster()
+{
+	glbin_clusterizer.Compute();
+	NotifyViewUpdate({ gstNull });
+}
+
+void ComponentDlgAgent::CompAnalyze()
+{
+	glbin_comp_analyzer.Analyze();
+	NotifyViewUpdate({ gstCompAnalysisResult });
+}
+
+void ComponentDlgAgent::PlayCmdUpdate()
+{
+	glbin_comp_generator.PlayCmd(1.0);
+	NotifyViewUpdate({ gstNull });
+}
+
+void ComponentDlgAgent::ResetCmdUpdate()
+{
+	glbin_comp_generator.ResetCmd();
+	NotifyViewUpdate({ gstRecordCmd });
+}
+
+void ComponentDlgAgent::LoadCmdUpdate()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	ModalDlg fopendlg(
+		dlg, "Choose a FluoRender component generator macro command",
+		"", "", "*.txt;*.dft", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+	int rval = fopendlg.ShowModal();
+	if (rval != wxID_OK)
+		return;
+	std::wstring filename = fopendlg.GetPath().ToStdWstring();
+
+	glbin_comp_generator.LoadCmd(filename);
+	UpdateDataToUI({ gstRecordCmd });
+}
+
+void ComponentDlgAgent::SaveCmdUpdate()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	ModalDlg fopendlg(
+		dlg, "Save a FluoRender component generator macro command",
+		"", "", "*.txt", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+	int rval = fopendlg.ShowModal();
+	if (rval != wxID_OK)
+		return;
+
+	std::wstring filename = fopendlg.GetPath().ToStdWstring();
+
+	glbin_comp_generator.SaveCmd(filename);
 }
 
 void ComponentDlgAgent::OutputDistance()

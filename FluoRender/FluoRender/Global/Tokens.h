@@ -1180,6 +1180,12 @@ DEALINGS IN THE SOFTWARE.
 #define gstCompCombine "comp combine"
 #define gstCompOutputMesh "comp output mesh"
 #define gstCompOutputDist "comp output dist"
+#define gstConsistentSize "consistent size"
+#define gstCompOutputChannels "comp output channels"
+#define gstCompOutputAnnotData "comp output annot data"
+#define gstIncludeComps "include comps"
+#define gstExcludeComps "exclude comps"
+#define gstCompSelectionChanged "comp selection changed"
 
 //convert dialog agent
 #define gstMeshConvert "mesh convert"

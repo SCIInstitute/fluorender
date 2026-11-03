@@ -51,64 +51,6 @@ public:
 
 	int GetMaxLines() { return m_max_lines; }
 
-	void SetIter(int ival);
-	void SetThresh(double dval);
-	void SetUseDistField(bool bval);
-	void SetDistStrength(double dval);
-	void SetDistFilterSize(int ival);
-	void SetMaxDist(int ival);
-	void SetDistThresh(double dval);
-	void SetUseDiff(bool bval);
-	void SetFalloff(double dval);
-	void SetUseDensity(bool bval);
-	void SetDensity(double dval);
-	void SetVarth(double dval);
-	void SetDensityWindowSize(int ival);
-	void SetDensityStatsSize(int ival);
-	void SetFixSize(int ival);
-	void SetCleanIter(int ival);
-	void SetCleanLimit(int ival);
-
-	void SetFixate(bool bval);
-	void SetClean(bool bval);
-	void SetRecord(bool bval);
-
-	void SetClusterMethod(int ival);
-	void SetClusterClnum(int ival);
-	void SetClusterMaxiter(int ival);
-	void SetClusterTol(double dval);
-	void SetClusterSize(int ival);
-	void SetClustereps(double dval);
-
-	void SetCompId(const std::string& str);
-	void SetUseMin(bool bval);
-	void SetMin(int ival);
-	void SetUseMax(bool bval);
-	void SetMax(int ival);
-
-	void SetConSize(int ival);
-	void SetConsistent(bool bval);
-	void SetColocal(bool bval);
-	void SetOutputType(int ival);
-	void SetOutputChannels(int ival);
-	void SetOutputAnnotData(int ival);
-
-	void SetUseDistNeighbor(bool bval);
-	void SetDistAllChan(bool bval);
-	void SetDistNeighbor(int ival);
-
-	void SetAlignCenter(bool bval);
-	void SetAlignPca(int ival);
-
-	void SetUseSel(bool bval);
-	void SetUseMl(bool bval);
-
-	void IncludeComps(const GridSelection& sel);
-	void ExcludeComps(const GridSelection& sel);
-
-	void GridSelectionChanged(
-		const GridSelection& selection);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -189,6 +131,14 @@ private:
 		gstCompCombine,
 		gstCompOutputMesh,
 		gstCompOutputDist
+		gstCompId,
+		gstConsistentSize,
+		gstCompOutputChannels,
+		gstCompOutputAnnotData,
+		gstAlignPca,
+		gstIncludeComps,
+		gstExcludeComps,
+		gstCompSelectionChanged
 	};
 
 	int m_max_lines = 1000;
@@ -196,16 +146,45 @@ private:
 	fluo::AsyncTimer m_comp_gen_timer;
 
 private:
-	void TimerGenerateComps();
-	void CompCluster();
-	void CompAnalyze();
-
+	void SetIter();
+	void SetThresh();
+	void SetUseDistField();
+	void SetDistStrength();
+	void SetDistFilterSize();
+	void SetMaxDist();
+	void SetDistThresh();
+	void SetUseDiff();
+	void SetFalloff();
+	void SetUseDensity();
+	void SetDensity();
+	void SetVarth();
+	void SetDensityWindowSize();
+	void SetDensityStatsSize();
+	void SetFixate();
 	void FixUpdate();
+	void SetFixSize();
+	void SetClean();
 	void CleanUpdate();
+	void SetCleanIter();
+	void SetCleanLimit();
+	void SetRecord();
 	void PlayCmdUpdate();
 	void ResetCmdUpdate();
 	void LoadCmdUpdate();
 	void SaveCmdUpdate();
+
+	void SetClusterMethod();
+	void SetClusterClnum();
+	void SetClusterMaxiter();
+	void SetClusterTol();
+	void SetClusterSize();
+	void SetClustereps();
+
+	void SetCompId();
+	void SetUseMin();
+	void SetMin();
+	void SetUseMax();
+	void SetMax();
 
 	void CompFull();
 	void CompExclusive();
@@ -219,9 +198,38 @@ private:
 	void CompCleanBkg();
 	void CompCombine();
 
+	void SetConSize();
+	void SetConsistent();
+	void SetColocal();
+	void SetOutputType();
+	void SetOutputChannels();
+	void SetOutputAnnotData();
 	void CompOutputMesh();
 
+	void SetUseDistNeighbor();
+	void SetDistAllChan();
+	void SetDistNeighbor();
 	void OutputDistance();
+
+	void SetAlignCenter();
+	void SetAlignPca();
+
+	void SetUseSel();
+	void SetUseMl();
+
+	void IncludeComps();
+	void IncludeComps(const GridSelection& sel);
+	void ExcludeComps();
+	void ExcludeComps(const GridSelection& sel);
+	void GridSelectionChanged();
+	void GridSelectionChanged(
+		const GridSelection& selection);
+
+	void TimerGenerateComps();
+	void CompCluster();
+	void CompAnalyze();
+
+
 
 	void OutputCompAnalysisResult();
 

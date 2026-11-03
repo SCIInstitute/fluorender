@@ -217,6 +217,41 @@ void ColocalizationDlg::UpdateGrid(const GridData& data)
 	m_output_grid->ClearSelection();
 }
 
+bool ColocalizationDlg::GetUseSel() const
+{
+	return m_use_sel_chk->GetValue();
+}
+
+int ColocalizationDlg::GetMethod() const
+{
+	if (m_product_rdb->GetValue())
+		return 0;
+	else if (m_min_value_rdb->GetValue())
+		return 1;
+	else if (m_logical_and_rdb->GetValue())
+		return 2;
+	return -1;
+}
+
+bool ColocalizationDlg::GetIntWeighted() const
+{
+	return m_int_weight_btn->GetValue();
+}
+
+bool ColocalizationDlg::GetRatio() const
+{
+	return m_ratio_btn->GetValue();
+}
+
+bool ColocalizationDlg::GetPhysicalSize() const
+{
+	return m_physical_btn->GetValue();
+}
+
+bool ColocalizationDlg::GetColormap() const
+{
+	return m_colormap_btn->GetValue();
+}
 
 void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent& event)
 {
@@ -227,57 +262,45 @@ void ColocalizationDlg::OnColocalizenBtn(wxCommandEvent& event)
 
 void ColocalizationDlg::OnUseSelChk(wxCommandEvent& event)
 {
-	bool bval = m_use_sel_chk->GetValue();
 	auto agent = m_agent->As<ColocalizationDlgAgent>();
 	if (agent)
-		agent->SetUseSelection(bval);
+		agent->UpdateUIToData({ gstUseSelection });
 }
 
 void ColocalizationDlg::OnMethodRdb(wxCommandEvent& event)
 {
-	int ival = 0;
-	if (m_product_rdb->GetValue())
-		ival = 0;
-	else if (m_min_value_rdb->GetValue())
-		ival = 1;
-	else if (m_logical_and_rdb->GetValue())
-		ival = 2;
 	auto agent = m_agent->As<ColocalizationDlgAgent>();
 	if (agent)
-		agent->SetMethod(ival);
+		agent->UpdateUIToData({ gstColocalMethod });
 }
 
 //format
 void ColocalizationDlg::OnIntWeightBtn(wxCommandEvent& event)
 {
-	bool bval = m_int_weight_btn->GetValue();
 	auto agent = m_agent->As<ColocalizationDlgAgent>();
 	if (agent)
-		agent->SetInWeight(bval);
+		agent->UpdateUIToData({ gstIntWeighted });
 }
 
 void ColocalizationDlg::OnRatioBtn(wxCommandEvent& event)
 {
-	bool bval = m_ratio_btn->GetValue();
 	auto agent = m_agent->As<ColocalizationDlgAgent>();
 	if (agent)
-		agent->SetRatio(bval);
+		agent->UpdateUIToData({ gstGetRatio });
 }
 
 void ColocalizationDlg::OnPhysicalBtn(wxCommandEvent& event)
 {
-	bool bval = m_physical_btn->GetValue();
 	auto agent = m_agent->As<ColocalizationDlgAgent>();
 	if (agent)
-		agent->SetPhysical(bval);
+		agent->UpdateUIToData({ gstPhysSize });
 }
 
 void ColocalizationDlg::OnColorMapBtn(wxCommandEvent& event)
 {
-	bool bval = m_colormap_btn->GetValue();
 	auto agent = m_agent->As<ColocalizationDlgAgent>();
 	if (agent)
-		agent->SetColormap(bval);
+		agent->UpdateUIToData({ gstColocalColormap });
 }
 
 void ColocalizationDlg::OnHistoryChk(wxCommandEvent& event)

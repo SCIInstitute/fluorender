@@ -90,6 +90,30 @@ void ColocalizationDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void ColocalizationDlgAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstUseSelection))
+	{
+		SetUseSelection();
+	}
+	if (request.HasValue(gstColocalMethod))
+	{
+		SetMethod();
+	}
+	if (request.HasValue(gstIntWeighted))
+	{
+		SetInWeight();
+	}
+	if (request.HasValue(gstGetRatio))
+	{
+		SetRatio();
+	}
+	if (request.HasValue(gstPhysSize))
+	{
+		SetPhysical();
+	}
+	if (request.HasValue(gstColocalColormap))
+	{
+		SetColormap();
+	}
 	if (request.HasValue(gstColocalResult))
 	{
 		Colocalization();
@@ -101,8 +125,12 @@ ColocalizationDlg* ColocalizationDlgAgent::GetDialog() const
 	return static_cast<ColocalizationDlg*>(GetOwner());
 }
 
-void ColocalizationDlgAgent::SetUseSelection(bool bval)
+void ColocalizationDlgAgent::SetUseSelection()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetUseSel();
 	glbin_colocal_def.m_use_mask = bval;
 	bool auto_update = glbin_colocalizer.GetAutoColocalize();
 	if (auto_update)
@@ -111,8 +139,12 @@ void ColocalizationDlgAgent::SetUseSelection(bool bval)
 	}
 }
 
-void ColocalizationDlgAgent::SetMethod(int ival)
+void ColocalizationDlgAgent::SetMethod()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	int ival = dialog->GetMethod();
 	glbin_colocal_def.m_method = ival;
 	bool auto_update = glbin_colocalizer.GetAutoColocalize();
 	if (auto_update)
@@ -121,8 +153,12 @@ void ColocalizationDlgAgent::SetMethod(int ival)
 	}
 }
 
-void ColocalizationDlgAgent::SetInWeight(bool bval)
+void ColocalizationDlgAgent::SetInWeight()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetIntWeighted();
 	glbin_colocal_def.m_int_weighted = bval;
 	bool auto_update = glbin_colocalizer.GetAutoColocalize();
 	if (auto_update)
@@ -131,8 +167,12 @@ void ColocalizationDlgAgent::SetInWeight(bool bval)
 	}
 }
 
-void ColocalizationDlgAgent::SetRatio(bool bval)
+void ColocalizationDlgAgent::SetRatio()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetRatio();
 	glbin_colocal_def.m_get_ratio = bval;
 	bool auto_update = glbin_colocalizer.GetAutoColocalize();
 	if (auto_update)
@@ -141,8 +181,12 @@ void ColocalizationDlgAgent::SetRatio(bool bval)
 	}
 }
 
-void ColocalizationDlgAgent::SetPhysical(bool bval)
+void ColocalizationDlgAgent::SetPhysical()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetPhysicalSize();
 	glbin_colocal_def.m_physical_size = bval;
 	bool auto_update = glbin_colocalizer.GetAutoColocalize();
 	if (auto_update)
@@ -151,8 +195,12 @@ void ColocalizationDlgAgent::SetPhysical(bool bval)
 	}
 }
 
-void ColocalizationDlgAgent::SetColormap(bool bval)
+void ColocalizationDlgAgent::SetColormap()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	bool bval = dialog->GetColormap();
 	glbin_colocal_def.m_colormap = bval;
 	bool auto_update = glbin_colocalizer.GetAutoColocalize();
 	if (auto_update)

@@ -42,13 +42,6 @@ public:
 
 	ColocalizationDlg* GetDialog() const;
 
-	void SetUseSelection(bool bval);
-	void SetMethod(int ival);
-	void SetInWeight(bool bval);
-	void SetRatio(bool bval);
-	void SetPhysical(bool bval);
-	void SetColormap(bool bval);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -69,11 +62,19 @@ private:
 		gstPhysSize,
 		gstColocalColormap,
 		gstUseSelection,
-		gstColocalResult
+		gstColocalResult,
+		gstUseSelection
 	};
 
+	void SetUseSelection();
+	void SetMethod();
+	void SetInWeight();
+	void SetRatio();
+	void SetPhysical();
+	void SetColormap();
 	void Colocalization();
 	void SetOutput();
+
 };
 
 #endif // ColocalizationDlgAgent_h

@@ -52,6 +52,14 @@ public:
 	void CopyData();
 	void UpdateGrid(const GridData& data);
 
+	//get
+	bool GetUseSel() const;
+	int GetMethod() const;
+	bool GetIntWeighted() const;
+	bool GetRatio() const;
+	bool GetPhysicalSize() const;
+	bool GetColormap() const;
+
 private:
 	//output
 	bool m_hold_history;

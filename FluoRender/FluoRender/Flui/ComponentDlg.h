@@ -127,6 +127,59 @@ public:
 
 	void UpdateGrid(const GridData& data);
 
+	//get
+	int GetIter() const;
+	double GetThresh() const;
+	bool GetUseDistField() const;
+	double GetDistStrength() const;
+	int GetDistFilterSize() const;
+	int GetMaxDist() const;
+	double GetDistThresh() const;
+	bool GetUseDiff() const;
+	double GetFalloff() const;
+	bool GetUseDensity() const;
+	double GetDensity() const;
+	double GetDensityVarThresh() const;
+	int GetDensityWindowSize() const;
+	int GetDensityStatsSize() const;
+	bool GetFixateEnable() const;
+	int GetFixateSize() const;
+	bool GetCleanEnable() const;
+	int GetCleanIteration() const;
+	int GetCleanLimit() const;
+	bool GetRecordCmd() const;
+
+	int GetClusterMethod() const;
+	int GetClusterClnum() const;
+	int GetClusterMaxiter() const;
+	double GetClusterTol() const;
+	int GetClusterSize() const;
+	double GetClusterEps() const;
+
+	std::string GetCompId() const;
+	bool GetUseMin() const;
+	int GetAnalysisMin() const;
+	bool GetUseMax() const;
+	int GetAnalysisMax() const;
+
+	int GetConSize() const;
+	bool GetConsistent() const;
+	bool GetColocal() const;
+	int GetOutputType() const;
+	int GetOutputChannels() const;
+	int GetOutputAnnotData() const;
+	bool GetUseDistNeighbor() const;
+	bool GetUseDistAllchan() const;
+	int GetDistNeighbor() const;
+
+	bool GetAlignCenter() const;
+	int GetAlignPca() const;
+
+	bool GetUseSel() const;
+	bool GetUseMl() const;
+
+	GridSelection GetSelection() const;
+
 	bool GetCellULong(int row, int col, unsigned long& value);
 	int GetRowCount();
 	void DeleteGridRows();
@@ -137,7 +190,12 @@ private:
 	bool m_supress_select = false;
 
 	//output
-	bool m_hold_history;
+	bool m_hold_history = false;
+
+	int m_output_channel = 0;
+	int m_output_annot_data = 0;
+	int m_align_pca = 0;
+	bool m_use_sel = false;
 
 	//load/save settings
 	wxTextCtrl* m_load_settings_text;
