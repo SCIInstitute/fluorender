@@ -52,24 +52,6 @@ public:
 	virtual void ApplySettings() override;
 	virtual void PreShutdown() override;
 
-	void SetClipValue(fluo::ClipPlane i, int val, bool link = false);//index: 0~5 = X1~Z2
-	void SetClipValues(fluo::ClipPlane i, int val1, int val2);//index: clip mask
-	void SetClipValues(const std::array<int, 6>& vals);
-	void ResetClipValues();
-	void ResetClipValues(fluo::ClipPlane i);
-	void SyncClipValue(int i);
-	void UpdateClipIdle(bool bval);
-	void SetLinkedDist(fluo::ClipPlane i, int val);
-	void SetPlaneMask(int val);
-
-	void SetClipRotX(double val);
-	void SetClipRotY(double val);
-	void SetClipRotZ(double val);
-
-	void SetClipDistX(bool use_val = false, int val = 0);
-	void SetClipDistY(bool use_val = false, int val = 0);
-	void SetClipDistZ(bool use_val = false, int val = 0);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -113,6 +95,45 @@ private:
 	};
 
 	std::shared_ptr<TreeLayer> GetObject();
+
+	void ResetClipValues();
+	void ResetClipValues(fluo::ClipPlane i);
+	void SyncClipValue(int i);
+	void SetClipValueX1();
+	void SetClipValueX2();
+	void SetClipValueY1();
+	void SetClipValueY2();
+	void SetClipValueZ1();
+	void SetClipValueZ2();
+	void SetClipValue(fluo::ClipPlane i, int val, bool link = false);//index: 0~5 = X1~Z2
+	void SetClipValues(fluo::ClipPlane i, int val1, int val2);//index: clip mask
+	void SetClipValues(const std::array<int, 6>& vals);
+
+	void UpdateClipIdle();
+
+	void SetLinkedDistX();
+	void SetLinkedDistY();
+	void SetLinkedDistZ();
+	void SetLinkedDist(fluo::ClipPlane i, int val);
+
+	void SetClipRotX();
+	void SetClipRotY();
+	void SetClipRotZ();
+	void SpinUpClipRotX();
+	void SpinUpClipRotY();
+	void SpinUpClipRotZ();
+	void SpinDownClipRotX();
+	void SpinDownClipRotY();
+	void SpinDownClipRotZ();
+	void SetClipRotX(double val);
+	void SetClipRotY(double val);
+	void SetClipRotZ(double val);
+
+	void SetPlaneMask(int val);
+
+	void SetClipDistX(bool use_val = false, int val = 0);
+	void SetClipDistY(bool use_val = false, int val = 0);
+	void SetClipDistZ(bool use_val = false, int val = 0);
 
 	void LinkChannels();
 	void HoldPlanes();

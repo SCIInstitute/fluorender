@@ -268,16 +268,70 @@ void ClipPlanePanelAgent::UpdateUI(const UpdateRequest& request)
 
 void ClipPlanePanelAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstResetClipValues))
+		ResetClipValues();
+	if (request.HasValue(gstSyncClipValueX))
+		SyncClipValue(0);
+	if (request.HasValue(gstSyncClipValueY))
+		SyncClipValue(1);
+	if (request.HasValue(gstSyncClipValueZ))
+		SyncClipValue(2);
+	if (request.HasValue(gstResetClipValuesX))
+		ResetClipValues(fluo::ClipPlane::XNeg);
+	if (request.HasValue(gstResetClipValuesY))
+		ResetClipValues(fluo::ClipPlane::YNeg);
+	if (request.HasValue(gstResetClipValuesZ))
+		ResetClipValues(fluo::ClipPlane::ZNeg);
+	if (request.HasValue(gstSetClipValueX1))
+		SetClipValueX1();
+	if (request.HasValue(gstSetClipValueX2))
+		SetClipValueX2();
+	if (request.HasValue(gstSetClipValueY1))
+		SetClipValueY1();
+	if (request.HasValue(gstSetClipValueY2))
+		SetClipValueY2();
+	if (request.HasValue(gstSetClipValueZ1))
+		SetClipValueZ1();
+	if (request.HasValue(gstSetClipValueZ2))
+		SetClipValueZ2();
+	if (request.HasValue(gstClipIdle))
+		UpdateClipIdle();
+	if (request.HasValue(gstLinkedDistX))
+		SetLinkedDistX();
+	if (request.HasValue(gstLinkedDistY))
+		SetLinkedDistY();
+	if (request.HasValue(gstLinkedDistZ))
+		SetLinkedDistZ();
+
+	if (request.HasValue(gstClipSetZero))
+		SetClipZero();
+	if (request.HasValue(gstClipRotReset))
+		RotReset();
+	if (request.HasValue(gstClipRotX))
+		SetClipRotX();
+	if (request.HasValue(gstClipRotY))
+		SetClipRotY();
+	if (request.HasValue(gstClipRotZ))
+		SetClipRotZ();
+	if (request.HasValue(gstSpinUpClipRotX))
+		SpinUpClipRotX();
+	if (request.HasValue(gstSpinUpClipRotY))
+		SpinUpClipRotY();
+	if (request.HasValue(gstSpinUpClipRotZ))
+		SpinUpClipRotZ();
+	if (request.HasValue(gstSpinDownClipRotX))
+		SpinDownClipRotX();
+	if (request.HasValue(gstSpinDownClipRotY))
+		SpinDownClipRotY();
+	if (request.HasValue(gstSpinDownClipRotZ))
+		SpinDownClipRotZ();
+
 	if (request.HasValue(gstClipLinkChan))
 		LinkChannels();
 	if (request.HasValue(gstClipHold))
 		HoldPlanes();
 	if (request.HasValue(gstClipPlaneMode))
 		SetPlaneMode();
-	if (request.HasValue(gstClipSetZero))
-		SetClipZero();
-	if (request.HasValue(gstClipRotReset))
-		RotReset();
 	if (request.HasValue(gstClipRotResetX))
 		RotResetAxis(0);
 	if (request.HasValue(gstClipRotResetY))
@@ -329,6 +383,173 @@ std::shared_ptr<TreeLayer> ClipPlanePanelAgent::GetObject()
 	}
 
 	return nullptr;
+}
+
+void ClipPlanePanelAgent::ResetClipValues()
+{
+	auto view = glbin_current.render_view.lock();
+	auto obj = GetObject();
+	if (!obj)
+		return;
+	obj->ResetClipValues();
+	int type = glbin_current.GetType();
+	if (type == 1)
+		view->SyncClippingBoxes(view->GetClippingBox());
+	else if (glbin_settings.m_clip_link)
+		view->ResetAllClipValues();
+	SetPlaneMask(-1);
+
+	//links
+	if (auto panel = GetPanel())
+	{
+		panel->SetXLink(false);
+		panel->SetYLink(false);
+		panel->SetZLink(false);
+	}
+
+	fluo::ValueCollection vc{
+		gstClipX1, gstClipX2, gstClipLinkX,
+		gstClipY1, gstClipY2, gstClipLinkY,
+		gstClipZ1, gstClipZ2, gstClipLinkZ,
+		gstConvVolMeshUpdateTransf };
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
+	NotifyViewUpdate(vc, target);
+}
+
+void ClipPlanePanelAgent::ResetClipValues(fluo::ClipPlane i)
+{
+	auto view = glbin_current.render_view.lock();
+	auto obj = GetObject();
+	if (!obj)
+		return;
+	obj->ResetClipValues(i);
+	int type = glbin_current.GetType();
+	if (type == 1)
+		view->SyncClippingBoxes(view->GetClippingBox());
+	else if (glbin_settings.m_clip_link)
+		view->SyncClippingBoxes(obj->GetClippingBox());
+	SetPlaneMask(-1);
+
+	fluo::ValueCollection vc = { gstConvVolMeshUpdateTransf };
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	//links
+	switch (i)
+	{
+	case fluo::ClipPlane::XNeg:
+	case fluo::ClipPlane::XPos:
+		panel->SetXLink(false);
+		vc.insert({ gstClipX1, gstClipX2, gstClipLinkX });
+		break;
+	case fluo::ClipPlane::YNeg:
+	case fluo::ClipPlane::YPos:
+		panel->SetYLink(false);
+		vc.insert({ gstClipY1, gstClipY2, gstClipLinkY });
+		break;
+	case fluo::ClipPlane::ZNeg:
+	case fluo::ClipPlane::ZPos:
+		panel->SetZLink(false);
+		vc.insert({ gstClipZ1, gstClipZ2, gstClipLinkZ });
+		break;
+	}
+
+	std::set<Agent*> target{ this };
+	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
+	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
+	NotifyViewUpdate(vc, target);
+}
+
+void ClipPlanePanelAgent::SyncClipValue(int i)
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::array<int, 2> val;
+	switch (i)
+	{
+	case 0:
+		val = panel->GetClipX();
+		SetClipValues(fluo::ClipPlane::XNeg, val[0], val[1]);
+		break;
+	case 1:
+		val = panel->GetClipY();
+		SetClipValues(fluo::ClipPlane::YNeg, val[0], val[1]);
+		break;
+	case 2:
+		val = panel->GetClipZ();
+		SetClipValues(fluo::ClipPlane::ZNeg, val[0], val[1]);
+		break;
+	}
+}
+
+void ClipPlanePanelAgent::SetClipValueX1()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::array<int, 2> val = panel->GetClipX();
+	bool link = panel->GetXLink();
+	SetClipValue(fluo::ClipPlane::XNeg, val[0], link);
+}
+
+void ClipPlanePanelAgent::SetClipValueX2()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::array<int, 2> val = panel->GetClipX();
+	bool link = panel->GetXLink();
+	SetClipValue(fluo::ClipPlane::XPos, val[1], link);
+}
+
+void ClipPlanePanelAgent::SetClipValueY1()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::array<int, 2> val = panel->GetClipY();
+	bool link = panel->GetYLink();
+	SetClipValue(fluo::ClipPlane::YNeg, val[0], link);
+}
+
+void ClipPlanePanelAgent::SetClipValueY2()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::array<int, 2> val = panel->GetClipY();
+	bool link = panel->GetYLink();
+	SetClipValue(fluo::ClipPlane::YPos, val[1], link);
+}
+
+void ClipPlanePanelAgent::SetClipValueZ1()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::array<int, 2> val = panel->GetClipZ();
+	bool link = panel->GetZLink();
+	SetClipValue(fluo::ClipPlane::ZNeg, val[0], link);
+}
+
+void ClipPlanePanelAgent::SetClipValueZ2()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::array<int, 2> val = panel->GetClipZ();
+	bool link = panel->GetZLink();
+	SetClipValue(fluo::ClipPlane::ZPos, val[1], link);
 }
 
 void ClipPlanePanelAgent::SetClipValue(fluo::ClipPlane i, int val, bool link)
@@ -453,109 +674,13 @@ void ClipPlanePanelAgent::SetClipValues(const std::array<int, 6>& vals)
 	NotifyViewUpdate(vc, target);
 }
 
-void ClipPlanePanelAgent::ResetClipValues()
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->ResetClipValues();
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->ResetAllClipValues();
-	SetPlaneMask(-1);
-
-	//links
-	if (auto panel = GetPanel())
-	{
-		panel->SetXLink(false);
-		panel->SetYLink(false);
-		panel->SetZLink(false);
-	}
-
-	fluo::ValueCollection vc{
-		gstClipX1, gstClipX2, gstClipLinkX,
-		gstClipY1, gstClipY2, gstClipLinkY,
-		gstClipZ1, gstClipZ2, gstClipLinkZ,
-		gstConvVolMeshUpdateTransf };
-	std::set<Agent*> target{ this };
-	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
-	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
-	NotifyViewUpdate(vc, target);
-}
-
-void ClipPlanePanelAgent::ResetClipValues(fluo::ClipPlane i)
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-	obj->ResetClipValues(i);
-	int type = glbin_current.GetType();
-	if (type == 1)
-		view->SyncClippingBoxes(view->GetClippingBox());
-	else if (glbin_settings.m_clip_link)
-		view->SyncClippingBoxes(obj->GetClippingBox());
-	SetPlaneMask(-1);
-
-	fluo::ValueCollection vc = { gstConvVolMeshUpdateTransf };
-	auto panel = GetPanel();
-	if (!panel)
-		return;
-	//links
-	switch (i)
-	{
-	case fluo::ClipPlane::XNeg:
-	case fluo::ClipPlane::XPos:
-		panel->SetXLink(false);
-		vc.insert({ gstClipX1, gstClipX2, gstClipLinkX });
-		break;
-	case fluo::ClipPlane::YNeg:
-	case fluo::ClipPlane::YPos:
-		panel->SetYLink(false);
-		vc.insert({ gstClipY1, gstClipY2, gstClipLinkY });
-		break;
-	case fluo::ClipPlane::ZNeg:
-	case fluo::ClipPlane::ZPos:
-		panel->SetZLink(false);
-		vc.insert({ gstClipZ1, gstClipZ2, gstClipLinkZ });
-		break;
-	}
-
-	std::set<Agent*> target{ this };
-	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
-	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
-	NotifyViewUpdate(vc, target);
-}
-
-void ClipPlanePanelAgent::SyncClipValue(int i)
+void ClipPlanePanelAgent::UpdateClipIdle()
 {
 	auto panel = GetPanel();
 	if (!panel)
 		return;
+	bool bval = panel->GetClipIdle();
 
-	std::array<int, 2> val;
-	switch (i)
-	{
-	case 0:
-		val = panel->GetClipX();
-		SetClipValues(fluo::ClipPlane::XNeg, val[0], val[1]);
-		break;
-	case 1:
-		val = panel->GetClipY();
-		SetClipValues(fluo::ClipPlane::YNeg, val[0], val[1]);
-		break;
-	case 2:
-		val = panel->GetClipZ();
-		SetClipValues(fluo::ClipPlane::ZNeg, val[0], val[1]);
-		break;
-	}
-}
-
-void ClipPlanePanelAgent::UpdateClipIdle(bool bval)
-{
 	auto view = glbin_current.render_view.lock();
 	if (!view)
 		return;
@@ -572,6 +697,33 @@ void ClipPlanePanelAgent::UpdateClipIdle(bool bval)
 	}
 }
 
+void ClipPlanePanelAgent::SetLinkedDistX()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	SetLinkedDist(fluo::ClipPlane::XNeg,
+		panel->GetClipDistX());
+}
+
+void ClipPlanePanelAgent::SetLinkedDistY()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	SetLinkedDist(fluo::ClipPlane::YNeg,
+		panel->GetClipDistY());
+}
+
+void ClipPlanePanelAgent::SetLinkedDistZ()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+	SetLinkedDist(fluo::ClipPlane::ZNeg,
+		panel->GetClipDistZ());
+}
+
 void ClipPlanePanelAgent::SetLinkedDist(fluo::ClipPlane i, int val)
 {
 	auto layer = GetObject();
@@ -580,15 +732,112 @@ void ClipPlanePanelAgent::SetLinkedDist(fluo::ClipPlane i, int val)
 	layer->SetLinkedDist(i, val);
 }
 
-void ClipPlanePanelAgent::SetPlaneMask(int val)
+void ClipPlanePanelAgent::SetClipRotX()
 {
-	auto base = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
-	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);
-	if (renderer)
-	{
-		auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
-		settings->plane_mask = val;
-	}
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double val = panel->GetClipRotX();
+	SetClipRotX(val);
+}
+
+void ClipPlanePanelAgent::SetClipRotY()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double val = panel->GetClipRotY();
+	SetClipRotY(val);
+}
+
+void ClipPlanePanelAgent::SetClipRotZ()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double val = panel->GetClipRotZ();
+	SetClipRotZ(val);
+}
+
+void ClipPlanePanelAgent::SpinUpClipRotX()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double val = panel->GetClipRotX();
+	val += glbin_settings.m_inverse_slider ? -1 : 1;
+	if (val > 180.0) val -= 360.0;
+	if (val < -180.0) val += 360.0;
+	SetClipRotX(val);
+}
+
+void ClipPlanePanelAgent::SpinUpClipRotY()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double val = panel->GetClipRotY();
+	val += glbin_settings.m_inverse_slider ? -1 : 1;
+	if (val > 180.0) val -= 360.0;
+	if (val < -180.0) val += 360.0;
+	SetClipRotY(val);
+}
+
+void ClipPlanePanelAgent::SpinUpClipRotZ()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double val = panel->GetClipRotZ();
+	val += glbin_settings.m_inverse_slider ? -1 : 1;
+	if (val > 180.0) val -= 360.0;
+	if (val < -180.0) val += 360.0;
+	SetClipRotZ(val);
+}
+
+void ClipPlanePanelAgent::SpinDownClipRotX()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double val = panel->GetClipRotX();
+	val += glbin_settings.m_inverse_slider ? 1 : -1;
+	if (val > 180.0) val -= 360.0;
+	if (val < -180.0) val += 360.0;
+	SetClipRotX(val);
+}
+
+void ClipPlanePanelAgent::SpinDownClipRotY()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double val = panel->GetClipRotY();
+	val += glbin_settings.m_inverse_slider ? 1 : -1;
+	if (val > 180.0) val -= 360.0;
+	if (val < -180.0) val += 360.0;
+	SetClipRotY(val);
+}
+
+void ClipPlanePanelAgent::SpinDownClipRotZ()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	double val = panel->GetClipRotZ();
+	val += glbin_settings.m_inverse_slider ? 1 : -1;
+	if (val > 180.0) val -= 360.0;
+	if (val < -180.0) val += 360.0;
+	SetClipRotZ(val);
 }
 
 void ClipPlanePanelAgent::SetClipRotX(double val)
@@ -646,6 +895,17 @@ void ClipPlanePanelAgent::SetClipRotZ(double val)
 	target.insert(glbin_coordinator.FindRenderCanvasAgent(view));
 	target.insert(glbin_coordinator.FindAgent<ConvertDlgAgent>());
 	NotifyViewUpdate(vc, target);
+}
+
+void ClipPlanePanelAgent::SetPlaneMask(int val)
+{
+	auto base = glbin_renderer_factory.getOrCreate(gstClippingBoxRenderer);
+	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);
+	if (renderer)
+	{
+		auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
+		settings->plane_mask = val;
+	}
 }
 
 void ClipPlanePanelAgent::SetClipDistX(bool use_val, int val)

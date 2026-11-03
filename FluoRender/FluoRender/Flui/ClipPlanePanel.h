@@ -116,10 +116,24 @@ public:
 	std::array<int, 2> GetClipY();
 	std::array<int, 2> GetClipZ();
 
+	int GetClipDistX();
+	int GetClipDistY();
+	int GetClipDistZ();
+
+	double GetClipRotX();
+	double GetClipRotY();
+	double GetClipRotZ();
+
+	bool GetClipIdle() const
+	{
+		return m_clip_idle;
+	}
+
 	void ClearUndo();
 
 private:
-	bool m_enable_all;
+	bool m_enable_all = true;
+	bool m_clip_idle = false;
 
 	//1st line
 	wxUndoableToolbar* m_toolbar;
