@@ -86,12 +86,41 @@ private:
 		gstClipRotX,
 		gstClipRotY,
 		gstClipRotZ,
+		gstResetClipValues,
+		gstSyncClipValueX,
+		gstSyncClipValueY,
+		gstSyncClipValueZ,
+		gstResetClipValuesX,
+		gstResetClipValuesY,
+		gstResetClipValuesZ,
+		gstSetClipValueX1,
+		gstSetClipValueX2,
+		gstSetClipValueY1,
+		gstSetClipValueY2,
+		gstSetClipValueZ1,
+		gstSetClipValueZ2,
+		gstClipIdle,
+		gstLinkedDistX,
+		gstLinkedDistY,
+		gstLinkedDistZ,
+		gstClipDistXClick,
+		gstClipDistYClick,
+		gstClipDistZClick,
+		gstClipDistXEdit,
+		gstClipDistYEdit,
+		gstClipDistZEdit,
 		gstClipSetZero,
 		gstClipRotReset,
+		gstSpinUpClipRotX,
+		gstSpinUpClipRotY,
+		gstSpinUpClipRotZ,
+		gstSpinDownClipRotX,
+		gstSpinDownClipRotY,
+		gstSpinDownClipRotZ,
 		gstClipRotResetX,
 		gstClipRotResetY,
 		gstClipRotResetZ,
-		gstVolumeSampleRate
+		gstVolumeSampleRate,
 	};
 
 	std::shared_ptr<TreeLayer> GetObject();
@@ -111,10 +140,23 @@ private:
 
 	void UpdateClipIdle();
 
+	void SetXLink();
+	void SetYLink();
+	void SetZLink();
 	void SetLinkedDistX();
 	void SetLinkedDistY();
 	void SetLinkedDistZ();
 	void SetLinkedDist(fluo::ClipPlane i, int val);
+	void SetClipDistXClick();
+	void SetClipDistYClick();
+	void SetClipDistZClick();
+	void SetClipDistXEdit();
+	void SetClipDistYEdit();
+	void SetClipDistZEdit();
+	void SetClipDistX(bool use_val = false, int val = 0);
+	void SetClipDistY(bool use_val = false, int val = 0);
+	void SetClipDistZ(bool use_val = false, int val = 0);
+
 
 	void SetClipRotX();
 	void SetClipRotY();
@@ -130,10 +172,6 @@ private:
 	void SetClipRotZ(double val);
 
 	void SetPlaneMask(int val);
-
-	void SetClipDistX(bool use_val = false, int val = 0);
-	void SetClipDistY(bool use_val = false, int val = 0);
-	void SetClipDistZ(bool use_val = false, int val = 0);
 
 	void LinkChannels();
 	void HoldPlanes();

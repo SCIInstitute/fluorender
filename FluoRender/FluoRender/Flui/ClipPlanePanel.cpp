@@ -620,25 +620,16 @@ void ClipPlanePanel::UpdateClipRotZ(double dval)
 void ClipPlanePanel::SetXLink(bool val)
 {
 	m_clipx_sldr->SetLink(val);
-	auto agent = m_agent->As<ClipPlanePanelAgent>();
-	if (agent)
-		agent->UpdateUIToData({ gstClipLinkX });
 }
 
 void ClipPlanePanel::SetYLink(bool val)
 {
 	m_clipy_sldr->SetLink(val);
-	auto agent = m_agent->As<ClipPlanePanelAgent>();
-	if (agent)
-		agent->UpdateUIToData({ gstClipLinkY });
 }
 
 void ClipPlanePanel::SetZLink(bool val)
 {
 	m_clipz_sldr->SetLink(val);
-	auto agent = m_agent->As<ClipPlanePanelAgent>();
-	if (agent)
-		agent->UpdateUIToData({ gstClipLinkZ });
 }
 
 std::array<int, 6> ClipPlanePanel::GetClipValues()
@@ -983,20 +974,23 @@ void ClipPlanePanel::OnIdle(wxIdleEvent &event)
 
 void ClipPlanePanel::OnLinkXCheck(wxCommandEvent& event)
 {
-	bool link = m_linkx_tb->GetToolState(0);
-	SetXLink(link);
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstClipLinkX });
 }
 
 void ClipPlanePanel::OnLinkYCheck(wxCommandEvent& event)
 {
-	bool link = m_linky_tb->GetToolState(0);
-	SetYLink(link);
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstClipLinkY });
 }
 
 void ClipPlanePanel::OnLinkZCheck(wxCommandEvent& event)
 {
-	bool link = m_linkz_tb->GetToolState(0);
-	SetZLink(link);
+	auto agent = m_agent->As<ClipPlanePanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstClipLinkZ });
 }
 
 void ClipPlanePanel::OnClipDistXEdit(wxCommandEvent& event)
@@ -1209,79 +1203,43 @@ void ClipPlanePanel::UpdateSampleRate()
 void ClipPlanePanel::OnClipXRClick(wxMouseEvent& event)
 {
 	auto agent = m_agent->As<ClipPlanePanelAgent>();
-	if (!agent)
-		return;
-
-	int clip = m_clipx_sldr->GetLowValue();
-	agent->SetClipDistX(true, clip);
-	SetXLink(true);
-	SetYLink(false);
-	SetZLink(false);
+	if (agent)
+		agent->UpdateUIToData({ gstClipDistXClick });
 }
 
 void ClipPlanePanel::OnClipYRClick(wxMouseEvent& event)
 {
 	auto agent = m_agent->As<ClipPlanePanelAgent>();
-	if (!agent)
-		return;
-
-	int clip = m_clipy_sldr->GetLowValue();
-	agent->SetClipDistY(true, clip);
-	SetXLink(false);
-	SetYLink(true);
-	SetZLink(false);
+	if (agent)
+		agent->UpdateUIToData({ gstClipDistYClick });
 }
 
 void ClipPlanePanel::OnClipZRClick(wxMouseEvent& event)
 {
 	auto agent = m_agent->As<ClipPlanePanelAgent>();
-	if (!agent)
-		return;
-
-	int clip = m_clipz_sldr->GetLowValue();
-	agent->SetClipDistY(true, clip);
-	SetXLink(false);
-	SetYLink(false);
-	SetZLink(true);
+	if (agent)
+		agent->UpdateUIToData({ gstClipDistZClick });
 }
 
 void ClipPlanePanel::OnYZClipBtn(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<ClipPlanePanelAgent>();
-	if (!agent)
-		return;
-
-	int clip = m_clipx_sldr->GetLowValue();
-	agent->SetClipDistX();
-	SetXLink(true);
-	SetYLink(false);
-	SetZLink(false);
+	if (agent)
+		agent->UpdateUIToData({ gstClipDistXEdit });
 }
 
 void ClipPlanePanel::OnXZClipBtn(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<ClipPlanePanelAgent>();
-	if (!agent)
-		return;
-
-	int clip = m_clipy_sldr->GetLowValue();
-	agent->SetClipDistY();
-	SetXLink(false);
-	SetYLink(true);
-	SetZLink(false);
+	if (agent)
+		agent->UpdateUIToData({ gstClipDistYEdit });
 }
 
 void ClipPlanePanel::OnXYClipBtn(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<ClipPlanePanelAgent>();
-	if (!agent)
-		return;
-
-	int clip = m_clipz_sldr->GetLowValue();
-	agent->SetClipDistY();
-	SetXLink(false);
-	SetYLink(false);
-	SetZLink(true);
+	if (agent)
+		agent->UpdateUIToData({ gstClipDistZEdit });
 }
 
 void ClipPlanePanel::ClearUndo()

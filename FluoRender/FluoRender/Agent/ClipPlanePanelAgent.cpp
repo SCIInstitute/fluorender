@@ -296,12 +296,31 @@ void ClipPlanePanelAgent::UpdateData(const UpdateRequest& request)
 		SetClipValueZ2();
 	if (request.HasValue(gstClipIdle))
 		UpdateClipIdle();
+
+	if (request.HasValue(gstClipLinkX))
+		SetXLink();
+	if (request.HasValue(gstClipLinkY))
+		SetYLink();
+	if (request.HasValue(gstClipLinkZ))
+		SetZLink();
 	if (request.HasValue(gstLinkedDistX))
 		SetLinkedDistX();
 	if (request.HasValue(gstLinkedDistY))
 		SetLinkedDistY();
 	if (request.HasValue(gstLinkedDistZ))
 		SetLinkedDistZ();
+	if (request.HasValue(gstClipDistXClick))
+		SetClipDistXClick();
+	if (request.HasValue(gstClipDistYClick))
+		SetClipDistYClick();
+	if (request.HasValue(gstClipDistZClick))
+		SetClipDistZClick();
+	if (request.HasValue(gstClipDistXEdit))
+		SetClipDistXEdit();
+	if (request.HasValue(gstClipDistYEdit))
+		SetClipDistYEdit();
+	if (request.HasValue(gstClipDistZEdit))
+		SetClipDistZEdit();
 
 	if (request.HasValue(gstClipSetZero))
 		SetClipZero();
@@ -697,6 +716,39 @@ void ClipPlanePanelAgent::UpdateClipIdle()
 	}
 }
 
+void ClipPlanePanelAgent::SetXLink()
+{
+	auto panel = GetPanel();
+	if (panel)
+	{
+		bool link = panel->GetXLink();
+		panel->SetXLink(link);
+		panel->UpdateClipLinkX();
+	}
+}
+
+void ClipPlanePanelAgent::SetYLink()
+{
+	auto panel = GetPanel();
+	if (panel)
+	{
+		bool link = panel->GetYLink();
+		panel->SetYLink(link);
+		panel->UpdateClipLinkY();
+	}
+}
+
+void ClipPlanePanelAgent::SetZLink()
+{
+	auto panel = GetPanel();
+	if (panel)
+	{
+		bool link = panel->GetZLink();
+		panel->SetZLink(link);
+		panel->UpdateClipLinkZ();
+	}
+}
+
 void ClipPlanePanelAgent::SetLinkedDistX()
 {
 	auto panel = GetPanel();
@@ -731,6 +783,136 @@ void ClipPlanePanelAgent::SetLinkedDist(fluo::ClipPlane i, int val)
 		return;
 	layer->SetLinkedDist(i, val);
 }
+
+void ClipPlanePanelAgent::SetClipDistXClick()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto val = panel->GetClipX();
+	SetClipDistX(true, val[0]);
+	panel->SetXLink(true);
+	panel->SetYLink(false);
+	panel->SetZLink(false);
+}
+
+void ClipPlanePanelAgent::SetClipDistYClick()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto val = panel->GetClipY();
+	SetClipDistY(true, val[0]);
+	panel->SetXLink(false);
+	panel->SetYLink(true);
+	panel->SetZLink(false);
+}
+
+void ClipPlanePanelAgent::SetClipDistZClick()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto val = panel->GetClipZ();
+	SetClipDistZ(true, val[0]);
+	panel->SetXLink(false);
+	panel->SetYLink(false);
+	panel->SetZLink(true);
+}
+
+void ClipPlanePanelAgent::SetClipDistXEdit()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	SetClipDistX(false);
+	panel->SetXLink(true);
+	panel->SetYLink(false);
+	panel->SetZLink(false);
+}
+
+void ClipPlanePanelAgent::SetClipDistYEdit()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	SetClipDistY(false);
+	panel->SetXLink(false);
+	panel->SetYLink(true);
+	panel->SetZLink(false);
+}
+
+void ClipPlanePanelAgent::SetClipDistZEdit()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	SetClipDistZ(false);
+	panel->SetXLink(false);
+	panel->SetYLink(false);
+	panel->SetZLink(true);
+}
+
+void ClipPlanePanelAgent::SetClipDistX(bool use_val, int val)
+{
+	auto view = glbin_current.render_view.lock();
+	auto obj = GetObject();
+	if (!obj)
+		return;
+
+	obj->ResetClipValues();
+
+	if (use_val)
+		SetClipValues(fluo::ClipPlane::XNeg, val, val + 1);
+	else
+	{
+		int dist = obj->GetLinkedDist(fluo::ClipPlane::XNeg);
+		SetClipValues(fluo::ClipPlane::XNeg, 0, dist);
+	}
+}
+
+void ClipPlanePanelAgent::SetClipDistY(bool use_val, int val)
+{
+	auto view = glbin_current.render_view.lock();
+	auto obj = GetObject();
+	if (!obj)
+		return;
+
+	obj->ResetClipValues();
+
+	if (use_val)
+		SetClipValues(fluo::ClipPlane::YNeg, val, val + 1);
+	else
+	{
+		int dist = obj->GetLinkedDist(fluo::ClipPlane::YNeg);
+		SetClipValues(fluo::ClipPlane::YNeg, 0, dist);
+	}
+}
+
+void ClipPlanePanelAgent::SetClipDistZ(bool use_val, int val)
+{
+	auto view = glbin_current.render_view.lock();
+	auto obj = GetObject();
+	if (!obj)
+		return;
+
+	obj->ResetClipValues();
+
+	if (use_val)
+		SetClipValues(fluo::ClipPlane::ZNeg, val, val + 1);
+	else
+	{
+		int dist = obj->GetLinkedDist(fluo::ClipPlane::ZNeg);
+		SetClipValues(fluo::ClipPlane::ZNeg, 0, dist);
+	}
+}
+
 
 void ClipPlanePanelAgent::SetClipRotX()
 {
@@ -905,60 +1087,6 @@ void ClipPlanePanelAgent::SetPlaneMask(int val)
 	{
 		auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
 		settings->plane_mask = val;
-	}
-}
-
-void ClipPlanePanelAgent::SetClipDistX(bool use_val, int val)
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-
-	obj->ResetClipValues();
-
-	if (use_val)
-		SetClipValues(fluo::ClipPlane::XNeg, val, val + 1);
-	else
-	{
-		int dist = obj->GetLinkedDist(fluo::ClipPlane::XNeg);
-		SetClipValues(fluo::ClipPlane::XNeg, 0, dist);
-	}
-}
-
-void ClipPlanePanelAgent::SetClipDistY(bool use_val, int val)
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-
-	obj->ResetClipValues();
-
-	if (use_val)
-		SetClipValues(fluo::ClipPlane::YNeg, val, val + 1);
-	else
-	{
-		int dist = obj->GetLinkedDist(fluo::ClipPlane::YNeg);
-		SetClipValues(fluo::ClipPlane::YNeg, 0, dist);
-	}
-}
-
-void ClipPlanePanelAgent::SetClipDistZ(bool use_val, int val)
-{
-	auto view = glbin_current.render_view.lock();
-	auto obj = GetObject();
-	if (!obj)
-		return;
-
-	obj->ResetClipValues();
-
-	if (use_val)
-		SetClipValues(fluo::ClipPlane::ZNeg, val, val + 1);
-	else
-	{
-		int dist = obj->GetLinkedDist(fluo::ClipPlane::ZNeg);
-		SetClipValues(fluo::ClipPlane::ZNeg, 0, dist);
 	}
 }
 
