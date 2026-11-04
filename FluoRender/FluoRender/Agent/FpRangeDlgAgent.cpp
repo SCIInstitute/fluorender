@@ -63,6 +63,14 @@ void FpRangeDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void FpRangeDlgAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstFpRangeMin))
+	{
+		SetFpMin();
+	}
+	if (request.HasValue(gstFpRangeMax))
+	{
+		SetFpMax();
+	}
 	if (request.HasValue(gstFpRangeUpdate))
 	{
 		glbin_settings.m_fp_min = m_fp_min;
@@ -75,12 +83,18 @@ FpRangeDlg* FpRangeDlgAgent::GetDialog() const
 	return static_cast<FpRangeDlg*>(GetOwner());
 }
 
-void FpRangeDlgAgent::SetFpMin(double dval)
+void FpRangeDlgAgent::SetFpMin()
 {
-	m_fp_min = dval;
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	m_fp_min = dialog->GetFpMin();
 }
 
-void FpRangeDlgAgent::SetFpMax(double dval)
+void FpRangeDlgAgent::SetFpMax()
 {
-	m_fp_max = dval;
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	m_fp_max = dialog->GetFpMax();
 }

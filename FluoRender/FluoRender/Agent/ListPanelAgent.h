@@ -57,8 +57,6 @@ public:
 
 	ListContextInfo GetListContextInfo();
 	std::vector<std::wstring> GetViewNames();
-	void SetSelName(const std::wstring& name);
-	void SetCurrentSelection(ListItemType type, const std::wstring& name);
 
 protected:
 	std::span < const std::string_view>
@@ -91,6 +89,8 @@ private:
 	void UpdateList();
 	void UpdateSelection();
 
+	void SetSelName();
+	void SetCurrentSelection();
 	void AddSelectionToView();
 	void SaveSelection();
 	void BakeSelection();

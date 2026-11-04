@@ -121,6 +121,14 @@ void CountingDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void CountingDlgAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstUseSelection))
+		SetUseSelection();
+	if (request.HasValue(gstCountMinValue))
+		SetMinNum();
+	if (request.HasValue(gstCountMaxValue))
+		SetMaxNum();
+	if (request.HasValue(gstCountUseMax))
+		SetUseMax();
 	if (request.HasValue(gstCountAnalyze))
 		Analyze();
 }
@@ -130,27 +138,39 @@ CountingDlg* CountingDlgAgent::GetDialog() const
 	return static_cast<CountingDlg*>(GetOwner());
 }
 
-void CountingDlgAgent::SetUseSelection(bool bval)
+void CountingDlgAgent::SetUseSelection()
 {
-	glbin_comp_generator.SetUseSel(bval);
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	glbin_comp_generator.SetUseSel(dialog->GetUseSelection());
 }
 
-void CountingDlgAgent::SetMinNum(int ival)
+void CountingDlgAgent::SetMinNum()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
 	glbin_comp_analyzer.SetUseMin(true);
-	glbin_comp_analyzer.SetMinNum(ival);
+	glbin_comp_analyzer.SetMinNum(dialog->GetMinNum());
 }
 
-void CountingDlgAgent::SetMaxNum(int ival)
+void CountingDlgAgent::SetMaxNum()
 {
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
 	glbin_comp_analyzer.SetUseMax(true);
-	glbin_comp_analyzer.SetMaxNum(ival);
+	glbin_comp_analyzer.SetMaxNum(dialog->GetMaxNum());
 	UpdateDataToUI({ gstCountUseMax });
 }
 
-void CountingDlgAgent::SetUseMax(bool bval)
+void CountingDlgAgent::SetUseMax()
 {
-	glbin_comp_analyzer.SetUseMax(bval);
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+	glbin_comp_analyzer.SetUseMax(dialog->GetUseMax());
 }
 
 void CountingDlgAgent::Analyze()

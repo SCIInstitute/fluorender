@@ -231,45 +231,60 @@ void CountingDlg::UpdateGrid(const GridData& data)
 	m_output_grid->ClearSelection();
 }
 
+bool CountingDlg::GetUseSelection() const
+{
+	return m_ca_select_only_chk->GetValue();
+}
+
+int CountingDlg::GetMinNum() const
+{
+	long ival;
+	if (m_ca_min_text->GetValue().ToLong(&ival))
+		return static_cast<int>(ival);
+	else
+		return 0;
+}
+
+int CountingDlg::GetMaxNum() const
+{
+	long ival;
+	if (m_ca_max_text->GetValue().ToLong(&ival))
+		return static_cast<int>(ival);
+	else
+		return 0;
+}
+
+bool CountingDlg::GetUseMax() const
+{
+	return !m_ca_ignore_max_chk->GetValue();
+}
+
 void CountingDlg::OnUseSelChk(wxCommandEvent& event)
 {
-	bool bval = m_ca_select_only_chk->GetValue();
-
 	auto agent = m_agent->As<CountingDlgAgent>();
 	if (agent)
-		agent->SetUseSelection(bval);
+		agent->UpdateUIToData({ gstUseSelection });
 }
 
 void CountingDlg::OnMinText(wxCommandEvent& event)
 {
-	long ival;
-	wxString str = m_ca_min_text->GetValue();
-	if (str.ToLong(&ival))
-	{
-		auto agent = m_agent->As<CountingDlgAgent>();
-		if (agent)
-			agent->SetMinNum(ival);
-	}
+	auto agent = m_agent->As<CountingDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCountMinValue });
 }
 
 void CountingDlg::OnMaxText(wxCommandEvent& event)
 {
-	long ival;
-	wxString str = m_ca_max_text->GetValue();
-	if (str.ToLong(&ival))
-	{
-		auto agent = m_agent->As<CountingDlgAgent>();
-		if (agent)
-			agent->SetMaxNum(ival);
-	}
+	auto agent = m_agent->As<CountingDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstCountMaxValue });
 }
 
 void CountingDlg::OnIgnoreMaxChk(wxCommandEvent& event)
 {
-	bool bval = m_ca_ignore_max_chk->GetValue();
 	auto agent = m_agent->As<CountingDlgAgent>();
 	if (agent)
-		agent->SetUseMax(!bval);
+		agent->UpdateUIToData({ gstCountUseMax });
 }
 
 //component analyze

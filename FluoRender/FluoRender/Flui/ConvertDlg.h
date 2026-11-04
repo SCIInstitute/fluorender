@@ -75,6 +75,16 @@ public:
 	void CopyData();
 	void UpdateGrid(const GridData& data);
 
+	//get
+	double GetIsoValue() const;
+	int GetDownSample() const;
+	int GetDownSampleZ() const;
+	double GetSimplify() const;
+	double GetSmoothStrength() const;
+	double GetSmoothScale() const;
+	bool GetUseTransf() const;
+	bool GetUseSelection() const;
+
 private:
 	//output
 	bool m_hold_history = false;

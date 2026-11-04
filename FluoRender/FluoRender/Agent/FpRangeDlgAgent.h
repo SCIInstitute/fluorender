@@ -42,9 +42,6 @@ public:
 
 	FpRangeDlg* GetDialog() const;
 
-	void SetFpMin(double dval);
-	void SetFpMax(double dval);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -66,6 +63,11 @@ private:
 
 	double m_fp_min = 0.0;
 	double m_fp_max = 0.0;
+
+private:
+	void SetFpMin();
+	void SetFpMax();
+
 };
 
 #endif // FpRangeDlgAgent_h

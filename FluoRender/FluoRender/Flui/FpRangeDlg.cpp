@@ -117,28 +117,36 @@ void FpRangeDlg::UpdateFpRangeMax(double dval)
 	m_max_text->ChangeValue(str);
 }
 
-void FpRangeDlg::OnMinText(wxCommandEvent& event)
+double FpRangeDlg::GetFpMin() const
 {
 	wxString str = m_min_text->GetValue();
 	double dval;
 	if (str.ToDouble(&dval))
-	{
-		auto agent = m_agent->As<FpRangeDlgAgent>();
-		if (agent)
-			agent->SetFpMin(dval);
-	}
+		return dval;
+	return 0.0;
 }
 
-void FpRangeDlg::OnMaxText(wxCommandEvent& event)
+double FpRangeDlg::GetFpMax() const
 {
 	wxString str = m_max_text->GetValue();
 	double dval;
 	if (str.ToDouble(&dval))
-	{
-		auto agent = m_agent->As<FpRangeDlgAgent>();
-		if (agent)
-			agent->SetFpMax(dval);
-	}
+		return dval;
+	return 0.0;
+}
+
+void FpRangeDlg::OnMinText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<FpRangeDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstFpRangeMin });
+}
+
+void FpRangeDlg::OnMaxText(wxCommandEvent& event)
+{
+	auto agent = m_agent->As<FpRangeDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstFpRangeMax });
 }
 
 void FpRangeDlg::OnShow(wxShowEvent& event)

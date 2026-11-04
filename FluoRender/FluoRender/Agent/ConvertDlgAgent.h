@@ -45,15 +45,6 @@ public:
 	virtual void ApplySettings() override;
 	virtual void PreShutdown() override;
 
-	void SetIsoValue(double dval);
-	void SetDownSample(int ival);
-	void SetDownSampleZ(int ival);
-	void SetSimplify(double dval);
-	void SetSmoothStrength(double dval);
-	void SetSmoothScale(double dval);
-	void SetUseTransf(bool bval);
-	void SetUseSelection(bool bval);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -87,6 +78,15 @@ private:
 		gstMeshSimplify,
 		gstMeshSmooth
 	};
+
+	void SetIsoValue();
+	void SetDownSample();
+	void SetDownSampleZ();
+	void SetSimplify();
+	void SetSmoothStrength();
+	void SetSmoothScale();
+	void SetUseTransf();
+	void SetUseSelection();
 
 	void MeshConvert();
 	void MeshUpdate();

@@ -392,6 +392,64 @@ void ConvertDlg::UpdateGrid(const GridData& data)
 	m_output_grid->ClearSelection();
 }
 
+double ConvertDlg::GetIsoValue() const
+{
+	double dval;
+	if (m_cnv_vol_mesh_thresh_text->GetValue().ToDouble(&dval))
+		return dval;
+	return 0.0;
+}
+
+int ConvertDlg::GetDownSample() const
+{
+	long ival;
+	if (m_cnv_vol_mesh_downsample_text->GetValue().ToLong(&ival))
+		return static_cast<int>(ival);
+	return 1;
+}
+
+int ConvertDlg::GetDownSampleZ() const
+{
+	long ival;
+	if (m_cnv_vol_mesh_downsample_z_text->GetValue().ToLong(&ival))
+		return static_cast<int>(ival);
+	return 1;
+}
+
+double ConvertDlg::GetSimplify() const
+{
+	double dval;
+	if (m_cnv_vol_mesh_simplify_text->GetValue().ToDouble(&dval))
+		return dval;
+	return 0.0;
+}
+
+double ConvertDlg::GetSmoothStrength() const
+{
+	double dval;
+	if (m_cnv_vol_mesh_smooth_n_text->GetValue().ToDouble(&dval))
+		return dval;
+	return 0.0;
+}
+
+double ConvertDlg::GetSmoothScale() const
+{
+	double dval;
+	if (m_cnv_vol_mesh_smooth_t_text->GetValue().ToDouble(&dval))
+		return dval;
+	return 0.0;
+}
+
+bool ConvertDlg::GetUseTransf() const
+{
+	return m_cnv_vol_mesh_usetransf_chk->GetValue();
+}
+
+bool ConvertDlg::GetUseSelection() const
+{
+	return m_cnv_vol_mesh_selected_chk->GetValue();
+}
+
 //threshold
 void ConvertDlg::OnCnvVolMeshThreshChange(wxScrollEvent& event)
 {
@@ -404,15 +462,9 @@ void ConvertDlg::OnCnvVolMeshThreshChange(wxScrollEvent& event)
 
 void ConvertDlg::OnCnvVolMeshThreshText(wxCommandEvent& event)
 {
-	wxString str = m_cnv_vol_mesh_thresh_text->GetValue();
-	double dval;
-	if (str.ToDouble(&dval))
-	{
-		m_cnv_vol_mesh_thresh_sldr->ChangeValue(std::round(dval * 100.0));
-		auto agent = m_agent->As<ConvertDlgAgent>();
-		if (agent)
-			agent->SetIsoValue(dval);
-	}
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstVolMeshThresh });
 }
 
 //downsampling
@@ -426,15 +478,9 @@ void ConvertDlg::OnCnvVolMeshDownsampleChange(wxScrollEvent& event)
 
 void ConvertDlg::OnCnvVolMeshDownsampleText(wxCommandEvent& event)
 {
-	wxString str = m_cnv_vol_mesh_downsample_text->GetValue();
-	long ival;
-	if (str.ToLong(&ival))
-	{
-		m_cnv_vol_mesh_downsample_sldr->ChangeValue(ival);
-		auto agent = m_agent->As<ConvertDlgAgent>();
-		if (agent)
-			agent->SetDownSample(ival);
-	}
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstVolMeshDownXY });
 }
 
 //downsampling Z
@@ -448,15 +494,9 @@ void ConvertDlg::OnCnvVolMeshDownsampleZChange(wxScrollEvent& event)
 
 void ConvertDlg::OnCnvVolMeshDownsampleZText(wxCommandEvent& event)
 {
-	wxString str = m_cnv_vol_mesh_downsample_z_text->GetValue();
-	long ival;
-	if (str.ToLong(&ival))
-	{
-		m_cnv_vol_mesh_downsample_z_sldr->ChangeValue(ival);
-		auto agent = m_agent->As<ConvertDlgAgent>();
-		if (agent)
-			agent->SetDownSampleZ(ival);
-	}
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstVolMeshDownZ });
 }
 
 void ConvertDlg::OnCnvVolMeshSimplifyChange(wxScrollEvent& event)
@@ -470,15 +510,9 @@ void ConvertDlg::OnCnvVolMeshSimplifyChange(wxScrollEvent& event)
 
 void ConvertDlg::OnCnvVolMeshSimplifyText(wxCommandEvent& event)
 {
-	wxString str = m_cnv_vol_mesh_simplify_text->GetValue();
-	double dval;
-	if (str.ToDouble(&dval))
-	{
-		m_cnv_vol_mesh_simplify_sldr->ChangeValue(std::round(dval * 100.0));
-		auto agent = m_agent->As<ConvertDlgAgent>();
-		if (agent)
-			agent->SetSimplify(dval);
-	}
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstVolMeshSimplify });
 }
 
 void ConvertDlg::OnCnvVolMeshSmoothNChange(wxScrollEvent& event)
@@ -492,15 +526,9 @@ void ConvertDlg::OnCnvVolMeshSmoothNChange(wxScrollEvent& event)
 
 void ConvertDlg::OnCnvVolMeshSmoothNText(wxCommandEvent& event)
 {
-	wxString str = m_cnv_vol_mesh_smooth_n_text->GetValue();
-	double dval;
-	if (str.ToDouble(&dval))
-	{
-		m_cnv_vol_mesh_smooth_n_sldr->ChangeValue(std::round(dval * 100.0));
-		auto agent = m_agent->As<ConvertDlgAgent>();
-		if (agent)
-			agent->SetSmoothStrength(dval);
-	}
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstVolMeshSmoothN });
 }
 
 void ConvertDlg::OnCnvVolMeshSmoothTChange(wxScrollEvent& event)
@@ -514,31 +542,23 @@ void ConvertDlg::OnCnvVolMeshSmoothTChange(wxScrollEvent& event)
 
 void ConvertDlg::OnCnvVolMeshSmoothTText(wxCommandEvent& event)
 {
-	wxString str = m_cnv_vol_mesh_smooth_t_text->GetValue();
-	double dval;
-	if (str.ToDouble(&dval))
-	{
-		m_cnv_vol_mesh_smooth_t_sldr->ChangeValue(std::round(dval * 100.0));
-		auto agent = m_agent->As<ConvertDlgAgent>();
-		if (agent)
-			agent->SetSmoothScale(dval);
-	}
+	auto agent = m_agent->As<ConvertDlgAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstVolMeshSmoothT });
 }
 
 void ConvertDlg::OnCnvVolMeshUseTransfCheck(wxCommandEvent& event)
 {
-	bool bval = m_cnv_vol_mesh_usetransf_chk->GetValue();
 	auto agent = m_agent->As<ConvertDlgAgent>();
 	if (agent)
-		agent->SetUseTransf(bval);
+		agent->UpdateUIToData({ gstUseTransferFunc });
 }
 
 void ConvertDlg::OnCnvVolMeshUseSelCheck(wxCommandEvent& event)
 {
-	bool bval = m_cnv_vol_mesh_selected_chk->GetValue();
 	auto agent = m_agent->As<ConvertDlgAgent>();
 	if (agent)
-		agent->SetUseSelection(bval);
+		agent->UpdateUIToData({ gstUseSelection });
 }
 
 void ConvertDlg::OnToolBar(wxCommandEvent& event)

@@ -41,6 +41,10 @@ public:
 	void UpdateFpRangeMin(double dval);
 	void UpdateFpRangeMax(double dval);
 
+	//get
+	double GetFpMin() const;
+	double GetFpMax() const;
+
 private:
 	//text boxes
 	wxTextCtrl* m_min_text;

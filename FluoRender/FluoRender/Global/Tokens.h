@@ -1202,6 +1202,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstFpRangeUpdate "fp range update"
 
 //list panel agent
+#define gstListRename "list rename"
 #define gstAddListSelToView "add list sel to view"
 #define gstListSaveSelection "list save selection"
 #define gstListBakeSelection "list bake selection"

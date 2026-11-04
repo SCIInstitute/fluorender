@@ -70,6 +70,14 @@ void ListPanelAgent::UpdateUI(const UpdateRequest& request)
 
 void ListPanelAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstListRename))
+	{
+		SetSelName();
+	}
+	if (request.HasValue(gstCurrentSelect))
+	{
+		SetCurrentSelection();
+	}
 	if (request.HasValue(gstAddListSelToView))
 	{
 		AddSelectionToView();
@@ -94,57 +102,6 @@ void ListPanelAgent::UpdateData(const UpdateRequest& request)
 	{
 		DeleteAll();
 	}
-}
-
-void ListPanelAgent::SetSelName(const std::wstring& name)
-{
-	std::wstring new_name = name;
-	for (int i = 1; glbin_data_manager.CheckNames(new_name); i++)
-		new_name = new_name + L"_" + std::to_wstring(i);
-	int type = glbin_current.GetType();
-
-	switch (type)
-	{
-	case 2://volume
-	{
-		auto vd = glbin_current.vol_data.lock();
-		if (vd)
-			vd->SetName(new_name);
-	}
-	break;
-	case 3://mesh
-	{
-		auto md = glbin_current.mesh_data.lock();
-		if (md)
-			md->SetName(new_name);
-	}
-	break;
-	case 4://annotations
-	{
-		auto ann = glbin_current.ann_data.lock();
-		if (ann)
-			ann->SetName(new_name);
-	}
-	break;
-	}
-
-	NotifyViewUpdate({ gstTreeLayerName });
-}
-
-void ListPanelAgent::SetCurrentSelection(ListItemType type, const std::wstring& name)
-{
-	switch (type)
-	{
-	case ListItemType::Volume:
-		glbin_current.SetVolumeData(glbin_data_manager.GetVolumeData(name));
-		break;
-	case ListItemType::Mesh:
-		glbin_current.SetMeshData(glbin_data_manager.GetMeshData(name));
-		break;
-	case ListItemType::Annot:
-		glbin_current.SetAnnotData(glbin_data_manager.GetAnnotData(name));
-	}
-	NotifyViewUpdate({ gstCurrentSelect });
 }
 
 ListContextInfo ListPanelAgent::GetListContextInfo()
@@ -288,6 +245,67 @@ void ListPanelAgent::UpdateSelection()
 	}
 
 	panel->SelectListItem(list_type, name);
+}
+
+void ListPanelAgent::SetSelName()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::wstring new_name = panel->GetRenameStr();
+	for (int i = 1; glbin_data_manager.CheckNames(new_name); i++)
+		new_name = new_name + L"_" + std::to_wstring(i);
+	int type = glbin_current.GetType();
+
+	switch (type)
+	{
+	case 2://volume
+	{
+		auto vd = glbin_current.vol_data.lock();
+		if (vd)
+			vd->SetName(new_name);
+	}
+	break;
+	case 3://mesh
+	{
+		auto md = glbin_current.mesh_data.lock();
+		if (md)
+			md->SetName(new_name);
+	}
+	break;
+	case 4://annotations
+	{
+		auto ann = glbin_current.ann_data.lock();
+		if (ann)
+			ann->SetName(new_name);
+	}
+	break;
+	}
+
+	NotifyViewUpdate({ gstTreeLayerName });
+}
+
+void ListPanelAgent::SetCurrentSelection()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	ListItemType type = panel->GetSelType();
+	std::wstring name = panel->GetSelName();
+	switch (type)
+	{
+	case ListItemType::Volume:
+		glbin_current.SetVolumeData(glbin_data_manager.GetVolumeData(name));
+		break;
+	case ListItemType::Mesh:
+		glbin_current.SetMeshData(glbin_data_manager.GetMeshData(name));
+		break;
+	case ListItemType::Annot:
+		glbin_current.SetAnnotData(glbin_data_manager.GetAnnotData(name));
+	}
+	NotifyViewUpdate({ gstCurrentSelect });
 }
 
 void ListPanelAgent::AddSelectionToView()

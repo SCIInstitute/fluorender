@@ -185,6 +185,23 @@ void ConvertDlgAgent::UpdateUI(const UpdateRequest& request)
 
 void ConvertDlgAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstVolMeshThresh))
+		SetIsoValue();
+	if (request.HasValue(gstVolMeshDownXY))
+		SetDownSample();
+	if (request.HasValue(gstVolMeshDownZ))
+		SetDownSampleZ();
+	if (request.HasValue(gstVolMeshSimplify))
+		SetSimplify();
+	if (request.HasValue(gstVolMeshSmoothN))
+		SetSmoothStrength();
+	if (request.HasValue(gstVolMeshSmoothT))
+		SetSmoothScale();
+	if (request.HasValue(gstUseTransferFunc))
+		SetUseTransf();
+	if (request.HasValue(gstUseSelection))
+		SetUseSelection();
+
 	if (request.HasValue(gstMeshConvert))
 		MeshConvert();
 	if (request.HasValue(gstMeshUpdate))
@@ -218,54 +235,83 @@ void ConvertDlgAgent::PreShutdown()
 		glbin_settings.m_layout_convert = dialog->SavePerspective();
 }
 
-void ConvertDlgAgent::SetIsoValue(double dval)
+void ConvertDlgAgent::SetIsoValue()
 {
-	glbin_conv_vol_mesh.SetIsoValue(dval);
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
 
+	glbin_conv_vol_mesh.SetIsoValue(dialog->GetIsoValue());
+	NotifyViewUpdate({ gstVolMeshThresh, gstConvVolMeshUpdate });
+}
+
+void ConvertDlgAgent::SetDownSample()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+
+	glbin_conv_vol_mesh.SetDownsample(dialog->GetDownSample());
+	NotifyViewUpdate({ gstVolMeshDownXY, gstConvVolMeshUpdate });
+}
+
+void ConvertDlgAgent::SetDownSampleZ()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+
+	glbin_conv_vol_mesh.SetDownsampleZ(dialog->GetDownSampleZ());
+	NotifyViewUpdate({ gstVolMeshDownZ, gstConvVolMeshUpdate });
+}
+
+void ConvertDlgAgent::SetSimplify()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+
+	glbin_conv_vol_mesh.SetSimplify(dialog->GetSimplify());
+	UpdateDataToUI({ gstVolMeshSimplify });
+}
+
+void ConvertDlgAgent::SetSmoothStrength()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+
+	glbin_conv_vol_mesh.SetSmoothStrength(dialog->GetSmoothStrength());
+	UpdateDataToUI({ gstVolMeshSmoothN });
+}
+
+void ConvertDlgAgent::SetSmoothScale()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+
+	glbin_conv_vol_mesh.SetSmoothScale(dialog->GetSmoothScale());
+	UpdateDataToUI({ gstVolMeshSmoothT });
+}
+
+void ConvertDlgAgent::SetUseTransf()
+{
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
+
+	glbin_conv_vol_mesh.SetUseTransfer(dialog->GetUseTransf());
 	NotifyViewUpdate({ gstConvVolMeshUpdate }, UpdateMode::SenderOnly);
 }
 
-void ConvertDlgAgent::SetDownSample(int ival)
+void ConvertDlgAgent::SetUseSelection()
 {
-	glbin_conv_vol_mesh.SetDownsample(ival);
-	
-	NotifyViewUpdate({ gstConvVolMeshUpdate }, UpdateMode::SenderOnly);
-}
+	auto dialog = GetDialog();
+	if (!dialog)
+		return;
 
-void ConvertDlgAgent::SetDownSampleZ(int ival)
-{
-	glbin_conv_vol_mesh.SetDownsampleZ(ival);
-
-	NotifyViewUpdate({ gstConvVolMeshUpdate }, UpdateMode::SenderOnly);
-}
-
-void ConvertDlgAgent::SetSimplify(double dval)
-{
-	glbin_conv_vol_mesh.SetSimplify(dval);
-	//FluoRefresh(2, { gstVolMeshInfo });
-}
-
-void ConvertDlgAgent::SetSmoothStrength(double dval)
-{
-	glbin_conv_vol_mesh.SetSmoothStrength(dval);
-	//FluoRefresh(2, { gstVolMeshInfo });
-}
-
-void ConvertDlgAgent::SetSmoothScale(double dval)
-{
-	glbin_conv_vol_mesh.SetSmoothScale(dval);
-	//FluoRefresh(2, { gstVolMeshInfo });
-}
-
-void ConvertDlgAgent::SetUseTransf(bool bval)
-{
-	glbin_conv_vol_mesh.SetUseTransfer(bval);
-	NotifyViewUpdate({ gstConvVolMeshUpdate }, UpdateMode::SenderOnly);
-}
-
-void ConvertDlgAgent::SetUseSelection(bool bval)
-{
-	glbin_conv_vol_mesh.SetUseMask(bval);
+	glbin_conv_vol_mesh.SetUseMask(dialog->GetUseSelection());
 	NotifyViewUpdate({ gstConvVolMeshUpdate }, UpdateMode::SenderOnly);
 }
 

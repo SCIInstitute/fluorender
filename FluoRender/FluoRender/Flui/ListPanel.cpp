@@ -398,9 +398,10 @@ void ListPanel::AppendListItem(ListItemType type, const std::wstring& name, cons
 
 void ListPanel::RenameSelection(const wxString& name)
 {
+	m_rename_str = name.ToStdWstring();
 	auto agent = m_agent->As<ListPanelAgent>();
 	if (agent)
-		agent->SetSelName(name.ToStdWstring());
+		agent->UpdateUIToData({ gstListRename });
 }
 
 void ListPanel::SelectListItem(ListItemType type, const std::wstring& name)
@@ -547,25 +548,25 @@ void ListPanel::OnSelect(wxListEvent& event)
 		return;
 
 	std::wstring stype = m_datalist->GetText(item, 0).ToStdWstring();
-	std::wstring name = m_datalist->GetText(item, 1).ToStdWstring();
-	ListItemType type = ListItemType::Invalid;
+	m_sel_name = m_datalist->GetText(item, 1).ToStdWstring();
+	m_sel_type = ListItemType::Invalid;
 
 	if (stype == L"Volume")
 	{
-		type = ListItemType::Volume;
+		m_sel_type = ListItemType::Volume;
 	}
 	else if (stype == L"Mesh")
 	{
-		type = ListItemType::Mesh;
+		m_sel_type = ListItemType::Mesh;
 	}
 	else if (stype == L"AnnotData")
 	{
-		type = ListItemType::Annot;
+		m_sel_type = ListItemType::Annot;
 	}
 
 	auto agent = m_agent->As<ListPanelAgent>();
 	if (agent)
-		agent->SetCurrentSelection(type, name);
+		agent->UpdateUIToData({ gstCurrentSelect });
 
 	event.Skip();
 }

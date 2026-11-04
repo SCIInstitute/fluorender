@@ -49,6 +49,12 @@ public:
 	void CopyData();
 	void UpdateGrid(const GridData& data);
 
+	//get
+	bool GetUseSelection() const;
+	int GetMinNum() const;
+	int GetMaxNum() const;
+	bool GetUseMax() const;
+
 private:
 	//output
 	bool m_hold_history = false;

@@ -42,11 +42,6 @@ public:
 
 	CountingDlg* GetDialog() const;
 
-	void SetUseSelection(bool bval);
-	void SetMinNum(int ival);
-	void SetMaxNum(int ival);
-	void SetUseMax(bool bval);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -70,6 +65,11 @@ private:
 	};
 
 private:
+	void SetUseSelection();
+	void SetMinNum();
+	void SetMaxNum();
+	void SetUseMax();
+
 	void Analyze();
 };
 
