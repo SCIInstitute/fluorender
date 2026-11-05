@@ -310,7 +310,8 @@ ListPanel::ListPanel(
 	const wxSize& size,
 	long style,
 	const wxString& name) :
-	AgentPanel(parent, pos, size, style, name)
+	AgentPanel(parent, pos, size, style, name),
+	m_sel_type(ListItemType::Invalid)
 {
 }
 
@@ -407,6 +408,19 @@ void ListPanel::RenameSelection(const wxString& name)
 void ListPanel::SelectListItem(ListItemType type, const std::wstring& name)
 {
 	m_datalist->SelectItemSilently(type, name);
+}
+
+std::wstring ListPanel::GetRenameStr() const
+{
+	return m_rename_str;
+}
+ListItemType ListPanel::GetSelType() const
+{
+	return m_sel_type;
+}
+std::wstring ListPanel::GetSelName() const
+{
+	return m_sel_name;
 }
 
 void ListPanel::OnContextMenu(wxContextMenuEvent& event)

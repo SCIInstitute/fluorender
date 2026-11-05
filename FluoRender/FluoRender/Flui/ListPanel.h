@@ -163,22 +163,13 @@ public:
 	void RenameSelection(const wxString& name);
 
 	//get
-	std::wstring GetRenameStr() const
-	{
-		return m_rename_str;
-	}
-	ListItemType GetSelType() const
-	{
-		return m_sel_type;
-	}
-	std::wstring GetSelName() const
-	{
-		return m_sel_name;
-	}
+	std::wstring GetRenameStr() const;
+	ListItemType GetSelType() const;
+	std::wstring GetSelName() const;
 
 private:
 	std::wstring m_rename_str;
-	ListItemType m_sel_type = ListItemType::Invalid;
+	ListItemType m_sel_type;
 	std::wstring m_sel_name;
 	wxToolBar *m_toolbar;
 	DataListCtrl *m_datalist;
