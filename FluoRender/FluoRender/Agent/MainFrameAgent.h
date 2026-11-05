@@ -57,10 +57,6 @@ public:
 		m_benchmark_str = str;
 	}
 
-	void AddRenderView(RenderViewPanelAgent* agent);
-	void RemoveRenderView(RenderViewPanelAgent* agent);
-	void DeleteRenderViewPanel(RenderViewPanelAgent* agent);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -120,6 +116,9 @@ private:
 		gstFullscreenFrame,
 		gstQuitCanvasFullscreen,
 		gstMainFrameClose,
+		gstAddRenderView,
+		gstRemoveRenderView,
+		gstDeleteRenderViewPanel,
 		gstLastOpen,
 		gstOpenVolume,
 		gstImportVolume,
@@ -135,6 +134,10 @@ private:
 	std::string m_benchmark_str;
 
 private:
+	void AddRenderView(RenderViewPanelAgent* agent);
+	void RemoveRenderView(RenderViewPanelAgent* agent);
+	void DeleteRenderViewPanel(RenderViewPanelAgent* agent);
+
 	void CreateRenderViewPanel();
 	void LayoutRenderViewPanels();
 	void SyncRenderViewPanels();

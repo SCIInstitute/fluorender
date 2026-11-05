@@ -57,6 +57,13 @@ struct KeyframeInfo
 	std::wstring description;
 };
 
+struct MoveKeyframeInfo
+{
+	int source_id;
+	int target_id;
+	bool before;
+};
+
 struct PresetInfo
 {
 	std::string id;
@@ -321,8 +328,21 @@ public:
 	bool GetScriptEnable();
 	std::wstring GetScriptFileName();
 	std::string GetSelScriptName();
+	int GetKeyframeId() const;
+	double GetKeyframeTime() const;
+	double GetKeyframeDuration() const;
+	int GetKeyframeInterpolation() const;
+	std::wstring GetKeyframeDescription() const;
+	MoveKeyframeInfo GetMoveKeyframeInfo() const;
 
 private:
+	int m_keyframe_id = 0;
+	double m_keyframe_time = 0.0;
+	double m_keyframe_duration = 0.0;
+	int m_keyframe_interpolation = 0;
+	std::wstring m_keyframe_description;
+	MoveKeyframeInfo m_move_keyframe_info;
+
 	//common controls
 	wxNumTextCtrl *m_fps_text;
 	wxNumTextCtrl *m_movie_len_text;

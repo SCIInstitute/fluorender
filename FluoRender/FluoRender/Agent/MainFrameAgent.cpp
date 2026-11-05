@@ -194,6 +194,12 @@ void MainFrameAgent::UpdateUI(const UpdateRequest& request)
 
 void MainFrameAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstAddRenderView))
+		AddRenderView(request.sender->As<RenderViewPanelAgent>());
+	if (request.HasValue(gstRemoveRenderView))
+		RemoveRenderView(request.sender->As<RenderViewPanelAgent>());
+	if (request.HasValue(gstDeleteRenderViewPanel))
+		DeleteRenderViewPanel(request.sender->As<RenderViewPanelAgent>());
 	if (request.HasValue(gstLastOpen))
 		LastOpen();
 	if (request.HasValue(gstOpenVolume))

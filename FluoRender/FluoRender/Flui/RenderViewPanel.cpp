@@ -195,7 +195,11 @@ RenderViewPanel::~RenderViewPanel()
 	auto agent = m_agent->As<RenderViewPanelAgent>();
 	auto mainframe_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
 	if (mainframe_agent)
-		mainframe_agent->RemoveRenderView(agent);
+		mainframe_agent->Update(
+			UpdateRequest::UIToData(
+				{ gstRemoveRenderView },
+				agent,
+				UpdateMode::All));
 }
 
 void RenderViewPanel::CreateUI()

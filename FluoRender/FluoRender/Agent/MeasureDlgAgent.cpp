@@ -176,129 +176,95 @@ void MeasureDlgAgent::UpdateUI(const UpdateRequest& request)
 void MeasureDlgAgent::UpdateData(const UpdateRequest& request)
 {
 	if (request.HasValue(gstCurrentRuler))
-	{
 		SetSelectedRulers();
-	}
+	if (request.HasValue(gstRulerIntMethod))
+		SetIntensityMethod();
+	if (request.HasValue(gstRulerTransient))
+		SetTransient();
+	if (request.HasValue(gstRulerUseTransf))
+		SetUseTransfer();
+	if (request.HasValue(gstRulerDispPoint))
+		SetDispPoint();
+	if (request.HasValue(gstRulerDispLine))
+		SetDispLine();
+	if (request.HasValue(gstRulerDispName))
+		SetDispName();
+	if (request.HasValue(gstRulerDispAll))
+		SetDispAll();
+	if (request.HasValue(gstRulerRelaxType))
+		SetRelaxData();
+	if (request.HasValue(gstRulerF1))
+		SetRelaxValue();
+	if (request.HasValue(gstRulerGroupSel))
+		SetGroup();
+	if (request.HasValue(gstRulerInterpolation))
+		SetInterpolation();
+	if (request.HasValue(gstAlignCenter))
+		SetAlignCenter();
+	if (request.HasValue(gstAlignAxis))
+		AlignRuler();
+	if (request.HasValue(gstAlignPca))
+		AlignPca();
 	if (request.HasValue(gstRulerLocator))
-	{
 		Locator();
-	}
 	if (request.HasValue(gstRulerProbe))
-	{
 		Probe();
-	}
 	if (request.HasValue(gstRulerLine))
-	{
 		RulerLine();
-	}
 	if (request.HasValue(gstRulerProtractor))
-	{
 		Protractor();
-	}
 	if (request.HasValue(gstRulerEllipse))
-	{
 		Ellipse();
-	}
 	if (request.HasValue(gstRulerPolyline))
-	{
 		RulerPolyline();
-	}
 	if (request.HasValue(gstRulerPencil))
-	{
 		Pencil();
-	}
 	if (request.HasValue(gstRulerGrow))
-	{
 		Grow();
-	}
 	if (request.HasValue(gstRulerMove))
-	{
 		RulerMove();
-	}
 	if (request.HasValue(gstRulerMovePoint))
-	{
 		RulerMovePoint();
-	}
 	if (request.HasValue(gstRulerMagnet))
-	{
 		Magnet();
-	}
 	if (request.HasValue(gstRulerMovePencil))
-	{
 		RulerMovePencil();
-	}
 	if (request.HasValue(gstRulerFlip))
-	{
 		RulerFlip();
-	}
 	if (request.HasValue(gstRulerAvg))
-	{
 		RulerAvg();
-	}
 	if (request.HasValue(gstRulerLock))
-	{
 		Lock();
-	}
 	if (request.HasValue(gstRulerRelax))
-	{
 		Relax();
-	}
 	if (request.HasValue(gstRulerDeleteSelection))
-	{
 		DeleteSelection();
-	}
 	if (request.HasValue(gstRulerDeleteAll))
-	{
 		DeleteAll();
-	}
 	if (request.HasValue(gstRulerDeletePoint))
-	{
 		DeletePoint();
-	}
 	if (request.HasValue(gstRulerPrune))
-	{
 		Prune();
-	}
 	if (request.HasValue(gstRulerProfile))
-	{
 		Profile();
-	}
 	if (request.HasValue(gstRulerDistance))
-	{
 		Distance();
-	}
 	if (request.HasValue(gstRulerProject))
-	{
 		Project();
-	}
 	if (request.HasValue(gstRulerExport))
-	{
 		Export();
-	}
 	if (request.HasValue(gstRulerNewGroup))
-	{
 		NewGroup();
-	}
 	if (request.HasValue(gstRulerGroupRulers))
-	{
 		GroupRulers();
-	}
 	if (request.HasValue(gstRulerToggleGroupDisp))
-	{
 		ToggleGroupDisp();
-	}
 	if (request.HasValue(gstRulerDeleteKey))
-	{
 		DeleteKey();
-	}
 	if (request.HasValue(gstRulerDeleteAllKeys))
-	{
 		DeleteAllKeys();
-	}
 	if (request.HasValue(gstRulerToggleDisp))
-	{
 		ToggleDisplay();
-	}
 }
 
 MeasureDlg* MeasureDlgAgent::GetDialog() const
@@ -664,17 +630,21 @@ void MeasureDlgAgent::SetCurrentRuler(const RulerCurrentInfo& info)
 	NotifyViewUpdate({ gstRulerListCur });
 }
 
-void MeasureDlgAgent::SetIntensityMethod(int ival)
+void MeasureDlgAgent::SetIntensityMethod()
 {
-	glbin_settings.m_point_volume_mode = ival;
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_point_volume_mode =
+			dlg->GetIntensityMethod();
 }
 
-void MeasureDlgAgent::SetTransient(bool bval)
+void MeasureDlgAgent::SetTransient()
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
+	bool bval = dlg->GetTransient();
 	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.SetTransient(bval, sel);
 
@@ -684,17 +654,21 @@ void MeasureDlgAgent::SetTransient(bool bval)
 	NotifyViewUpdate({ gstRulerList }, target);
 }
 
-void MeasureDlgAgent::SetUseTransfer(bool bval)
+void MeasureDlgAgent::SetUseTransfer()
 {
-	glbin_settings.m_ruler_use_transf = bval;
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_ruler_use_transf =
+			dlg->GetUseTransfer();
 }
 
-void MeasureDlgAgent::SetDispPoint(bool bval)
+void MeasureDlgAgent::SetDispPoint()
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
+	bool bval = dlg->GetDispPoint();
 	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.SetDisplay(bval, sel, 0);
 
@@ -704,12 +678,13 @@ void MeasureDlgAgent::SetDispPoint(bool bval)
 	NotifyViewUpdate({ gstRulerList, gstRulerDisp }, target);
 }
 
-void MeasureDlgAgent::SetDispLine(bool bval)
+void MeasureDlgAgent::SetDispLine()
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
+	bool bval = dlg->GetDispLine();
 	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.SetDisplay(bval, sel, 1);
 
@@ -719,12 +694,13 @@ void MeasureDlgAgent::SetDispLine(bool bval)
 	NotifyViewUpdate({ gstRulerList, gstRulerDisp }, target);
 }
 
-void MeasureDlgAgent::SetDispName(bool bval)
+void MeasureDlgAgent::SetDispName()
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
+	bool bval = dlg->GetDispName();
 	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.SetDisplay(bval, sel, 2);
 
@@ -734,12 +710,13 @@ void MeasureDlgAgent::SetDispName(bool bval)
 	NotifyViewUpdate({ gstRulerList, gstRulerDisp }, target);
 }
 
-void MeasureDlgAgent::SetDispAll(bool bval)
+void MeasureDlgAgent::SetDispAll()
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
+	bool bval = dlg->GetDispAll();
 	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.SetDisplay(bval, sel, 0);
 	glbin_ruler_handler.SetDisplay(bval, sel, 1);
@@ -752,28 +729,39 @@ void MeasureDlgAgent::SetDispAll(bool bval)
 	NotifyViewUpdate({ gstRulerList, gstRulerDisp }, target);
 }
 
-void MeasureDlgAgent::SetRelaxData(int ival)
+void MeasureDlgAgent::SetRelaxData()
 {
-	glbin_settings.m_ruler_relax_type = ival;
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_settings.m_ruler_relax_type =
+			dlg->GetRelaxData();
 }
 
-void MeasureDlgAgent::SetRelaxValue(double dval)
-{
-	glbin_dist_calculator.SetF1(dval);
-	glbin_settings.m_ruler_relax_f1 = dval;
-}
-
-void MeasureDlgAgent::SetGroup(unsigned int ival)
-{
-	glbin_ruler_handler.SetGroup(ival);
-}
-
-void MeasureDlgAgent::SetInterpolation(int ival)
+void MeasureDlgAgent::SetRelaxValue()
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
+	double dval = dlg->GetRelaxValue();
+	glbin_dist_calculator.SetF1(dval);
+	glbin_settings.m_ruler_relax_f1 = dval;
+}
+
+void MeasureDlgAgent::SetGroup()
+{
+	auto dlg = GetDialog();
+	if (dlg)
+		glbin_ruler_handler.SetGroup(dlg->GetGroup());
+}
+
+void MeasureDlgAgent::SetInterpolation()
+{
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	int ival = dlg->GetInterpolation();
 	auto sel = dlg->GetCurrentSelection();
 	glbin_ruler_handler.SetInterp(ival, sel);
 
@@ -783,8 +771,13 @@ void MeasureDlgAgent::SetInterpolation(int ival)
 	NotifyViewUpdate({ gstRulerList }, target);
 }
 
-void MeasureDlgAgent::SetAlignCenter(bool bval)
+void MeasureDlgAgent::SetAlignCenter()
 {
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	bool bval = dlg->GetAlignCenter();
 	glbin_aligner.SetAlignCenter(bval);
 
 	auto view = glbin_current.render_view.lock();
@@ -793,8 +786,13 @@ void MeasureDlgAgent::SetAlignCenter(bool bval)
 	NotifyViewUpdate({ gstAlignCenter }, target);
 }
 
-void MeasureDlgAgent::AlignRuler(int ival)
+void MeasureDlgAgent::AlignRuler()
 {
+	auto dlg = GetDialog();
+	if (!dlg)
+		return;
+
+	int ival = dlg->GetAlignRuler();
 	auto ruler = glbin_current.GetRuler();
 	if (!ruler)
 		return;
@@ -809,12 +807,13 @@ void MeasureDlgAgent::AlignRuler(int ival)
 	NotifyViewUpdate({ gstNull }, target);
 }
 
-void MeasureDlgAgent::AlignPca(int ival)
+void MeasureDlgAgent::AlignPca()
 {
 	auto dlg = GetDialog();
 	if (!dlg)
 		return;
 
+	int ival = dlg->GetAlignPca();
 	auto sel = dlg->GetCurrentSelection();
 	flrd::RulerList list;
 	glbin_ruler_handler.GetRulerList(sel, list);

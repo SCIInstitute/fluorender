@@ -1048,6 +1048,79 @@ int MeasureDlg::GetFocusSelection()
 	//	return;
 }
 
+int MeasureDlg::GetIntensityMethod() const
+{
+	return m_intensity_method;
+}
+
+bool MeasureDlg::GetTransient() const
+{
+	return m_transient_chk->GetValue();
+}
+
+bool MeasureDlg::GetUseTransfer() const
+{
+	return m_use_transfer_chk->GetValue();
+}
+
+bool MeasureDlg::GetDispPoint() const
+{
+	return m_disp_point_chk->GetValue();
+}
+
+bool MeasureDlg::GetDispLine() const
+{
+	return m_disp_line_chk->GetValue();
+}
+
+bool MeasureDlg::GetDispName() const
+{
+	return m_disp_name_chk->GetValue();
+}
+
+bool MeasureDlg::GetDispAll() const
+{
+	return m_disp_all_chk->GetValue();
+}
+
+int MeasureDlg::GetRelaxData() const
+{
+	return m_relax_data_cmb->GetSelection();
+}
+
+double MeasureDlg::GetRelaxValue() const
+{
+	return m_relax_value_spin->GetValue();
+}
+
+unsigned int MeasureDlg::GetGroup() const
+{
+	unsigned long ival;
+	if (m_group_text->GetValue().ToULong(&ival))
+		return static_cast<unsigned int>(ival);
+	return 0;
+}
+
+int MeasureDlg::GetInterpolation() const
+{
+	return m_interp_cmb->GetSelection();
+}
+
+bool MeasureDlg::GetAlignCenter() const
+{
+	return m_align_center->GetValue();
+}
+
+int MeasureDlg::GetAlignRuler() const
+{
+	return m_align_ruler;
+}
+
+int MeasureDlg::GetAlignPca() const
+{
+	return m_align_pca;
+}
+
 void MeasureDlg::OnToolbar(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<MeasureDlgAgent>();
@@ -1138,93 +1211,91 @@ void MeasureDlg::OnToolbar(wxCommandEvent& event)
 
 void MeasureDlg::OnIntensityMethodCheck(wxCommandEvent& event)
 {
-	int ival = event.GetId();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetIntensityMethod(ival);
+		agent->UpdateUIToData({ gstRulerIntMethod });
 }
 
 void MeasureDlg::OnTransientCheck(wxCommandEvent& event)
 {
-	bool bval = m_transient_chk->GetValue();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetTransient(bval);
+		agent->UpdateUIToData({ gstRulerTransient });
 }
 
 void MeasureDlg::OnUseTransferCheck(wxCommandEvent& event)
 {
-	bool bval = m_use_transfer_chk->GetValue();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetUseTransfer(bval);
+		agent->UpdateUIToData({ gstRulerUseTransf });
 }
 
 void MeasureDlg::OnDispPointCheck(wxCommandEvent& event)
 {
-	bool bval = m_disp_point_chk->GetValue();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetDispPoint(bval);
+		agent->UpdateUIToData({ gstRulerDispPoint });
 }
 
 void MeasureDlg::OnDispLineCheck(wxCommandEvent& event)
 {
-	bool bval = m_disp_line_chk->GetValue();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetDispLine(bval);
+		agent->UpdateUIToData({ gstRulerDispLine });
 }
 
 void MeasureDlg::OnDispNameCheck(wxCommandEvent& event)
 {
-	bool bval = m_disp_name_chk->GetValue();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetDispName(bval);
+		agent->UpdateUIToData({ gstRulerDispName });
 }
 
 void MeasureDlg::OnDispAllCheck(wxCommandEvent& event)
 {
-	bool bval = m_disp_all_chk->GetValue();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetDispAll(bval);
+		agent->UpdateUIToData({ gstRulerDispAll });
 }
 
 void MeasureDlg::OnRelaxData(wxCommandEvent& event)
 {
-	int ival = m_relax_data_cmb->GetSelection();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetRelaxData(ival);
+		agent->UpdateUIToData({ gstRulerRelaxType });
 }
 
 void MeasureDlg::OnRelaxValueSpin(wxSpinDoubleEvent& event)
 {
-	double dval = m_relax_value_spin->GetValue();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetRelaxValue(dval);
+		agent->UpdateUIToData({ gstRulerF1 });
 }
 
 void MeasureDlg::OnRelaxValueText(wxCommandEvent& event)
 {
-	double dval = m_relax_value_spin->GetValue();
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetRelaxValue(dval);
+		agent->UpdateUIToData({ gstRulerF1 });
 }
 
 //ruler list
 void MeasureDlg::OnGroupText(wxCommandEvent& event)
 {
-	unsigned long ival;
-	if (!m_group_text->GetValue().ToULong(&ival))
-		return;
+	m_intensity_method = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetRelaxValue(ival);
+		agent->UpdateUIToData({ gstRulerGroupSel });
 }
 
 void MeasureDlg::OnNewGroup(wxCommandEvent& event)
@@ -1258,10 +1329,9 @@ void MeasureDlg::OnDispTglGroup(wxCommandEvent& event)
 //interpolation/key
 void MeasureDlg::OnInterpCmb(wxCommandEvent& event)
 {
-	int ival = m_interp_cmb->GetSelection();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetInterpolation(ival);
+		agent->UpdateUIToData({ gstRulerInterpolation });
 }
 
 void MeasureDlg::OnDeleteKeyBtn(wxCommandEvent& event)
@@ -1280,26 +1350,25 @@ void MeasureDlg::OnDeleteAllKeyBtn(wxCommandEvent& event)
 
 void MeasureDlg::OnAlignCenterChk(wxCommandEvent& event)
 {
-	bool bval = m_align_center->GetValue();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->SetAlignCenter(bval);
+		agent->UpdateUIToData({ gstAlignCenter });
 }
 
 void MeasureDlg::OnAlignRuler(wxCommandEvent& event)
 {
-	int ival = event.GetId();
+	m_align_ruler = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->AlignRuler(ival);
+		agent->UpdateUIToData({ gstAlignAxis });
 }
 
 void MeasureDlg::OnAlignPca(wxCommandEvent& event)
 {
-	int ival = event.GetId();
+	m_align_pca = event.GetId();
 	auto agent = m_agent->As<MeasureDlgAgent>();
 	if (agent)
-		agent->AlignPca(ival);
+		agent->UpdateUIToData({ gstAlignPca });
 }
 
 void MeasureDlg::OnKeyDown(wxKeyEvent& event)

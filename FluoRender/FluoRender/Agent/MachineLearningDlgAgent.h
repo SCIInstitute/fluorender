@@ -79,14 +79,6 @@ public:
 	std::string GetTopGridName() { return m_top_grid_name; }
 	std::string GetBotGridName() { return m_bot_grid_name; }
 
-	virtual void LoadTable(const std::wstring& filename) = 0;
-	virtual void SaveTable(const std::wstring& filename) = 0;
-	virtual void SetTable(const std::wstring& name) = 0;
-	virtual void SetAutoStart(bool bval) = 0;
-	virtual void DeleteRecord(const GridSelection& sel) = 0;
-	virtual void UpdateCellChanged(const GridCellChanged& cell) = 0;
-	virtual void UpdateList(int index);
-
 protected:
 	bool m_record = false;//state for recording
 	std::wstring m_dir;//dir for searching tables
@@ -104,6 +96,21 @@ protected:
 	void UpdateUI(const UpdateRequest& request) override;
 
 	void UpdateData(const UpdateRequest& request) override;
+
+	virtual void LoadTable();
+	virtual void SaveTable();
+	virtual void SetTable();
+	virtual void SetAutoStart();
+	virtual void DeleteRecord();
+	virtual void UpdateCellChanged();
+
+	virtual void LoadTable(const std::wstring& filename) = 0;
+	virtual void SaveTable(const std::wstring& filename) = 0;
+	virtual void SetTable(const std::wstring& name) = 0;
+	virtual void SetAutoStart(bool bval) = 0;
+	virtual void DeleteRecord(const GridSelection& sel) = 0;
+	virtual void UpdateCellChanged(const GridCellChanged& cell) = 0;
+	virtual void UpdateList(int index);
 
 	virtual void UpdateTopListFromFile();
 	virtual void UpdateTopListByName();
@@ -136,13 +143,6 @@ public:
 
 	MLCompGenPanel* GetPanel() const;
 
-	virtual void LoadTable(const std::wstring& filename) override;
-	virtual void SaveTable(const std::wstring& filename) override;
-	virtual void SetTable(const std::wstring& name) override;
-	virtual void SetAutoStart(bool bval) override;
-	virtual void DeleteRecord(const GridSelection& sel) override;
-	virtual void UpdateCellChanged(const GridCellChanged& cell) override;
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -154,7 +154,14 @@ protected:
 
 	void UpdateData(const UpdateRequest& request) override;
 
-	void UpdateBotList() override;
+protected:
+	virtual void UpdateBotList() override;
+	virtual void LoadTable(const std::wstring& filename) override;
+	virtual void SaveTable(const std::wstring& filename) override;
+	virtual void SetTable(const std::wstring& name) override;
+	virtual void SetAutoStart(bool bval) override;
+	virtual void DeleteRecord(const GridSelection& sel) override;
+	virtual void UpdateCellChanged(const GridCellChanged& cell) override;
 
 private:
 	static constexpr std::string_view kAcceptedValues[] =
@@ -167,7 +174,13 @@ private:
 		gstCompGenDelTable,
 		gstCompGenDupTable,
 		gstCompGenStartRec,
-		gstCompGenApplyRecord
+		gstCompGenApplyRecord,
+		gstMlLoadTable,
+		gstMlSaveTable,
+		gstMlSetTable,
+		gstMlSetAutoStart,
+		gstMlDeleteRecord,
+		gstMlUpdateCellChanged
 	};
 
 	virtual void UpdateAutoStart() override;
@@ -189,15 +202,6 @@ public:
 
 	MLVolPropPanel* GetPanel() const;
 
-	virtual void LoadTable(const std::wstring& filename) override;
-	virtual void SaveTable(const std::wstring& filename) override;
-	virtual void SetTable(const std::wstring& name) override;
-	virtual void SetAutoStart(bool bval) override;
-	virtual void DeleteRecord(const GridSelection& sel) override;
-	virtual void UpdateCellChanged(const GridCellChanged& cell) override;
-
-	void SetAutoApply(bool bval);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -211,6 +215,13 @@ protected:
 
 	void UpdateBotList() override;
 
+	virtual void LoadTable(const std::wstring& filename) override;
+	virtual void SaveTable(const std::wstring& filename) override;
+	virtual void SetTable(const std::wstring& name) override;
+	virtual void SetAutoStart(bool bval) override;
+	virtual void DeleteRecord(const GridSelection& sel) override;
+	virtual void UpdateCellChanged(const GridCellChanged& cell) override;
+
 private:
 	static constexpr std::string_view kAcceptedValues[] =
 	{
@@ -223,7 +234,14 @@ private:
 		gstVolPropDelTable,
 		gstVolPropDupTable,
 		gstVolPropStartRec,
-		gstVolPropApplyRecord
+		gstVolPropApplyRecord,
+		gstMlLoadTable,
+		gstMlSaveTable,
+		gstMlSetTable,
+		gstMlSetAutoStart,
+		gstMlDeleteRecord,
+		gstMlUpdateCellChanged,
+		gstVolPropAutoApply
 	};
 
 	virtual void UpdateAutoStart() override;
@@ -232,6 +250,7 @@ private:
 	virtual void StartRecording() override;
 	virtual void ApplyRecord() override;
 	virtual void AutoLoadTable() override;
+	void SetAutoApply();
 	void UpdateAutoApply();
 };
 

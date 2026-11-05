@@ -61,10 +61,19 @@ public:
 	virtual void UpdateTopListRow(const GridRowData& data);
 	virtual void PopBotList(const GridData& data);
 	virtual void UpdateStartRecording(bool bval);
+	virtual void ClearTopGridSelection();
 
 	//virtual void SetAutoStart(bool bval) { m_auto_start_check->SetValue(bval); }
 
+	//get
+	std::wstring GetTableName() const;
+	bool GetAutoStartRec() const;
+	GridSelection GetBotGridSelection() const;
+	GridCellChanged GetTopGridCellChanged();
+
 protected:
+	GridCellChanged m_cell_change_info;
+
 	wxSplitterWindow* m_splitter;
 	//
 	wxPanel* m_panel_top;
@@ -105,6 +114,7 @@ protected:
 	virtual void OnBotGridCellChanging(wxGridEvent& event);
 	virtual void OnTopGridCellChanged(wxGridEvent& event);
 	virtual void OnBotGridCellChanged(wxGridEvent& event);
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,6 +154,9 @@ public:
 
 	void UpdateAutoStart(bool bval);
 	void UpdateAutoApply(bool bval);
+
+	//get
+	bool GetAutoApply() const;
 
 protected:
 	virtual void OnNewTable(wxCommandEvent& event);

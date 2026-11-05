@@ -104,7 +104,11 @@ void RenderViewPanelAgent::Close()
 
 	auto frame = glbin_coordinator.FindAgent<MainFrameAgent>();
 	if (frame)
-		frame->DeleteRenderViewPanel(this);
+		frame->Update(
+			UpdateRequest::UIToData(
+				{ gstDeleteRenderViewPanel },
+				this,
+				UpdateMode::All));
 }
 
 RenderViewPanel* RenderViewPanelAgent::GetPanel() const

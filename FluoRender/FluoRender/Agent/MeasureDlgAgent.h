@@ -50,22 +50,6 @@ public:
 	virtual void ApplySettings() override;
 	virtual void PreShutdown() override;
 
-	void SetCurrentRuler(const RulerCurrentInfo& info);
-	void SetIntensityMethod(int ival);
-	void SetTransient(bool bval);
-	void SetUseTransfer(bool bval);
-	void SetDispPoint(bool bval);
-	void SetDispLine(bool bval);
-	void SetDispName(bool bval);
-	void SetDispAll(bool bval);
-	void SetRelaxData(int ival);
-	void SetRelaxValue(double dval);
-	void SetGroup(unsigned int ival);
-	void SetInterpolation(int ival);
-	void SetAlignCenter(bool bval);
-	void AlignRuler(int ival);
-	void AlignPca(int ival);
-
 	bool GetSelectedRulerText(
 		std::wstring& text) const;
 	RulerCurrentInfo GetCurrentRulerInfo();
@@ -129,7 +113,12 @@ private:
 		gstRulerToggleGroupDisp,
 		gstRulerDeleteKey,
 		gstRulerDeleteAllKeys,
-		gstRulerToggleDisp
+		gstRulerToggleDisp,
+		gstRulerIntMethod,
+		gstRulerDispPoint,
+		gstRulerDispLine,
+		gstRulerDispName,
+		gstRulerDispAll
 	};
 
 	RulerListInfo GetRulerListInfo();
@@ -139,6 +128,27 @@ private:
 
 	void ToggleDisplay();
 	void SetSelectedRulers();
+	void SetCurrentRuler(const RulerCurrentInfo& info);
+
+	void SetIntensityMethod();
+	void SetTransient();
+	void SetUseTransfer();
+	void SetDispPoint();
+	void SetDispLine();
+	void SetDispName();
+	void SetDispAll();
+	void SetRelaxData();
+	void SetRelaxValue();
+	void SetGroup();
+	void NewGroup();
+	void GroupRulers();
+	void ToggleGroupDisp();
+	void SetInterpolation();
+	void DeleteKey();
+	void DeleteAllKeys();
+	void SetAlignCenter();
+	void AlignRuler();
+	void AlignPca();
 
 	//toolbar1
 	void Locator();
@@ -169,13 +179,6 @@ private:
 	void Distance();
 	void Project();
 	void Export();
-
-	//others
-	void NewGroup();
-	void GroupRulers();
-	void ToggleGroupDisp();
-	void DeleteKey();
-	void DeleteAllKeys();
 };
 
 #endif // MeasureDlgAgent_h

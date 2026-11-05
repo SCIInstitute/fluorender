@@ -95,14 +95,6 @@ MachineLearningPanel* MachineLearningPanelAgent::GetPanel() const
 	return static_cast<MachineLearningPanel*>(GetOwner());
 }
 
-void MachineLearningPanelAgent::UpdateList(int index)
-{
-	if (index & 1)
-		this->UpdateTopListByName();
-	if (index & 2)
-		this->UpdateBotList();
-}
-
 void MachineLearningPanelAgent::UpdateUI(const UpdateRequest& request)
 {
 	auto panel = GetPanel();
@@ -119,7 +111,89 @@ void MachineLearningPanelAgent::UpdateUI(const UpdateRequest& request)
 
 void MachineLearningPanelAgent::UpdateData(const UpdateRequest& request)
 {
+	if (request.HasValue(gstMlLoadTable))
+		LoadTable();
+	if (request.HasValue(gstMlSaveTable))
+		SaveTable();
+	if (request.HasValue(gstMlSetTable))
+		SetTable();
+	if (request.HasValue(gstMlSetAutoStart))
+		SetAutoStart();
+	if (request.HasValue(gstMlDeleteRecord))
+		DeleteRecord();
+	if (request.HasValue(gstMlUpdateCellChanged))
+		UpdateCellChanged();
+}
 
+void MachineLearningPanelAgent::LoadTable()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::wstring name = panel->GetTableName();
+	LoadTable(name);
+	UpdateDataToUI({ gstMlBotList });
+}
+
+void MachineLearningPanelAgent::SaveTable()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::wstring name = panel->GetTableName();
+	SaveTable(name);
+}
+
+void MachineLearningPanelAgent::SetTable()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	std::wstring name = panel->GetTableName();
+	SetTable(name);
+}
+
+void MachineLearningPanelAgent::SetAutoStart()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	bool bval = panel->GetAutoStartRec();
+	SetAutoStart(bval);
+}
+
+void MachineLearningPanelAgent::DeleteRecord()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	GridSelection selection = panel->GetBotGridSelection();
+	DeleteRecord(selection);
+}
+
+void MachineLearningPanelAgent::UpdateCellChanged()
+{
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	GridCellChanged info = panel->GetTopGridCellChanged();
+	UpdateCellChanged(info);
+	if (info.col == 0)
+		panel->ClearTopGridSelection();
+}
+
+void MachineLearningPanelAgent::UpdateList(int index)
+{
+	if (index & 1)
+		this->UpdateTopListByName();
+	if (index & 2)
+		this->UpdateBotList();
 }
 
 void MachineLearningPanelAgent::UpdateTopListFromFile()
@@ -685,6 +759,8 @@ void MLVolPropPanelAgent::UpdateData(const UpdateRequest& request)
 		StartRecording();
 	if (request.HasValue(gstVolPropApplyRecord))
 		ApplyRecord();
+	if (request.HasValue(gstVolPropAutoApply))
+		SetAutoApply();
 }
 
 void MLVolPropPanelAgent::UpdateBotList()
@@ -823,8 +899,10 @@ void MLVolPropPanelAgent::UpdateAutoApply()
 		panel->UpdateAutoApply(bval);
 }
 
-void MLVolPropPanelAgent::SetAutoApply(bool bval)
+void MLVolPropPanelAgent::SetAutoApply()
 {
-	glbin_settings.m_vp_auto_apply = bval;
+	auto panel = GetPanel();
+	if (panel)
+		glbin_settings.m_vp_auto_apply = panel->GetAutoApply();
 }
 

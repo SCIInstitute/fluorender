@@ -1562,51 +1562,63 @@ void MoviePanel::SelectKeyframe(int id)
 
 void MoviePanel::DeleteKeyframe(int id)
 {
+	m_keyframe_id = id;
 	auto agent = m_agent->As<MoviePanelAgent>();
 	if (agent)
-		agent->DeleteKeyframe(id);
+		agent->UpdateUIToData({ gstDeleteKeyframe });
 }
 
 void MoviePanel::DeleteAllKeyframes()
 {
 	auto agent = m_agent->As<MoviePanelAgent>();
 	if (agent)
-		agent->DeleteAllKeyframes();
+		agent->UpdateUIToData({ gstDeleteAllKeyframes });
 }
 
 void MoviePanel::SetKeyframeTime(int id, double time)
 {
+	m_keyframe_id = id;
+	m_keyframe_time = time;
 	auto agent = m_agent->As<MoviePanelAgent>();
 	if (agent)
-		agent->SetKeyframeTime(id, time);
+		agent->UpdateUIToData({ gstSetKeyframeTime });
 }
 
 void MoviePanel::SetKeyframeDuration(int id, double duration)
 {
+	m_keyframe_id = id;
+	m_keyframe_duration = duration;
 	auto agent = m_agent->As<MoviePanelAgent>();
 	if (agent)
-		agent->SetKeyframeDuration(id, duration);
+		agent->UpdateUIToData({ gstSetKeyframeDuration });
 }
 
 void MoviePanel::SetKeyframeInterpolation(int id, int type)
 {
+	m_keyframe_id = id;
+	m_keyframe_interpolation = type;
 	auto agent = m_agent->As<MoviePanelAgent>();
 	if (agent)
-		agent->SetKeyframeInterpolation(id, type);
+		agent->UpdateUIToData({ gstSetKeyframeInterpolation });
 }
 
 void MoviePanel::SetKeyframeDescription(int id, const std::wstring& description)
 {
+	m_keyframe_id = id;
+	m_keyframe_description = description;
 	auto agent = m_agent->As<MoviePanelAgent>();
 	if (agent)
-		agent->SetKeyframeDescription(id, description);
+		agent->UpdateUIToData({ gstSetKeyframeDescription });
 }
 
 void MoviePanel::MoveKeyframe(int sourceId, int targetId, bool before)
 {
+	m_move_keyframe_info.source_id = sourceId;
+	m_move_keyframe_info.target_id = targetId;
+	m_move_keyframe_info.before = before;
 	auto agent = m_agent->As<MoviePanelAgent>();
 	if (agent)
-		agent->MoveKeyframe(sourceId, targetId, before);
+		agent->UpdateUIToData({ gstMoveKeyframe });
 }
 
 double MoviePanel::GetFps()
@@ -1859,6 +1871,36 @@ std::string MoviePanel::GetSelScriptName()
 		str = m_script_list->GetItemText(item, 1).ToStdString();
 	}
 	return str;
+}
+
+int MoviePanel::GetKeyframeId() const
+{
+	return m_keyframe_id;
+}
+
+double MoviePanel::GetKeyframeTime() const
+{
+	return m_keyframe_time;
+}
+
+double MoviePanel::GetKeyframeDuration() const
+{
+	return m_keyframe_duration;
+}
+
+int MoviePanel::GetKeyframeInterpolation() const
+{
+	return m_keyframe_interpolation;
+}
+
+std::wstring MoviePanel::GetKeyframeDescription() const
+{
+	return m_keyframe_description;
+}
+
+MoveKeyframeInfo MoviePanel::GetMoveKeyframeInfo() const
+{
+	return m_move_keyframe_info;
 }
 
 void MoviePanel::OnNotebookPage(wxAuiNotebookEvent& event)

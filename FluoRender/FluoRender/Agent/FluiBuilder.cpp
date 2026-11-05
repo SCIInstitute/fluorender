@@ -268,7 +268,11 @@ FluiBuilder::BuildRenderViewPanel(
 	glbin_coordinator.Register(agent.get());
 	auto mainframe_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
 	if (mainframe_agent)
-		mainframe_agent->AddRenderView(agent.get());
+		mainframe_agent->Update(
+			UpdateRequest::UIToData(
+				{ gstAddRenderView },
+				agent.get(),
+				UpdateMode::All));
 	panel->SetAgent(std::move(agent));
 
 	auto canvas = BuildRenderCanvas(panel, sharedContext, view);

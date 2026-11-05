@@ -49,15 +49,6 @@ public:
 	virtual void ApplySettings() override;
 	virtual void PreShutdown() override;
 
-	void SelectKeyframe(int id);
-	void DeleteKeyframe(int id);
-	void DeleteAllKeyframes();
-	void SetKeyframeTime(int id, double time);
-	void SetKeyframeDuration(int id, double duration);
-	void SetKeyframeInterpolation(int id, int type);
-	void SetKeyframeDescription(int id, const std::wstring& description);
-	void MoveKeyframe(int sourceId, int targetId, bool before);
-
 protected:
 	std::span < const std::string_view>
 		AcceptedValues() const override
@@ -123,10 +114,26 @@ private:
 		gstScalbarOffset,
 		gstEnableScript,
 		gstLoadScriptFile,
-		gstSelectScriptFile
+		gstSelectScriptFile,
+		gstDeleteKeyframe,
+		gstDeleteAllKeyframes,
+		gstSetKeyframeTime,
+		gstSetKeyframeDuration,
+		gstSetKeyframeInterpolation,
+		gstSetKeyframeDescription,
+		gstMoveKeyframe
 	};
 
 	size_t GetScriptFiles(std::vector<std::wstring>& list);
+
+	void SelectKeyframe();
+	void DeleteKeyframe();
+	void DeleteAllKeyframes();
+	void SetKeyframeTime();
+	void SetKeyframeDuration();
+	void SetKeyframeInterpolation();
+	void SetKeyframeDescription();
+	void MoveKeyframe();
 
 	//common
 	void SetFps();

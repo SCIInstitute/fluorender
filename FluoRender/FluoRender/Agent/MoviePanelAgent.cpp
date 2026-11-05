@@ -431,15 +431,34 @@ void MoviePanelAgent::UpdateData(const UpdateRequest& request)
 		LoadScriptFile();
 	if (request.HasValue(gstSelectScriptFile))
 		SelectScriptFile();
+	if (request.HasValue(gstDeleteKeyframe))
+		DeleteKeyframe();
+	if (request.HasValue(gstDeleteAllKeyframes))
+		DeleteAllKeyframes();
+	if (request.HasValue(gstSetKeyframeTime))
+		SetKeyframeTime();
+	if (request.HasValue(gstSetKeyframeDuration))
+		SetKeyframeDuration();
+	if (request.HasValue(gstSetKeyframeInterpolation))
+		SetKeyframeInterpolation();
+	if (request.HasValue(gstSetKeyframeDescription))
+		SetKeyframeDescription();
+	if (request.HasValue(gstMoveKeyframe))
+		MoveKeyframe();
 }
 
-void MoviePanelAgent::SelectKeyframe(int id)
+void MoviePanelAgent::SelectKeyframe()
 {
 
 }
 
-void MoviePanelAgent::DeleteKeyframe(int id)
+void MoviePanelAgent::DeleteKeyframe()
 {
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int id = panel->GetKeyframeId();
 	glbin_interpolator.RemoveKey(id);
 	glbin_moviemaker.SetFullFrameNum(std::round(glbin_interpolator.GetLastT()));
 	UpdateDataToUI({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
@@ -452,36 +471,65 @@ void MoviePanelAgent::DeleteAllKeyframes()
 	UpdateDataToUI({ gstMovLength, gstMovProgSlider, gstBeginFrame, gstEndFrame, gstCurrentFrame, gstTotalFrames, gstParamList, gstParamListSelect });
 }
 
-void MoviePanelAgent::SetKeyframeTime(int id, double time)
+void MoviePanelAgent::SetKeyframeTime()
 {
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int id = panel->GetKeyframeId();
+	double time = panel->GetKeyframeTime();
 	glbin_interpolator.ChangeTime(id, time);
 	UpdateDataToUI({ gstParamList });
 }
 
-void MoviePanelAgent::SetKeyframeDuration(int id, double duration)
+void MoviePanelAgent::SetKeyframeDuration()
 {
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int id = panel->GetKeyframeId();
+	double duration = panel->GetKeyframeDuration();
 	glbin_interpolator.ChangeDuration(id, duration);
 	UpdateDataToUI({ gstParamList });
 }
 
-void MoviePanelAgent::SetKeyframeInterpolation(int id, int type)
+void MoviePanelAgent::SetKeyframeInterpolation()
 {
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int id = panel->GetKeyframeId();
+	int type = panel->GetKeyframeInterpolation();
 	glbin_interpolator.ChangeInterpolation(id, type);
 	UpdateDataToUI({ gstParamList });
 }
 
-void MoviePanelAgent::SetKeyframeDescription(int id, const std::wstring& description)
+void MoviePanelAgent::SetKeyframeDescription()
 {
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	int id = panel->GetKeyframeId();
+	std::wstring description = panel->GetKeyframeDescription();
 	glbin_interpolator.ChangeDescription(id, description);
 	UpdateDataToUI({ gstParamList });
 }
 
-void MoviePanelAgent::MoveKeyframe(int sourceId, int targetId, bool before)
+void MoviePanelAgent::MoveKeyframe()
 {
-	if (before)
-		glbin_interpolator.MoveKeyBefore(sourceId, targetId);
+	auto panel = GetPanel();
+	if (!panel)
+		return;
+
+	auto info = panel->GetMoveKeyframeInfo();
+	if (info.before)
+		glbin_interpolator.MoveKeyBefore(info.source_id, info.target_id);
 	else
-		glbin_interpolator.MoveKeyAfter(sourceId, targetId);
+		glbin_interpolator.MoveKeyAfter(info.source_id, info.target_id);
 	UpdateDataToUI({ gstParamList });
 }
 

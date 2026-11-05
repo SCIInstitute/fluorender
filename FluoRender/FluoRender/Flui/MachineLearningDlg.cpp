@@ -283,6 +283,43 @@ void MachineLearningPanel::UpdateStartRecording(bool bval)
 	}
 }
 
+void MachineLearningPanel::ClearTopGridSelection()
+{
+	m_top_grid->ClearSelection();
+}
+
+std::wstring MachineLearningPanel::GetTableName() const
+{
+	wxArrayInt seli = m_top_grid->GetSelectedRows();
+	if (seli.GetCount() > 0)
+	{
+		return m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
+	}
+	return L"";
+}
+
+bool MachineLearningPanel::GetAutoStartRec() const
+{
+	return m_auto_start_check->GetValue();
+}
+
+GridSelection MachineLearningPanel::GetBotGridSelection() const
+{
+	return GridHelper::GetSelection(m_bot_grid);
+}
+
+GridCellChanged MachineLearningPanel::GetTopGridCellChanged()
+{
+	m_cell_change_info.new_value =
+		m_top_grid->GetCellValue(
+			m_cell_change_info.row,
+			m_cell_change_info.col).ToStdWstring();
+	m_cell_change_info.index_value =
+		m_top_grid->GetCellValue(
+			m_cell_change_info.row, 0).ToStdWstring();
+	return m_cell_change_info;
+}
+
 void MachineLearningPanel::EvenSizeBotGrid()
 {
 	int s0 = m_bot_grid->GetRowLabelSize();
@@ -336,17 +373,9 @@ void MLCompGenPanel::OnNewTable(wxCommandEvent& event)
 
 void MLCompGenPanel::OnLoadTable(wxCommandEvent& event)
 {
-	wxArrayInt seli = m_top_grid->GetSelectedRows();
-	if (seli.GetCount() > 0)
-	{
-		std::wstring name = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
-		auto agent = m_agent->As<MLCompGenPanelAgent>();
-		if (agent)
-		{
-			agent->LoadTable(name);
-			agent->UpdateDataToUI({ gstMlBotList });
-		}
-	}
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMlLoadTable });
 }
 
 void MLCompGenPanel::OnDelTable(wxCommandEvent& event)
@@ -366,22 +395,15 @@ void MLCompGenPanel::OnDupTable(wxCommandEvent& event)
 void MLCompGenPanel::OnAutoLoad(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<MLCompGenPanelAgent>();
-	if (!agent)
-		return;
-	wxArrayInt seli = m_top_grid->GetSelectedRows();
-	if (seli.GetCount() > 0)
-	{
-		std::wstring name = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
-		agent->SetTable(name);
-	}
+	if (agent)
+		agent->UpdateUIToData({ gstMlSetTable });
 }
 
 void MLCompGenPanel::OnAutoStartRec(wxCommandEvent& event)
 {
-	bool bval = m_auto_start_check->GetValue();
 	auto agent = m_agent->As<MLCompGenPanelAgent>();
 	if (agent)
-		agent->SetAutoStart(bval);
+		agent->UpdateUIToData({ gstMlSetAutoStart });
 }
 
 void MLCompGenPanel::OnStartRec(wxCommandEvent& event)
@@ -395,8 +417,7 @@ void MLCompGenPanel::OnDelRec(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<MLCompGenPanelAgent>();
 	if (agent)
-		agent->DeleteRecord(
-			GridHelper::GetSelection(m_bot_grid));
+		agent->UpdateUIToData({ gstMlDeleteRecord });
 }
 
 void MLCompGenPanel::OnApplyRec(wxCommandEvent& event)
@@ -413,19 +434,13 @@ void MLCompGenPanel::OnBotGridAutoSize(wxGridSizeEvent& event)
 
 void MLCompGenPanel::OnTopGridCellChanged(wxGridEvent& event)
 {
-	auto agent = m_agent->As<MLCompGenPanelAgent>();
-	if (!agent)
-		return;
+	m_cell_change_info.col = event.GetCol();
+	m_cell_change_info.row = event.GetRow();
+	m_cell_change_info.old_value = event.GetString();
 
-	GridCellChanged info;
-	info.col = event.GetCol();
-	info.row = event.GetRow();
-	info.old_value = event.GetString();
-	info.new_value = m_top_grid->GetCellValue(info.row, info.col).ToStdWstring();
-	info.index_value = m_top_grid->GetCellValue(info.row, 0).ToStdWstring();
-	agent->UpdateCellChanged(info);
-	if (info.col == 0)
-		m_top_grid->ClearSelection();
+	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMlUpdateCellChanged });
 
 	event.Skip();
 }
@@ -449,6 +464,16 @@ void MLVolPropPanel::CreateUI()
 	m_panel_bot->Layout();
 }
 
+void MLVolPropPanel::UpdateAutoApply(bool bval)
+{
+	m_auto_apply_chk->SetValue(bval);
+}
+
+bool MLVolPropPanel::GetAutoApply() const
+{
+	return m_auto_apply_chk->GetValue();
+}
+
 void MLVolPropPanel::UpdateAutoStart(bool bval)
 {
 	m_auto_start_check->SetValue(bval);
@@ -461,17 +486,9 @@ void MLVolPropPanel::OnNewTable(wxCommandEvent& event)
 
 void MLVolPropPanel::OnLoadTable(wxCommandEvent& event)
 {
-	wxArrayInt seli = m_top_grid->GetSelectedRows();
-	if (seli.GetCount() > 0)
-	{
-		std::wstring name = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
-		auto agent = m_agent->As<MLVolPropPanelAgent>();
-		if (agent)
-		{
-			agent->LoadTable(name);
-			agent->UpdateDataToUI({ gstMlBotList });
-		}
-	}
+	auto agent = m_agent->As<MLVolPropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMlLoadTable });
 }
 
 void MLVolPropPanel::OnDelTable(wxCommandEvent& event)
@@ -491,22 +508,15 @@ void MLVolPropPanel::OnDupTable(wxCommandEvent& event)
 void MLVolPropPanel::OnAutoLoad(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<MLVolPropPanelAgent>();
-	if (!agent)
-		return;
-	wxArrayInt seli = m_top_grid->GetSelectedRows();
-	if (seli.GetCount() > 0)
-	{
-		std::wstring name = m_top_grid->GetCellValue(seli[0], 0).ToStdWstring();
-		agent->SetTable(name);
-	}
+	if (agent)
+		agent->UpdateUIToData({ gstMlSetTable });
 }
 
 void MLVolPropPanel::OnAutoStartRec(wxCommandEvent& event)
 {
-	bool bval = m_auto_start_check->GetValue();
 	auto agent = m_agent->As<MLVolPropPanelAgent>();
 	if (agent)
-		agent->SetAutoStart(bval);
+		agent->UpdateUIToData({ gstMlSetAutoStart });
 }
 
 void MLVolPropPanel::OnStartRec(wxCommandEvent& event)
@@ -520,13 +530,12 @@ void MLVolPropPanel::OnDelRec(wxCommandEvent& event)
 {
 	auto agent = m_agent->As<MLVolPropPanelAgent>();
 	if (agent)
-		agent->DeleteRecord(
-			GridHelper::GetSelection(m_bot_grid));
+		agent->UpdateUIToData({ gstMlDeleteRecord });
 }
 
 void MLVolPropPanel::OnApplyRec(wxCommandEvent& event)
 {
-	auto agent = m_agent->As<MLCompGenPanelAgent>();
+	auto agent = m_agent->As<MLVolPropPanelAgent>();
 	if (agent)
 		agent->UpdateUIToData({ gstVolPropApplyRecord });
 }
@@ -538,33 +547,21 @@ void MLVolPropPanel::OnBotGridAutoSize(wxGridSizeEvent& event)
 
 void MLVolPropPanel::OnTopGridCellChanged(wxGridEvent& event)
 {
-	auto agent = m_agent->As<MLVolPropPanelAgent>();
-	if (!agent)
-		return;
+	m_cell_change_info.col = event.GetCol();
+	m_cell_change_info.row = event.GetRow();
+	m_cell_change_info.old_value = event.GetString();
 
-	GridCellChanged info;
-	info.col = event.GetCol();
-	info.row = event.GetRow();
-	info.old_value = event.GetString();
-	info.new_value = m_top_grid->GetCellValue(info.row, info.col).ToStdWstring();
-	info.index_value = m_top_grid->GetCellValue(info.row, 0).ToStdWstring();
-	agent->UpdateCellChanged(info);
-	if (info.col == 0)
-		m_top_grid->ClearSelection();
+	auto agent = m_agent->As<MLVolPropPanelAgent>();
+	if (agent)
+		agent->UpdateUIToData({ gstMlUpdateCellChanged });
 
 	event.Skip();
 }
 
 void MLVolPropPanel::OnAutoApply(wxCommandEvent& event)
 {
-	bool bval = m_auto_apply_chk->GetValue();
 	auto agent = m_agent->As<MLVolPropPanelAgent>();
 	if (agent)
-		agent->SetAutoApply(bval);
-}
-
-void MLVolPropPanel::UpdateAutoApply(bool bval)
-{
-	m_auto_apply_chk->SetValue(bval);
+		agent->UpdateUIToData({ gstVolPropAutoApply });
 }
 

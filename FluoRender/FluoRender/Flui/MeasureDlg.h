@@ -277,8 +277,26 @@ public:
 	//get
 	std::set<int> GetCurrentSelection();
 	int GetFocusSelection();
+	int GetIntensityMethod() const;
+	bool GetTransient() const;
+	bool GetUseTransfer() const;
+	bool GetDispPoint() const;
+	bool GetDispLine() const;
+	bool GetDispName() const;
+	bool GetDispAll() const;
+	int GetRelaxData() const;
+	double GetRelaxValue() const;
+	unsigned int GetGroup() const;
+	int GetInterpolation() const;
+	bool GetAlignCenter() const;
+	int GetAlignRuler() const;
+	int GetAlignPca() const;
 
 private:
+	int m_intensity_method = 0;
+	int m_align_ruler = 0;
+	int m_align_pca = 0;
+
 	//list ctrl
 	wxButton* m_new_group;
 	wxTextCtrl* m_group_text;

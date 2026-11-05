@@ -1211,6 +1211,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstListDeleteAll "list delete all"
 
 //machine learning agents
+#define gstMlLoadTable "ml load table"
+#define gstMlSaveTable "ml save table"
+#define gstMlSetTable "ml set table"
+#define gstMlSetAutoStart "ml set auto start"
+#define gstMlDeleteRecord "ml delete record"
+#define gstMlUpdateCellChanged "ml update cell changed"
+#define gstMlUpdateList "ml update list"
 #define gstCompGenDelTable "comp gen del table"
 #define gstCompGenDupTable "comp gen dup table"
 #define gstCompGenStartRec "comp gen start rec"
@@ -1219,6 +1226,7 @@ DEALINGS IN THE SOFTWARE.
 #define gstVolPropDupTable "vol prop dup table"
 #define gstVolPropStartRec "vol prop start rec"
 #define gstVolPropApplyRecord "vol prop apply record"
+#define gstVolPropAutoApply "vol prop auto apply"
 
 //manip prop panel agent
 #define gstManipUpdateMesh "manip update mesh"
@@ -1255,6 +1263,11 @@ DEALINGS IN THE SOFTWARE.
 #define gstRulerDeleteKey "ruler delete key"
 #define gstRulerDeleteAllKeys "ruler delete all keys"
 #define gstRulerToggleDisp "ruler toggle disp"
+#define gstRulerIntMethod "ruler int method"
+#define gstRulerDispPoint "ruler disp point"
+#define gstRulerDispLine "ruler disp line"
+#define gstRulerDispName "ruler disp name"
+#define gstRulerDispAll "ruler disp all"
 
 //mesh prop panel
 #define gstMeshOutline "mesh outline"
@@ -1286,6 +1299,13 @@ DEALINGS IN THE SOFTWARE.
 #define gstEnableScript "enable script"
 #define gstLoadScriptFile "load script file"
 #define gstSelectScriptFile "select script file"
+#define gstDeleteKeyframe "delete keyframe"
+#define gstDeleteAllKeyframes "delete all keyframes"
+#define gstSetKeyframeTime "set keyframe time"
+#define gstSetKeyframeDuration "set keyframe duration"
+#define gstSetKeyframeInterpolation "set keyframe interpolation"
+#define gstSetKeyframeDescription "set keyframe description"
+#define gstMoveKeyframe "move keyframe"
 
 //output adj panel
 #define gstOutputAdjSaveDefault "output adj save default"
@@ -1522,6 +1542,9 @@ DEALINGS IN THE SOFTWARE.
 #define gstSettingDlg "setting dlg"
 #define gstQuitCanvasFullscreen "quit canvas fullscreen"
 #define gstMainFrameClose "mainframe close"
+#define gstAddRenderView "add render view"
+#define gstRemoveRenderView "remove render view"
+#define gstDeleteRenderViewPanel "delete render view panel"
 
 //proptery panel
 #define gstPropertyPageCreate "property page create"

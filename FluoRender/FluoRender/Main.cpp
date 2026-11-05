@@ -31,6 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #include <Global.h>
 #include <MainSettings.h>
 #include <FluiBuilder.h>
+#include <Coordinator.h>
 #include <MainFrame.h>
 #include <MainFrameAgent.h>
 #include <DataManager.h>
@@ -129,7 +130,9 @@ bool FluoRenderApp::OnInit()
 	if (m_file_num > 0)
 		glbin_data_manager.StartupLoad(m_files, run_mov, m_imagej);
 
-	frame->UpdateProps({});
+	auto frame_agent = glbin_coordinator.FindAgent<MainFrameAgent>();
+	if (frame_agent)
+		frame_agent->NotifyDataToUI({}, UpdateMode::All);
 	return true;
 }
 
