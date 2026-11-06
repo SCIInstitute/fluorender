@@ -42,6 +42,8 @@ DEALINGS IN THE SOFTWARE.
 #include <Coordinator.h>
 #include <State.h>
 #include <MovieMaker.h>
+#include <RendererFactory.h>
+#include <ViewRenderer.h>
 
 RenderCanvasAgent::RenderCanvasAgent(
 	RenderCanvas* canvas,
@@ -93,7 +95,8 @@ void RenderCanvasAgent::Update(
 
 	if (request.HasValue(gstCanvasIdle))
 		Idle();
-	else if (request.HasValue(gstRenderView))
+
+	if (request.HasValue(gstRenderView))
 		RequestDraw();
 }
 
@@ -167,12 +170,16 @@ void RenderCanvasAgent::PerformDraw()
 	//glbin_lg_renderer.SetUpdating(
 	//	view->GetLgChanged());
 
-	bool success = view->Draw();
-
-	view->DrawDefault();
+	auto base = glbin_renderer_factory.getOrCreate(gstViewRenderer);
+	auto renderer = std::dynamic_pointer_cast<flrd::ViewRenderer>(base);
+	if (renderer)
+	{
+		renderer->setInput<RenderView>(view);
+		renderer->render();
+	}
 
 	auto canvas = GetCanvas();
-	if (canvas && success)
+	if (canvas)
 		canvas->SwapBuffers();
 
 	if (initialized)

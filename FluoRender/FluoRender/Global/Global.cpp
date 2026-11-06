@@ -90,6 +90,7 @@ DEALINGS IN THE SOFTWARE.
 #include <ClippingBoxRenderer.h>
 #include <RulerRenderer.h>
 #include <CamCenterRenderer.h>
+#include <ViewRenderer.h>
 
 using namespace fluo;
 
@@ -367,6 +368,8 @@ void Global::BuildFactories()
 		[]() { return std::make_shared<flrd::RulerRenderer>(); });
 	m_renderer_factory->registerRenderer(gstCamCenterRenderer,
 		[]() { return std::make_shared<flrd::CamCenterRenderer>(); });
+	m_renderer_factory->registerRenderer(gstViewRenderer,
+		[]() { return std::make_shared<flrd::ViewRenderer>(); });
 }
 
 //locale

@@ -456,7 +456,7 @@ void RenderCanvas::OnDraw(wxPaintEvent& event)
 
 	auto agent = m_agent->As<RenderCanvasAgent>();
 	if (agent)
-		agent->NotifyViewUpdate({}, UpdateMode::SenderOnly, "RenderCanvas::OnDraw()");
+		agent->PerformDraw();
 }
 
 #ifdef _WIN32

@@ -32,13 +32,30 @@ DEALINGS IN THE SOFTWARE.
 #include <BaseRenderer.h>
 
 class RenderView;
-namespace flvr
+namespace flrd
 {
+	struct ViewRenderSettings : public RendererSettings
+	{
+		std::weak_ptr<RenderView> view;
+	};
 	class ViewRenderer : public BaseRenderer
 	{
 	public:
-		ViewRenderer();
-		~ViewRenderer();
+		ViewRenderer() {}
+
+		void setSettings(const std::shared_ptr<RendererSettings>& settings) override {
+			settings_ = std::dynamic_pointer_cast<ViewRenderSettings>(settings);
+		}
+
+		std::shared_ptr<RendererSettings> getSettings() override
+		{
+			return settings_;
+		}
+
+		void render() override;
+
+	private:
+		std::shared_ptr<ViewRenderSettings> settings_;
 
 	};
 }
