@@ -62,7 +62,7 @@ namespace flrd
 		TransBack,
 	};
 
-	struct ClippingBoxSettings : public RendererSettings
+	struct ClippingBoxContext : public RenderContext
 	{
 		ClippingRenderMode mode = ClippingRenderMode::ColoredFront;
 		FaceWinding winding = FaceWinding::Front;
@@ -76,18 +76,18 @@ namespace flrd
 
 	class ClippingBoxRenderer : public BaseRenderer {
 	public:
-		ClippingBoxRenderer() : settings_(std::make_shared<ClippingBoxSettings>()) {}
+		ClippingBoxRenderer() : settings_(std::make_shared<ClippingBoxContext>()) {}
 
 		void setData(const fluo::ClippingBox& box)
 		{
 			box_ = box;
 		}
 
-		void setSettings(const std::shared_ptr<RendererSettings>& settings) override {
-			settings_ = std::dynamic_pointer_cast<ClippingBoxSettings>(settings);
+		void setContext(const std::shared_ptr<RenderContext>& settings) override {
+			settings_ = std::dynamic_pointer_cast<ClippingBoxContext>(settings);
 		}
 
-		std::shared_ptr<RendererSettings> getSettings() override
+		std::shared_ptr<RenderContext> getContext() override
 		{
 			return settings_;
 		}
@@ -109,7 +109,7 @@ namespace flrd
 		fluo::Vector getPlaneNormal(int idx);
 
 		fluo::ClippingBox box_;
-		std::shared_ptr<ClippingBoxSettings> settings_;
+		std::shared_ptr<ClippingBoxContext> settings_;
 	};
 }
 

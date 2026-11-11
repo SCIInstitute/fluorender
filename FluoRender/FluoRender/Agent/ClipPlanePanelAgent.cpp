@@ -1085,8 +1085,8 @@ void ClipPlanePanelAgent::SetPlaneMask(int val)
 	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);
 	if (renderer)
 	{
-		auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
-		settings->plane_mask = val;
+		auto context = std::dynamic_pointer_cast<flrd::ClippingBoxContext>(renderer->getContext());
+		context->plane_mask = val;
 	}
 }
 
@@ -1133,8 +1133,8 @@ void ClipPlanePanelAgent::SetPlaneMode()
 	auto renderer = std::dynamic_pointer_cast<flrd::ClippingBoxRenderer>(base);
 	if (renderer)
 	{
-		auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
-		settings->mode = static_cast<flrd::ClippingRenderMode>(ival);
+		auto context = std::dynamic_pointer_cast<flrd::ClippingBoxContext>(renderer->getContext());
+		context->mode = static_cast<flrd::ClippingRenderMode>(ival);
 	}
 	std::set<Agent*> target{ this };
 	auto agent = glbin_coordinator.FindRenderCanvasAgent(glbin_current.render_view.lock());

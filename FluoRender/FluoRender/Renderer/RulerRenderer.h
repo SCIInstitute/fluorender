@@ -44,7 +44,7 @@ namespace fluo
 }
 namespace flrd
 {
-	struct RulerSettings : public RendererSettings
+	struct RulerContext : public RenderContext
 	{
 		std::weak_ptr<RenderView> view;
 		double line_size;
@@ -55,18 +55,18 @@ namespace flrd
 	{
 	public:
 		RulerRenderer() :
-			settings_(std::make_shared<RulerSettings>()) {}
+			settings_(std::make_shared<RulerContext>()) {}
 
 		void setData(const flrd::RulerList& ruler_list)
 		{
 			m_ruler_list = ruler_list;
 		}
 
-		void setSettings(const std::shared_ptr<RendererSettings>& settings) override {
-			settings_ = std::dynamic_pointer_cast<RulerSettings>(settings);
+		void setContext(const std::shared_ptr<RenderContext>& settings) override {
+			settings_ = std::dynamic_pointer_cast<RulerContext>(settings);
 		}
 
-		std::shared_ptr<RendererSettings> getSettings() override
+		std::shared_ptr<RenderContext> getContext() override
 		{
 			return settings_;
 		}
@@ -79,7 +79,7 @@ namespace flrd
 
 	private:
 		RulerList m_ruler_list;
-		std::shared_ptr<RulerSettings> settings_;
+		std::shared_ptr<RulerContext> settings_;
 
 	private:
 		unsigned int DrawVerts(std::vector<float> &verts, int sel_mode);//sel_mode: 0: all; 1: selected; 2 unselected

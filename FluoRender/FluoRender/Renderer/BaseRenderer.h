@@ -31,55 +31,22 @@ DEALINGS IN THE SOFTWARE.
 #include <memory>
 #include <vector>
 #include <string>
-#include <unordered_map>
-#include <variant>
 
 namespace flrd
 {
-	template <typename T>
-	class RendererInput {
+	class RenderContext {
 	public:
-		using ValueType = T;
-		using RefType = std::reference_wrapper<const T>;
-		using PtrType = std::shared_ptr<T>;
-
-		RendererInput(const T& value) : storage_(value) {}
-		RendererInput(RefType ref) : storage_(ref) {}
-		RendererInput(PtrType ptr) : storage_(ptr) {}
-
-		const T& get() const {
-			if (std::holds_alternative<ValueType>(storage_))
-				return std::get<ValueType>(storage_);
-			else if (std::holds_alternative<RefType>(storage_))
-				return std::get<RefType>(storage_);
-			else
-				return *std::get<PtrType>(storage_);
-		}
-
-	private:
-		std::variant<ValueType, RefType, PtrType> storage_;
-	};
-
-	class RendererSettings {
-	public:
-		virtual ~RendererSettings() = default;
+		virtual ~RenderContext() = default;
 	};
 
 	class BaseRenderer {
 	public:
 		virtual ~BaseRenderer() = default;
 
-		// Accepts a generic input wrapper
-		template <typename T>
-		void setInput(RendererInput<T> input) {
-			setInputImpl(input);
-		}
-
-		virtual void setSettings(const std::shared_ptr<RendererSettings>& settings) = 0;
-		virtual std::shared_ptr<RendererSettings> getSettings() = 0;
+		virtual void setContext(const std::shared_ptr<RenderContext>& settings) = 0;
+		virtual std::shared_ptr<RenderContext> getContext() = 0;
 		virtual void render() = 0;
 		virtual std::string type() const = 0;
-
 	};
 }
 

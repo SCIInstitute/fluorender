@@ -46,7 +46,7 @@ namespace flrd
 		CornerJack,
 		Crosshair
 	};
-	struct CamCenterSettings : public RendererSettings
+	struct CamCenterContext : public RenderContext
 	{
 		std::weak_ptr<RenderView> view;
 		CamCenterStyle style;
@@ -55,13 +55,13 @@ namespace flrd
 	class CamCenterRenderer : public BaseRenderer
 	{
 	public:
-		CamCenterRenderer() : settings_(std::make_shared<CamCenterSettings>()) {}
+		CamCenterRenderer() : settings_(std::make_shared<CamCenterContext>()) {}
 
-		void setSettings(const std::shared_ptr<RendererSettings>& settings) override {
-			settings_ = std::dynamic_pointer_cast<CamCenterSettings>(settings);
+		void setContext(const std::shared_ptr<RenderContext>& settings) override {
+			settings_ = std::dynamic_pointer_cast<CamCenterContext>(settings);
 		}
 
-		std::shared_ptr<RendererSettings> getSettings() override
+		std::shared_ptr<RenderContext> getContext() override
 		{
 			return settings_;
 		}
@@ -73,7 +73,7 @@ namespace flrd
 		}
 
 	private:
-		std::shared_ptr<CamCenterSettings> settings_;
+		std::shared_ptr<CamCenterContext> settings_;
 
 	private:
 		void drawCrosshair(const std::shared_ptr<flvr::VertexArray>& va, const std::shared_ptr<flvr::ShaderProgram>& shader);

@@ -174,7 +174,11 @@ void RenderCanvasAgent::PerformDraw()
 	auto renderer = std::dynamic_pointer_cast<flrd::ViewRenderer>(base);
 	if (renderer)
 	{
-		renderer->setInput<RenderView>(view);
+		auto context = std::dynamic_pointer_cast<flrd::ViewRenderContext>(renderer->getContext());
+		if (context)
+		{
+			context->view = view;
+		}
 		renderer->render();
 	}
 

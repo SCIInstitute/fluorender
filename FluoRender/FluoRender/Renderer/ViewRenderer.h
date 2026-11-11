@@ -34,7 +34,7 @@ DEALINGS IN THE SOFTWARE.
 class RenderView;
 namespace flrd
 {
-	struct ViewRenderSettings : public RendererSettings
+	struct ViewRenderContext : public RenderContext
 	{
 		std::weak_ptr<RenderView> view;
 	};
@@ -43,19 +43,19 @@ namespace flrd
 	public:
 		ViewRenderer() {}
 
-		void setSettings(const std::shared_ptr<RendererSettings>& settings) override {
-			settings_ = std::dynamic_pointer_cast<ViewRenderSettings>(settings);
+		void setContext(const std::shared_ptr<RenderContext>& settings) override {
+			context_ = std::dynamic_pointer_cast<ViewRenderContext>(settings);
 		}
 
-		std::shared_ptr<RendererSettings> getSettings() override
+		std::shared_ptr<RenderContext> getContext() override
 		{
-			return settings_;
+			return context_;
 		}
 
 		void render() override;
 
 	private:
-		std::shared_ptr<ViewRenderSettings> settings_;
+		std::shared_ptr<ViewRenderContext> context_;
 
 	};
 }

@@ -7318,10 +7318,10 @@ void RenderView::DrawRulers()
 	auto renderer = std::dynamic_pointer_cast<flrd::RulerRenderer>(base);
 	if (renderer)
 	{
-		auto settings = std::dynamic_pointer_cast<flrd::RulerSettings>(renderer->getSettings());
-		settings->line_size = width;
-		settings->sel_line_size = width * 1.5;
-		settings->view = glbin_current.render_view.lock();
+		auto context = std::dynamic_pointer_cast<flrd::RulerContext>(renderer->getContext());
+		context->line_size = width;
+		context->sel_line_size = width * 1.5;
+		context->view = glbin_current.render_view.lock();
 		renderer->setData(*m_ruler_list);
 		renderer->render();
 	}
@@ -7547,13 +7547,13 @@ void RenderView::DrawClippingPlanes(flvr::FaceWinding face_winding)
 
 	renderer->setData(cb);
 
-	auto settings = std::dynamic_pointer_cast<flrd::ClippingBoxSettings>(renderer->getSettings());
-	if (settings)
+	auto context = std::dynamic_pointer_cast<flrd::ClippingBoxContext>(renderer->getContext());
+	if (context)
 	{
-		settings->winding = static_cast<flrd::FaceWinding>(face_winding);
-		settings->view = view;
-		settings->color = color;
-		renderer->setSettings(settings);
+		context->winding = static_cast<flrd::FaceWinding>(face_winding);
+		context->view = view;
+		context->color = color;
+		renderer->setContext(context);
 	}
 
 	renderer->render();
@@ -7626,22 +7626,22 @@ void RenderView::DrawCamCtr()
 	auto renderer = std::dynamic_pointer_cast<flrd::CamCenterRenderer>(base);
 	if (!renderer)
 		return;
-	auto settings = std::dynamic_pointer_cast<flrd::CamCenterSettings>(renderer->getSettings());
-	if (settings)
+	auto context = std::dynamic_pointer_cast<flrd::CamCenterContext>(renderer->getContext());
+	if (context)
 	{
-		settings->view = glbin_current.render_view;
+		context->view = glbin_current.render_view;
 		if (m_pin_rot_ctr)
 		{
-			settings->style = flrd::CamCenterStyle::Crosshair;
-			settings->size = m_scale_factor * 5;
+			context->style = flrd::CamCenterStyle::Crosshair;
+			context->size = m_scale_factor * 5;
 		}
 		else
 		{
-			settings->style = flrd::CamCenterStyle::CenterJack;
+			context->style = flrd::CamCenterStyle::CenterJack;
 			if (m_camctr_size > 0.0)
-				settings->size = m_distance * tan(d2r(m_aov / 2.0)) * m_camctr_size / 10.0;
+				context->size = m_distance * tan(d2r(m_aov / 2.0)) * m_camctr_size / 10.0;
 			else
-				settings->size = std::fabs(m_camctr_size);
+				context->size = std::fabs(m_camctr_size);
 		}
 	}
 	renderer->render();
