@@ -54,6 +54,11 @@ namespace flrd
 
 		void render() override;
 
+		std::string type() const override
+		{
+			return "ViewRenderer";
+		}
+
 	private:
 		std::shared_ptr<ViewRenderContext> context_;
 
