@@ -37,6 +37,11 @@ namespace flrd
 	struct ViewRenderContext : public RenderContext
 	{
 		std::weak_ptr<RenderView> view;
+		bool clearFramebuffer = true;//from m_retain_finalbuffer in renderview
+		bool loadUpdate = false;//from m_load_update in renderview
+		bool restartLoop = true;
+		bool interactive = false;
+		bool lgChanged = true;
 	};
 	class ViewRenderer : public BaseRenderer
 	{
@@ -62,6 +67,22 @@ namespace flrd
 	private:
 		std::shared_ptr<ViewRenderContext> context_;
 
+		//members from render view
+		bool m_force_clear = false;
+		//interactive state control
+		bool m_interactive = false;//main control
+
+	private:
+		//entry point for drawing the view
+		bool Draw();			//return if swap buffers
+		void DrawDefault();		//draw the base fbo to default on canvas
+
+		//start loop update
+		void StartLoopUpdate();
+		void HaltLoopUpdate();
+
+		//sort bricks after view change
+		void SetSortBricks();
 	};
 }
 
