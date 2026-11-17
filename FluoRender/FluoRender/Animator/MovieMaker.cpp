@@ -36,7 +36,6 @@ DEALINGS IN THE SOFTWARE.
 #include <DataManager.h>
 #include <MoviePanel.h>
 #include <RenderViewPanel.h>
-#include <StopWatch.hpp>
 #include <VideoEncoder.h>
 #include <MainSettings.h>
 #include <Project.h>

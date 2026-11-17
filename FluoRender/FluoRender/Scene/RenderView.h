@@ -32,6 +32,7 @@ DEALINGS IN THE SOFTWARE.
 #include <TreeLayer.h>
 #include <Size.h>
 #include <Value.hpp>
+#include <StopWatch.hpp>
 #include <glm/glm.hpp>
 #include <string>
 #include <memory>
@@ -123,6 +124,10 @@ public:
 	RenderView(RenderView& copy);
 	virtual ~RenderView();
 
+	//add new members here
+	void Init();
+	double GetFps() const;
+
 	std::string GetBufferName(const std::string& base, int sn = -1) const;
 	//handle
 	void SetHandle(void* hWnd) { m_hWnd = hWnd; }
@@ -138,8 +143,6 @@ public:
 	void SetClient(int x, int y, int w, int h) { m_client_x = x; m_client_y = y; m_client_w = w; m_client_h = h; }
 	void SetDpiFactor(double factor) { m_dpi_factor = factor; }
 	std::string GetOGLVersion() const;
-	//initialization
-	bool Init();
 
 	void InitOpenXR();
 	void InitLookingGlass();
@@ -401,17 +404,6 @@ public:
 	//text renderer
 	flvr::TextRenderer* GetTextRenderer() const;
 
-	//entry point for drawing the view
-	bool Draw();			//return if swap buffers
-	void DrawDefault();		//draw the base fbo to default on canvas
-
-	//start loop update
-	void StartLoopUpdate();
-	void HaltLoopUpdate();
-
-	//sort bricks after view change
-	void SetSortBricks();
-
 	//rulers
 	std::optional<std::reference_wrapper<flrd::RulerList>> GetRulerList() const;
 	void SetCurRuler(const std::shared_ptr<flrd::Ruler>& ruler);
@@ -540,7 +532,6 @@ public:
 	//hud
 	bool m_retain_finalbuffer;	//sometimes we don't redraw everything,
 								//just use the final buffer from last draw
-	bool m_updating;
 	bool m_draw_annotdata;
 	bool m_draw_camctr;
 	double m_camctr_size;
@@ -578,6 +569,11 @@ public:
 	fluo::Point m_pin_ctr;//the center point for view rotation
 
 private:
+	//new members added here
+	bool m_render_init = false;
+	fluo::StopWatch m_frame_timer;
+
+
 	void* m_hWnd;
 	RenderViewPanel* m_render_view_panel;
 	bool m_drawing;

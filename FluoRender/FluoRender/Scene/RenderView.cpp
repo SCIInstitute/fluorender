@@ -44,7 +44,6 @@ DEALINGS IN THE SOFTWARE.
 #include <DataBrick.h>
 #include <MultiVolumeRenderer.h>
 #include <TextRenderer.h>
-#include <StopWatch.hpp>
 #include <VolumeLoader.h>
 #include <VolumePropPanel.h>
 #include <MovieMaker.h>
@@ -121,7 +120,6 @@ RenderView::RenderView() :
 	m_frame_num_type(0),
 	m_total_frames(0),
 	//hud
-	m_updating(true),
 	m_draw_annotdata(true),
 	m_draw_camctr(false),
 	m_camctr_size(2.0),
@@ -526,6 +524,23 @@ RenderView::~RenderView()
 		m_ruler_list->Clear();
 }
 
+void RenderView::Init()
+{
+	if (m_render_init)
+		return;
+
+	//canvas buffer for default fbo
+	auto default_buffer = glbin_framebuffer_manager.framebuffer(
+		flvr::FBRole::Canvas, m_canvas_size.w(), m_canvas_size.h(),
+		gstRBCanvasDefault);
+	assert(default_buffer);
+	glbin_framebuffer_manager.bind(default_buffer);
+
+	m_frame_timer.start();
+
+	m_render_init = true;
+}
+
 std::string RenderView::GetBufferName(const std::string& base, int sn) const
 {
 	if (sn >= 0)
@@ -593,39 +608,6 @@ void RenderView::GetRenderSize(int &nx, int &ny) const
 std::string RenderView::GetOGLVersion() const
 {
 	return m_GLversion;
-}
-
-bool RenderView::Init()
-{
-	if (m_initialized)
-		return false;
-
-	flvr::ShaderProgram::init_shaders_supported();
-	flvr::ShaderProgram::set_max_texture_size(glbin_settings.m_max_texture_size);
-	flvr::ShaderProgram::set_no_tex_upack(glbin_settings.m_no_tex_pack);
-	flvr::KernelProgram::set_platform_id(glbin_settings.m_cl_platform_id);
-	flvr::KernelProgram::set_device_id(glbin_settings.m_cl_device_id);
-	flvr::KernelProgram::init_kernels_supported();
-#ifdef _DARWIN
-	CGLContextObj ctx = CGLGetCurrentContext();
-	if (ctx != flvr::TextureRenderer::gl_context_)
-		flvr::TextureRenderer::gl_context_ = ctx;
-#endif
-	glbin_settings.GetGraphicsInfo();
-	flvr::BrickTexture::mask_undo_num_ = (size_t)(glbin_brush_def.m_paint_hist_depth);
-
-	//canvas buffer for default fbo
-	auto default_buffer = glbin_framebuffer_manager.framebuffer(
-		flvr::FBRole::Canvas, m_canvas_size.w(), m_canvas_size.h(),
-		gstRBCanvasDefault);
-	assert(default_buffer);
-	glbin_framebuffer_manager.bind(default_buffer);
-
-	m_initialized = true;
-
-	glbin.getStopWatch(gstStopWatch)->start();
-
-	return true;
 }
 
 void RenderView::InitOpenXR()

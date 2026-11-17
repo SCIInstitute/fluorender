@@ -27,8 +27,11 @@ DEALINGS IN THE SOFTWARE.
 */
 
 #include <ViewRenderer.h>
+#include <RenderView.h>
 #include <Global.h>
 #include <LookingGlassRenderer.h>
+#include <MainSettings.h>
+#include <RenderSystem.h>
 
 using namespace flrd;
 
@@ -37,6 +40,7 @@ void ViewRenderer::render()
 	auto view = context_->view.lock();
 	if (!view)
 		return;
+	view_ = view.get();
 
 	m_force_clear = context_->clearFramebuffer;
 	m_interactive = context_->interactive;
@@ -54,7 +58,8 @@ bool ViewRenderer::Draw()
 
 	bool swap = false;
 
-	Init();
+	flvr::RenderSystem::Init();
+	view_->Init();
 
 	switch (glbin_settings.m_hologram_mode)
 	{

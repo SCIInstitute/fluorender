@@ -66,11 +66,13 @@ namespace flrd
 
 	private:
 		std::shared_ptr<ViewRenderContext> context_;
+		RenderView* view_ = nullptr;
 
 		//members from render view
 		bool m_force_clear = false;
 		//interactive state control
 		bool m_interactive = false;//main control
+		bool m_updating = false;
 
 	private:
 		//entry point for drawing the view
