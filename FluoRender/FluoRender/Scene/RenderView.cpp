@@ -559,9 +559,9 @@ void RenderView::SetRenderViewPanel(RenderViewPanel* panel)
 	m_name = panel->GetName();
 }
 
-void RenderView::SetSize(int x, int y)
+void RenderView::SetSize(const Size2D size)
 {
-	m_canvas_size = Size2D(x, y);
+	m_canvas_size = size;
 	if (glbin_settings.m_hologram_mode != 2)
 	{
 		m_size = m_canvas_size * m_dpi_factor;
@@ -571,11 +571,15 @@ void RenderView::SetSize(int x, int y)
 		else
 			m_gl_size = m_size;
 	}
+	else
+	{
+		m_gl_size = m_size = m_canvas_size;
+	}
 }
 
 void RenderView::ResetSize()
 {
-	SetSize(m_canvas_size.w(), m_canvas_size.h());
+	SetSize(m_canvas_size);
 }
 
 Size2D RenderView::GetCanvasSize() const
@@ -608,103 +612,6 @@ void RenderView::GetRenderSize(int &nx, int &ny) const
 std::string RenderView::GetOGLVersion() const
 {
 	return m_GLversion;
-}
-
-void RenderView::InitOpenXR()
-{
-	if (m_use_openxr)
-		return;
-#ifdef _WIN32
-	HDC hdc = GetDC((HWND)m_hWnd);
-	HGLRC hglrc = wglGetCurrentContext();
-	if (glbin_xr_renderer)
-		m_use_openxr = glbin_xr_renderer->Init(
-			static_cast<void*>(hdc),
-			static_cast<void*>(hglrc),
-			0);
-#elif defined(__APPLE__)
-	/*CGLContextObj cglContext = CGLGetCurrentContext();
-	// Define the pixel format attributes based on wxGLCanvas attributes
-	NSOpenGLPixelFormatAttribute profile_ver = NSOpenGLProfileVersionLegacy;
-	if (glbin_settings.m_gl_major_ver == 3)
-		profile_ver = NSOpenGLProfileVersion3_2Core;
-	else if (glbin_settings.gl_major_ver == 4)
-		profile_ver = NSOpenGLProfileVersion4_1Core;
-	NSOpenGLPixelFormatAttribute color_size =
-		glbin_settings.m_red_bit +
-		glbin_settings.m_green_bit +
-		glbin_settings.m_blue_bit;
-	NSOpenGLPixelFormatAttribute alpha_size = glbin_settings.m_alpha_bit;
-	NSOpenGLPixelFormatAttribute depth_size = glbin_settings.m_depth_bit;
-	NSOpenGLPixelFormatAttribute attributes[] = {
-		NSOpenGLPFAOpenGLProfile, profile_ver,
-		NSOpenGLPFAColorSize, color_size,
-		NSOpenGLPFAAlphaSize, alpha_size,
-		NSOpenGLPFADepthSize, depth_size,
-		NSOpenGLPFADoubleBuffer,
-		0
-	};
-	// Create the NSOpenGLPixelFormat object
-	NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
-	if (!pixelFormat)
-		return;
-	// Retrieve the CGLPixelFormatObj from the NSOpenGLPixelFormat
-	CGLPixelFormatObj cglPixelFormat = [pixelFormat CGLPixelFormatObj];*/
-	if (glbin_xr_renderer)
-		m_use_openxr = glbin_xr_renderer->Init(
-			0,
-			0,
-			0);
-#elif defined(__linux__)
-	Display* xDisplay = glXGetCurrentDisplay();
-	GLXDrawable glxDrawable = glXGetCurrentDrawable();
-	GLXContext glxContext = glXGetCurrentContext();
-	if (glbin_xr_renderer)
-		m_use_openxr = glbin_xr_renderer->Init(
-			static_cast<void*>(xDisplay),
-			static_cast<void*>(glxContext),
-			static_cast<uint64_t>(glxDrawable));
-#endif
-	if (m_use_openxr)
-	{
-		m_persp = true;// always use perspective for xr
-	}
-	else
-	{
-		glbin_settings.m_xr_api = 0;
-		//m_frame->UpdateProps({ gstHologramMode });
-	}
-}
-
-void RenderView::InitLookingGlass()
-{
-	//set canvas size to the display
-	//looking glass size
-	glbin_lg_renderer.SetRenderViewSize(m_canvas_size);
-	Size2D lg_size = glbin_lg_renderer.GetViewSize();
-	if (lg_size.isValid())
-	{
-		m_gl_size = m_size = lg_size;
-	}
-	if (m_lg_initiated)
-		return;
-	bool bval = glbin_lg_renderer.Init();
-	if (!bval)
-	{
-		glbin_settings.m_hologram_mode = 0;
-		glbin_current.mainframe->UpdateProps({ gstHologramMode });
-		return;
-	}
-	glbin_lg_renderer.SetDevIndex(glbin_settings.m_lg_dev_id);
-	glbin_lg_renderer.Setup();
-	glbin_lg_renderer.Clear();
-	if (glbin_settings.m_lg_offset == 0)
-		glbin_settings.m_lg_offset = glbin_lg_renderer.GetHalfCone();
-	glbin_settings.m_disp_id = glbin_lg_renderer.GetDisplayId();
-	glbin_current.mainframe->UpdateProps({ gstHologramMode, gstFullscreenDisplay });
-	//if (m_render_view_panel)
-	//	m_render_view_panel->SetFullScreen();
-	m_lg_initiated = true;
 }
 
 //init

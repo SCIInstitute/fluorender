@@ -34,9 +34,13 @@ namespace flvr
 	class RenderSystem
 	{
 	public:
-		static void Init();
-	private:
-		static bool initialized_;
+		static void InitViewRenderer();
+		static void InitOpenXR();
+		static void InitLookingGlass();
+
+		static bool view_renderer_initialized_;
+		static bool openxr_initialized_;
+		static bool looking_glass_initialized_;
 	};
 }
 #endif//RenderSystem_h

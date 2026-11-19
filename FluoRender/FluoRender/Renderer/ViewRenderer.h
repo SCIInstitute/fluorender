@@ -42,6 +42,7 @@ namespace flrd
 		bool restartLoop = true;
 		bool interactive = false;
 		bool lgChanged = true;
+		bool resizing = false;
 	};
 	class ViewRenderer : public BaseRenderer
 	{
@@ -73,6 +74,7 @@ namespace flrd
 		//interactive state control
 		bool m_interactive = false;//main control
 		bool m_updating = false;
+		bool m_resizing = false;
 
 	private:
 		//entry point for drawing the view

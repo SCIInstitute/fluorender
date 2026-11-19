@@ -131,11 +131,12 @@ public:
 	std::string GetBufferName(const std::string& base, int sn = -1) const;
 	//handle
 	void SetHandle(void* hWnd) { m_hWnd = hWnd; }
+	void* GetHandle() { return m_hWnd; }
 	//set render view panel
 	void SetRenderViewPanel(RenderViewPanel* panel);
 
 	//size
-	void SetSize(int x, int y);
+	void SetSize(const Size2D size);
 	Size2D GetSize() const { return m_size; }
 	void ResetSize();
 	Size2D GetCanvasSize() const;
@@ -144,8 +145,6 @@ public:
 	void SetDpiFactor(double factor) { m_dpi_factor = factor; }
 	std::string GetOGLVersion() const;
 
-	void InitOpenXR();
-	void InitLookingGlass();
 	//recalculate view according to object bounds
 	void InitView(unsigned int type = INIT_BOUNDS);
 

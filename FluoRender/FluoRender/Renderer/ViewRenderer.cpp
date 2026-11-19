@@ -32,6 +32,8 @@ DEALINGS IN THE SOFTWARE.
 #include <LookingGlassRenderer.h>
 #include <MainSettings.h>
 #include <RenderSystem.h>
+#include <Coordinator.h>
+#include <SettingDlgAgent.h>
 
 using namespace flrd;
 
@@ -44,6 +46,7 @@ void ViewRenderer::render()
 
 	m_force_clear = context_->clearFramebuffer;
 	m_interactive = context_->interactive;
+	m_resizing = context_->resizing;
 	if (context_->restartLoop)
 		StartLoopUpdate();
 	SetSortBricks();
@@ -58,7 +61,7 @@ bool ViewRenderer::Draw()
 
 	bool swap = false;
 
-	flvr::RenderSystem::Init();
+	flvr::RenderSystem::InitViewRenderer();
 	view_->Init();
 
 	switch (glbin_settings.m_hologram_mode)
@@ -66,18 +69,29 @@ bool ViewRenderer::Draw()
 	case 0:
 		break;
 	case 1:
-		InitOpenXR();
+		flvr::RenderSystem::InitOpenXR();
+		if (flvr::RenderSystem::openxr_initialized_)
+		{
+			view_->SetPersp(true);// always use perspective for xr
+		}
+		else
+		{
+			glbin_settings.m_xr_api = 0;
+			auto setting_agent = glbin_coordinator.FindAgent<SettingDlgAgent>();
+			if (setting_agent)
+				setting_agent->UpdateDataToUI({ gstHologramMode });
+		}
 		break;
 	case 2:
-		InitLookingGlass();
+		flvr::RenderSystem::InitLookingGlass();
 		break;
 	}
 
-	if (m_resize)
-		m_retain_finalbuffer = false;
+	if (m_resizing)
+		view_->m_retain_finalbuffer = false;
 
 	int nx, ny;
-	GetRenderSize(nx, ny);
+	view_->GetRenderSize(nx, ny);
 
 	PopMeshList();
 	if (glbin_states.QuerySelection())

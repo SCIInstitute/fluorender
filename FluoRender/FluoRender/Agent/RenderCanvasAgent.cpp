@@ -161,7 +161,6 @@ void RenderCanvasAgent::PerformDraw()
 	auto view = GetView();
 	if (!view)
 		return;
-	bool initialized = view->Init();
 
 	glbin_current.render_view_drawing = view;
 
@@ -185,9 +184,6 @@ void RenderCanvasAgent::PerformDraw()
 	auto canvas = GetCanvas();
 	if (canvas)
 		canvas->SwapBuffers();
-
-	if (initialized)
-		NotifyDataToUI({ gstMaxTextureSize, gstDeviceTree });
 }
 
 RenderCanvas* RenderCanvasAgent::GetCanvas() const
