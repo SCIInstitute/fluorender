@@ -2055,37 +2055,6 @@ void RenderView::PopMeshList()
 	if (!m_md_pop_dirty)
 		return;
 
-	m_md_pop_list.clear();
-
-	for (auto& it : m_layer_list)
-	{
-		if (!it)
-			return;
-		switch (it->IsA())
-		{
-		case 3://mesh data
-		{
-			auto md = std::dynamic_pointer_cast<MeshData>(it);
-			if (md->GetDisp())
-				m_md_pop_list.push_back(md);
-		}
-		break;
-		case 6://mesh group
-		{
-			auto group = std::dynamic_pointer_cast<MeshGroup>(it);
-			if (!group->GetDisp())
-				continue;
-			for (int j = 0; j<group->GetMeshNum(); j++)
-			{
-				if (group->GetMeshData(j) &&
-					group->GetMeshData(j)->GetDisp())
-					m_md_pop_list.push_back(group->GetMeshData(j));
-			}
-		}
-		break;
-		}
-	}
-	m_md_pop_dirty = false;
 }
 
 //organize layers in view
@@ -5027,85 +4996,6 @@ void RenderView::DrawHologramFramebuffer()
 	{
 		glbin_xr_renderer->Draw(fbos);
 		glbin_xr_renderer->EndFrame();
-	}
-}
-
-//pre-draw processings
-void RenderView::PreDraw()
-{
-	//skip if not done with loop
-	if (glbin_settings.m_mem_swap)
-	{
-		if (m_pre_draw)
-			m_pre_draw = false;
-		else
-			return;
-	}
-}
-
-void RenderView::PostDraw()
-{
-	//skip if not done with loop
-	if (glbin_settings.m_mem_swap &&
-		flvr::TextureRenderer::get_start_update_loop() &&
-		!flvr::TextureRenderer::get_done_update_loop())
-		return;
-
-	//output animations
-	if (m_capture && !m_cap_file.empty())
-	{
-		//capture
-		int chann = glbin_settings.m_save_alpha ? 4 : 3;
-		bool fp32 = glbin_settings.m_save_float;
-		float dpi = static_cast<float>(glbin_settings.m_dpi);
-		int x, y, w, h;
-		void* image = 0;
-		std::wstring cap_file = m_cap_file;
-		if (glbin_settings.m_hologram_mode == 2)
-		{
-			ReadPixelsQuilt(chann, fp32, x, y, w, h, &image);
-			//change the file name
-			Size2D layout = glbin_lg_renderer.GetQuiltLayout();
-			double aspect = glbin_lg_renderer.GetAspect();
-			cap_file = APPEND_QUILT_INFO(
-				m_cap_file,
-				layout.w(),
-				layout.h(),
-				aspect);
-		}
-		else
-			ReadPixels(chann, fp32, x, y, w, h, &image);
-
-		auto img_capture = CreateImageCapture(cap_file);
-		if (img_capture)
-		{
-			img_capture->SetFilename(cap_file);
-			img_capture->SetData(image, w, h, chann);
-			if (glbin_settings.m_hologram_mode == 2)
-				img_capture->SetFlipVertically(false);
-			else
-				img_capture->SetFlipVertically(true);
-			img_capture->SetIsFloat(fp32);
-			img_capture->SetDpi(dpi);
-			bool compress = glbin_settings.m_save_compress;
-			if (compress)
-			{
-				img_capture->SetUseCompression(true);
-				img_capture->SetQuality(80);
-			}
-			else
-			{
-				img_capture->SetUseCompression(false);
-				img_capture->SetQuality(100);
-			}
-			img_capture->Write();
-		}
-
-		if (image)
-			delete[]image;
-
-		m_capture = false;
-		glbin_states.m_capture = false;
 	}
 }
 

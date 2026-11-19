@@ -34,6 +34,8 @@ DEALINGS IN THE SOFTWARE.
 #include <RenderSystem.h>
 #include <Coordinator.h>
 #include <SettingDlgAgent.h>
+#include <MeshDataBuilder.h>
+#include <GlobalStates.h>
 
 using namespace flrd;
 
@@ -93,10 +95,12 @@ bool ViewRenderer::Draw()
 	int nx, ny;
 	view_->GetRenderSize(nx, ny);
 
-	PopMeshList();
+	MeshDataBuilder mesh_builder(view_);
+	mesh_builder.build();
+	
 	if (glbin_states.QuerySelection())
 		m_draw_type = 1;
-	else if (m_md_pop_list.size() > 0)
+	else if (view_->GetMeshList().size() > 0)
 		m_draw_type = 2;
 	else
 		m_draw_type = 1;
@@ -682,6 +686,85 @@ void ViewRenderer::SetSortBricks()
 		auto vd = it->lock();
 		if (vd && vd->GetTexture())
 			vd->GetTexture()->set_sort_bricks();
+	}
+}
+
+//pre-draw processings
+void ViewRenderer::PreDraw()
+{
+	//skip if not done with loop
+	if (glbin_settings.m_mem_swap)
+	{
+		if (m_pre_draw)
+			m_pre_draw = false;
+		else
+			return;
+	}
+}
+
+void ViewRenderer::PostDraw()
+{
+	//skip if not done with loop
+	if (glbin_settings.m_mem_swap &&
+		flvr::TextureRenderer::get_start_update_loop() &&
+		!flvr::TextureRenderer::get_done_update_loop())
+		return;
+
+	//output animations
+	if (m_capture && !m_cap_file.empty())
+	{
+		//capture
+		int chann = glbin_settings.m_save_alpha ? 4 : 3;
+		bool fp32 = glbin_settings.m_save_float;
+		float dpi = static_cast<float>(glbin_settings.m_dpi);
+		int x, y, w, h;
+		void* image = 0;
+		std::wstring cap_file = m_cap_file;
+		if (glbin_settings.m_hologram_mode == 2)
+		{
+			ReadPixelsQuilt(chann, fp32, x, y, w, h, &image);
+			//change the file name
+			Size2D layout = glbin_lg_renderer.GetQuiltLayout();
+			double aspect = glbin_lg_renderer.GetAspect();
+			cap_file = APPEND_QUILT_INFO(
+				m_cap_file,
+				layout.w(),
+				layout.h(),
+				aspect);
+		}
+		else
+			ReadPixels(chann, fp32, x, y, w, h, &image);
+
+		auto img_capture = CreateImageCapture(cap_file);
+		if (img_capture)
+		{
+			img_capture->SetFilename(cap_file);
+			img_capture->SetData(image, w, h, chann);
+			if (glbin_settings.m_hologram_mode == 2)
+				img_capture->SetFlipVertically(false);
+			else
+				img_capture->SetFlipVertically(true);
+			img_capture->SetIsFloat(fp32);
+			img_capture->SetDpi(dpi);
+			bool compress = glbin_settings.m_save_compress;
+			if (compress)
+			{
+				img_capture->SetUseCompression(true);
+				img_capture->SetQuality(80);
+			}
+			else
+			{
+				img_capture->SetUseCompression(false);
+				img_capture->SetQuality(100);
+			}
+			img_capture->Write();
+		}
+
+		if (image)
+			delete[]image;
+
+		m_capture = false;
+		glbin_states.m_capture = false;
 	}
 }
 

@@ -128,6 +128,18 @@ public:
 	void Init();
 	double GetFps() const;
 
+	//layer list
+	std::vector<std::shared_ptr<TreeLayer>>& GetLayerList() { return m_layer_list; }
+	//reload volume list
+	void SetVolumeListDirty(bool bval = true) { m_volume_list_dirty = bval; }
+	bool GetVolumeListDirty() { return m_volume_list_dirty; }
+	std::vector<VolumeData*>& GetVolumeList() { return m_volume_list; }
+	//reload mesh list
+	void SetMeshListDirty(bool bval = true) { m_mesh_list_dirty = bval; }
+	bool GetMeshListDirty() { return m_mesh_list_dirty; }
+	std::vector<MeshData*>& GetMeshList() { return m_mesh_list; }
+
+
 	std::string GetBufferName(const std::string& base, int sn = -1) const;
 	//handle
 	void SetHandle(void* hWnd) { m_hWnd = hWnd; }
@@ -357,11 +369,6 @@ public:
 	bool GetSync(int i) const { if (i >= 0 && i < 3) return m_sync[i]; else return false; }
 	void SetSync(int i, bool val) { if (i >= 0 && i < 3) m_sync[i] = val; }
 
-	//reload volume list
-	void SetVolPopDirty() { m_vd_pop_dirty = true; }
-	//reload mesh list
-	void SetMeshPopDirty() { m_md_pop_dirty = true; }
-
 	//inteactive mode selection
 	InteractiveMode GetIntMode() const { return m_int_mode; }
 	void SetIntMode(InteractiveMode val);
@@ -457,12 +464,6 @@ public:
 	void ProcessIdle(IdleState& state);
 	//process mouse
 	void ProcessMouse(MouseState& state);
-
-	//pop list
-	bool GetVolPopListEmpty() const { return m_vd_pop_list.empty(); }
-	std::shared_ptr<VolumeData> GetVolPopList(int index) const { return m_vd_pop_list[index].lock(); }
-	bool GetMeshPopListEmpty() const { return m_md_pop_list.empty(); }
-	std::shared_ptr<MeshData> GetMeshPopList(int index) const { return m_md_pop_list[index].lock(); }
 
 	//volume properties
 	void SetGammaEnable(bool);
@@ -572,10 +573,16 @@ private:
 	bool m_render_init = false;
 	fluo::StopWatch m_frame_timer;
 
+	//real data list
+	std::vector<std::shared_ptr<TreeLayer>> m_layer_list;
+	//linearized lists of data
+	bool m_volume_list_dirty = true;
+	std::vector<VolumeData*> m_volume_list;
+	bool m_mesh_list_dirty = true;
+	std::vector<MeshData*> m_mesh_list;
 
 	void* m_hWnd;
 	RenderViewPanel* m_render_view_panel;
-	bool m_drawing;
 	Size2D m_canvas_size;//size from wxwidgets window
 	Size2D m_size;//size with dpi factor
 	Size2D m_gl_size;//actual render size
@@ -584,13 +591,6 @@ private:
 
 	ChannelMixMode m_channel_mix_mode;
 
-	//populated lists of data
-	bool m_vd_pop_dirty;
-	std::vector<std::weak_ptr<VolumeData>> m_vd_pop_list;
-	bool m_md_pop_dirty;
-	std::vector<std::weak_ptr<MeshData>> m_md_pop_list;
-	//real data list
-	std::vector<std::shared_ptr<TreeLayer>> m_layer_list;
 	//ruler list
 	std::unique_ptr<flrd::RulerList> m_ruler_list;
 	std::shared_ptr<flrd::Ruler> m_cur_ruler;
@@ -685,7 +685,6 @@ private:
 
 	//draw controls
 	bool m_draw_all;
-	int m_draw_type;
 
 	//fog
 	bool m_use_fog;
@@ -814,9 +813,6 @@ private:
 	//vr buffers
 	void PrepareStereoFramebuffer();
 	void DrawHologramFramebuffer();
-	//pre draw and post draw actions
-	void PreDraw();
-	void PostDraw();
 
 	//draw quad for framebuffer texture
 	void DrawViewQuad();

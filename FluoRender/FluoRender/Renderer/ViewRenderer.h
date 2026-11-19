@@ -76,10 +76,16 @@ namespace flrd
 		bool m_updating = false;
 		bool m_resizing = false;
 
+		bool m_drawing = false;
+		int m_draw_type = 1;
+
 	private:
 		//entry point for drawing the view
 		bool Draw();			//return if swap buffers
 		void DrawDefault();		//draw the base fbo to default on canvas
+		//pre draw and post draw actions
+		void PreDraw();
+		void PostDraw();
 
 		//start loop update
 		void StartLoopUpdate();

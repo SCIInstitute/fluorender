@@ -1251,6 +1251,13 @@ file(GLOB scn_hdr FluoRender/FluoRender/Scene/*.h)
 add_library(SCENE_LIB STATIC
   ${scn_src} ${scn_hdr})
 
+# SceneBuilder
+include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/SceneBuilder)
+file(GLOB sbd_src FluoRender/FluoRender/SceneBuilder/*.cpp)
+file(GLOB sbd_hdr FluoRender/FluoRender/SceneBuilder/*.h)
+add_library(SCENE_BUILDER_LIB STATIC
+  ${sbd_src} ${sbd_hdr})
+
 # Script
 include_directories(${FluoRender_SOURCE_DIR}/FluoRender/FluoRender/Script)
 file(GLOB scr_src FluoRender/FluoRender/Script/*.cpp)
@@ -1645,6 +1652,8 @@ target_link_libraries(SCENE_LIB PUBLIC
     GRAPHICS_LIB
 )
 
+# SceneBuilder
+
 # Script
 target_include_directories(SCRIPT_LIB PRIVATE
   ${Boost_INCLUDE_DIR}
@@ -1846,6 +1855,7 @@ target_link_libraries(FluoRender PRIVATE
     RENDERER_MESH_LIB
     RENDERER_VOLUME_LIB
     SCENE_LIB
+    SCENE_BUILDER_LIB
     SCRIPT_LIB
     SELECTION_LIB
     TIMER_LIB
